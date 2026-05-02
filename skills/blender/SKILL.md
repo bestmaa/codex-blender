@@ -61,6 +61,23 @@ Returns armature and bone names for the current Blender scene.
 }
 ```
 
+### create_outdoor_scene
+
+Creates an outdoor road scene with road, trees, street lights, camera, and lighting.
+
+```json
+{
+  "action": "create_outdoor_scene",
+  "params": {
+    "road_length": 32,
+    "road_width": 5,
+    "tree_count": 12,
+    "street_light_count": 6,
+    "style": "clean_suburban"
+  }
+}
+```
+
 ### render_scene
 
 Renders the current scene from the active camera to a PNG file.

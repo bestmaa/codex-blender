@@ -1,0 +1,10 @@
+{
+  "action": "create_outdoor_scene",
+  "params": {
+    "road_length": 32,
+    "road_width": 5,
+    "tree_count": 12,
+    "street_light_count": 6,
+    "style": "clean_suburban"
+  }
+}

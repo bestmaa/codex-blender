@@ -1,7 +1,7 @@
 bl_info = {
     "name": "Codex Blender Bridge",
     "author": "Aditya",
-    "version": (0, 2, 0),
+    "version": (0, 3, 0),
     "blender": (3, 6, 0),
     "location": "View3D > Sidebar > Codex",
     "description": "Local HTTP bridge for sending Codex commands to Blender.",
@@ -11,6 +11,7 @@ bl_info = {
 import contextlib
 import io
 import json
+import math
 import os
 import queue
 import threading
@@ -82,6 +83,24 @@ def add_area_light(name, location, rotation, power, size):
     return light
 
 
+def get_number(params, name, default, minimum=None, maximum=None):
+    value = params.get(name, default)
+    if not isinstance(value, (int, float)):
+        raise ValueError(f"params.{name} must be a number")
+    if minimum is not None and value < minimum:
+        raise ValueError(f"params.{name} must be >= {minimum}")
+    if maximum is not None and value > maximum:
+        raise ValueError(f"params.{name} must be <= {maximum}")
+    return value
+
+
+def get_int(params, name, default, minimum=None, maximum=None):
+    value = get_number(params, name, default, minimum, maximum)
+    if int(value) != value:
+        raise ValueError(f"params.{name} must be an integer")
+    return int(value)
+
+
 def action_create_room(params):
     clear_scene()
 
@@ -120,6 +139,135 @@ def action_create_room(params):
     bpy.context.scene.frame_set(1)
 
     return make_result(True, message="Created starter room scene.", style=params.get("style", "modern_neon"))
+
+
+def create_cylinder(name, location, radius, depth, material, vertices=24):
+    bpy.ops.mesh.primitive_cylinder_add(vertices=vertices, radius=radius, depth=depth, location=location)
+    obj = bpy.context.object
+    obj.name = name
+    if material:
+        obj.data.materials.append(material)
+    return obj
+
+
+def create_cone(name, location, radius1, radius2, depth, material, vertices=24):
+    bpy.ops.mesh.primitive_cone_add(
+        vertices=vertices,
+        radius1=radius1,
+        radius2=radius2,
+        depth=depth,
+        location=location,
+    )
+    obj = bpy.context.object
+    obj.name = name
+    if material:
+        obj.data.materials.append(material)
+    return obj
+
+
+def add_tree(index, x, y, trunk_mat, leaf_mat, height_offset=0.0):
+    trunk_height = 1.0 + height_offset
+    create_cylinder(f"tree {index} trunk", (x, y, trunk_height / 2), 0.13, trunk_height, trunk_mat, vertices=14)
+    create_cone(f"tree {index} lower canopy", (x, y, trunk_height + 0.55), 0.78, 0.18, 1.15, leaf_mat, vertices=20)
+    create_cone(f"tree {index} upper canopy", (x, y, trunk_height + 1.15), 0.55, 0.08, 0.95, leaf_mat, vertices=20)
+
+
+def add_street_light(index, x, y, pole_mat, lamp_mat):
+    pole_height = 3.1
+    create_cylinder(f"street light {index} pole", (x, y, pole_height / 2), 0.055, pole_height, pole_mat, vertices=16)
+    arm_y = y - 0.28 if y > 0 else y + 0.28
+    lamp_y = y - 0.56 if y > 0 else y + 0.56
+    create_cube(f"street light {index} arm", (x, arm_y, pole_height), (0.08, 0.62, 0.08), pole_mat)
+    create_cube(f"street light {index} lamp", (x, lamp_y, pole_height - 0.05), (0.32, 0.18, 0.12), lamp_mat)
+    bpy.ops.object.light_add(type="POINT", location=(x, lamp_y, pole_height - 0.16))
+    light = bpy.context.object
+    light.name = f"street light {index} glow"
+    light.data.energy = 120
+    light.data.shadow_soft_size = 1.5
+    return light
+
+
+def action_create_outdoor_scene(params):
+    clear_scene()
+
+    road_length = get_number(params, "road_length", 32, minimum=6, maximum=200)
+    road_width = get_number(params, "road_width", 5, minimum=2, maximum=30)
+    tree_count = get_int(params, "tree_count", 12, minimum=0, maximum=80)
+    street_light_count = get_int(params, "street_light_count", 6, minimum=0, maximum=40)
+    style = params.get("style", "clean_suburban")
+    if not isinstance(style, str):
+        raise ValueError("params.style must be a string")
+
+    grass_mat = create_material("soft green grass", (0.12, 0.42, 0.15, 1.0), roughness=0.9)
+    asphalt_mat = create_material("dark asphalt", (0.025, 0.027, 0.028, 1.0), roughness=0.78)
+    marking_mat = create_material("warm white road marking", (0.95, 0.86, 0.56, 1.0), roughness=0.45)
+    curb_mat = create_material("concrete curb", (0.44, 0.42, 0.38, 1.0), roughness=0.8)
+    trunk_mat = create_material("tree bark", (0.23, 0.12, 0.055, 1.0), roughness=0.82)
+    leaf_mat = create_material("deep green leaves", (0.04, 0.28, 0.08, 1.0), roughness=0.88)
+    pole_mat = create_material("painted black metal", (0.015, 0.015, 0.018, 1.0), roughness=0.42, metallic=0.5)
+    lamp_mat = create_material(
+        "warm lamp glass",
+        (1.0, 0.78, 0.34, 1.0),
+        emission=(1.0, 0.62, 0.2, 1.0),
+        strength=1.8,
+    )
+
+    ground_width = max(road_width + 10, 14)
+    create_cube("grass ground", (0, 0, -0.06), (road_length + 8, ground_width, 0.12), grass_mat)
+    create_cube("main road", (0, 0, 0.01), (road_length, road_width, 0.08), asphalt_mat)
+    create_cube("left curb", (0, road_width / 2 + 0.18, 0.09), (road_length, 0.18, 0.16), curb_mat)
+    create_cube("right curb", (0, -road_width / 2 - 0.18, 0.09), (road_length, 0.18, 0.16), curb_mat)
+
+    dash_count = max(3, int(road_length // 4))
+    dash_spacing = road_length / dash_count
+    for index in range(dash_count):
+        x = -road_length / 2 + dash_spacing * (index + 0.5)
+        create_cube(f"center road dash {index + 1}", (x, 0, 0.075), (dash_spacing * 0.45, 0.08, 0.012), marking_mat)
+
+    if tree_count:
+        usable_length = road_length * 0.9
+        row_count = max(1, math.ceil(tree_count / 2))
+        for index in range(tree_count):
+            side = 1 if index % 2 == 0 else -1
+            row_index = index // 2
+            x = -usable_length / 2 + (usable_length / max(1, row_count - 1)) * row_index
+            y = side * (road_width / 2 + 1.8 + (0.35 if row_index % 2 else 0.0))
+            add_tree(index + 1, x, y, trunk_mat, leaf_mat, height_offset=(index % 3) * 0.08)
+
+    if street_light_count:
+        usable_length = road_length * 0.82
+        row_count = max(1, math.ceil(street_light_count / 2))
+        for index in range(street_light_count):
+            side = 1 if index % 2 == 0 else -1
+            row_index = index // 2
+            x = -usable_length / 2 + (usable_length / max(1, row_count - 1)) * row_index
+            y = side * (road_width / 2 + 0.78)
+            add_street_light(index + 1, x, y, pole_mat, lamp_mat)
+
+    bpy.ops.object.light_add(type="SUN", location=(0, -4, 8), rotation=(math.radians(48), 0, math.radians(28)))
+    sun = bpy.context.object
+    sun.name = "late afternoon sun"
+    sun.data.energy = 2.2
+
+    bpy.ops.object.camera_add(
+        location=(road_length * 0.32, -road_width * 2.2, 4.2),
+        rotation=(math.radians(62), 0.0, math.radians(38)),
+    )
+    bpy.context.scene.camera = bpy.context.object
+    bpy.context.scene.world.color = (0.58, 0.72, 0.88)
+    bpy.context.scene.render.engine = "CYCLES"
+    bpy.context.scene.cycles.samples = 64
+    bpy.context.scene.frame_set(1)
+
+    return make_result(
+        True,
+        message="Created outdoor road scene.",
+        style=style,
+        road_length=road_length,
+        road_width=road_width,
+        tree_count=tree_count,
+        street_light_count=street_light_count,
+    )
 
 
 def action_inspect_rig(_params):
@@ -211,6 +359,8 @@ def execute_command(payload):
         return make_result(True, message="Blender bridge is running.")
     if action == "create_room":
         return action_create_room(params)
+    if action == "create_outdoor_scene":
+        return action_create_outdoor_scene(params)
     if action == "inspect_rig":
         return action_inspect_rig(params)
     if action == "render_scene":

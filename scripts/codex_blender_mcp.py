@@ -76,6 +76,39 @@ TOOLS = [
         ),
     },
     {
+        "name": "blender_create_outdoor_scene",
+        "description": "Create an outdoor road scene with trees, street lights, camera, and lighting.",
+        "inputSchema": json_schema(
+            {
+                "road_length": {
+                    "type": "number",
+                    "description": "Road length in Blender units.",
+                    "default": 32,
+                },
+                "road_width": {
+                    "type": "number",
+                    "description": "Road width in Blender units.",
+                    "default": 5,
+                },
+                "tree_count": {
+                    "type": "integer",
+                    "description": "Number of simple trees to place along both sides.",
+                    "default": 12,
+                },
+                "street_light_count": {
+                    "type": "integer",
+                    "description": "Number of street lights to place along both sides.",
+                    "default": 6,
+                },
+                "style": {
+                    "type": "string",
+                    "description": "Scene style label.",
+                    "default": "clean_suburban",
+                },
+            }
+        ),
+    },
+    {
         "name": "blender_inspect_rig",
         "description": "Return armature and bone names from the current Blender scene.",
         "inputSchema": json_schema({}),
@@ -142,6 +175,15 @@ def call_tool(name: str, arguments: dict[str, Any]) -> tuple[dict[str, Any], boo
             "timeout_seconds": arguments.get("timeout_seconds", 300),
         }
         result = call_http("/command", {"action": "render_scene", "params": params}, timeout=params["timeout_seconds"])
+    elif name == "blender_create_outdoor_scene":
+        params = {
+            "road_length": arguments.get("road_length", 32),
+            "road_width": arguments.get("road_width", 5),
+            "tree_count": arguments.get("tree_count", 12),
+            "street_light_count": arguments.get("street_light_count", 6),
+            "style": arguments.get("style", "clean_suburban"),
+        }
+        result = call_http("/command", {"action": "create_outdoor_scene", "params": params})
     elif name == "blender_inspect_rig":
         result = call_http("/command", {"action": "inspect_rig"})
     elif name == "blender_command":
@@ -179,7 +221,7 @@ def handle_request(message: dict[str, Any]) -> dict[str, Any] | None:
             {
                 "protocolVersion": "2024-11-05",
                 "capabilities": {"tools": {}},
-                "serverInfo": {"name": "codex-blender", "version": "0.2.0"},
+                "serverInfo": {"name": "codex-blender", "version": "0.3.0"},
             },
         )
     if method == "tools/list":
