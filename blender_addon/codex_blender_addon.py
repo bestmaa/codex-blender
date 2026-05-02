@@ -1,7 +1,7 @@
 bl_info = {
     "name": "Codex Blender Bridge",
     "author": "Aditya",
-    "version": (0, 23, 0),
+    "version": (0, 24, 0),
     "blender": (3, 6, 0),
     "location": "View3D > Sidebar > Codex",
     "description": "Local HTTP bridge for sending Codex commands to Blender.",
@@ -876,6 +876,122 @@ def action_create_lamp_model(params):
     )
 
 
+def action_create_furniture_set(params):
+    clear_scene()
+
+    table_length = get_number(params, "table_length", 3.2, minimum=1.0, maximum=10)
+    table_width = get_number(params, "table_width", 1.55, minimum=0.7, maximum=5)
+    chair_count = get_int(params, "chair_count", 4, minimum=1, maximum=8)
+    include_plant = params.get("include_plant", True)
+    include_lamp = params.get("include_lamp", True)
+    style = params.get("style", "compact_dining")
+    if not isinstance(include_plant, bool):
+        raise ValueError("params.include_plant must be a boolean")
+    if not isinstance(include_lamp, bool):
+        raise ValueError("params.include_lamp must be a boolean")
+    if not isinstance(style, str):
+        raise ValueError("params.style must be a string")
+
+    wood_mat = create_material("set warm wood", (0.70, 0.43, 0.23, 1), roughness=0.48)
+    dark_wood_mat = create_material("set dark wood", (0.30, 0.17, 0.09, 1), roughness=0.58)
+    fabric_mat = create_material("set muted fabric", (0.35, 0.49, 0.57, 1), roughness=0.88)
+    rug_mat = create_material("set woven rug", (0.62, 0.56, 0.48, 1), roughness=0.92)
+    floor_mat = create_material("set studio floor", (0.78, 0.76, 0.71, 1), roughness=0.65)
+    plant_mat = create_material("set plant leaves", (0.17, 0.50, 0.29, 1), roughness=0.68)
+    pot_mat = create_material("set ceramic planter", (0.70, 0.62, 0.52, 1), roughness=0.72)
+    glow_mat = create_material("set lamp warm glow", (1.0, 0.72, 0.32, 1), roughness=0.2, emission=(1.0, 0.66, 0.26, 1), strength=1.8)
+
+    create_rounded_cube("furniture set floor", (0, 0, -0.035), (6.4, 5.4, 0.07), floor_mat, 0.02, 2)
+    create_rounded_cube("furniture set rug", (0, 0, 0.012), (table_length + 2.2, table_width + 2.0, 0.025), rug_mat, 0.10, 8)
+
+    table_height = 1.05
+    create_rounded_cube("set dining tabletop", (0, 0, table_height), (table_length, table_width, 0.18), wood_mat, 0.09, 8)
+    leg_x = table_length * 0.40
+    leg_y = table_width * 0.35
+    for name, x, y in [
+        ("set table front left leg", -leg_x, -leg_y),
+        ("set table front right leg", leg_x, -leg_y),
+        ("set table back left leg", -leg_x, leg_y),
+        ("set table back right leg", leg_x, leg_y),
+    ]:
+        create_table_leg(name, x, y, table_height - 0.09, 0.045, 0.065, dark_wood_mat, angle=3)
+
+    chair_positions = [
+        ("front", 0, -table_width * 1.15),
+        ("back", 0, table_width * 1.15),
+        ("left", -table_length * 0.62, 0),
+        ("right", table_length * 0.62, 0),
+        ("front left", -table_length * 0.32, -table_width * 1.15),
+        ("front right", table_length * 0.32, -table_width * 1.15),
+        ("back left", -table_length * 0.32, table_width * 1.15),
+        ("back right", table_length * 0.32, table_width * 1.15),
+    ][:chair_count]
+    for index, (label, x, y) in enumerate(chair_positions, start=1):
+        prefix = f"set chair {index} {label}"
+        create_rounded_cube(f"{prefix} seat cushion", (x, y, 0.58), (0.72, 0.62, 0.14), fabric_mat, 0.06, 6)
+        back_y = y + (0.34 if y <= 0 else -0.34)
+        create_rounded_cube(f"{prefix} back cushion", (x, back_y, 1.02), (0.74, 0.12, 0.62), fabric_mat, 0.06, 6)
+        create_rounded_cube(f"{prefix} front apron", (x, y - 0.30, 0.45), (0.68, 0.07, 0.14), dark_wood_mat, 0.025, 3)
+        for leg_label, lx, ly in [
+            ("front left leg", -0.26, -0.22),
+            ("front right leg", 0.26, -0.22),
+            ("back left leg", -0.26, 0.22),
+            ("back right leg", 0.26, 0.22),
+        ]:
+            create_table_leg(f"{prefix} {leg_label}", x + lx, y + ly, 0.52, 0.026, 0.038, wood_mat, angle=3)
+
+    if include_plant:
+        plant_x = table_length * 0.72
+        plant_y = table_width * 1.35
+        create_cylinder("set plant pot", (plant_x, plant_y, 0.22), 0.26, 0.44, pot_mat, vertices=36)
+        create_cylinder("set plant soil", (plant_x, plant_y, 0.46), 0.22, 0.035, dark_wood_mat, vertices=36)
+        for index in range(9):
+            angle = math.tau * index / 9
+            x = plant_x + math.cos(angle) * 0.28
+            y = plant_y + math.sin(angle) * 0.28
+            z = 0.82 + 0.12 * (index % 3)
+            create_leaf(f"set plant leaf {index + 1}", (x, y, z), (0.22, 0.08, 0.025), (math.radians(18), 0, angle), plant_mat)
+
+    if include_lamp:
+        lamp_x = -table_length * 0.82
+        lamp_y = table_width * 1.42
+        create_cylinder("set floor lamp base", (lamp_x, lamp_y, 0.04), 0.24, 0.08, dark_wood_mat, vertices=36)
+        create_cylinder("set floor lamp pole", (lamp_x, lamp_y, 0.98), 0.035, 1.9, dark_wood_mat, vertices=18)
+        create_cone("set floor lamp shade", (lamp_x, lamp_y, 1.96), 0.36, 0.50, 0.42, glow_mat, vertices=36)
+        bpy.ops.object.light_add(type="POINT", location=(lamp_x, lamp_y, 1.9))
+        lamp = bpy.context.object
+        lamp.name = "set floor lamp point light"
+        lamp.data.energy = 360
+        lamp.data.shadow_soft_size = 1.6
+
+    add_area_light("set large window softbox", (-2.4, -3.2, 3.2), (math.radians(58), 0, math.radians(-28)), 540, 4.2)
+    add_area_light("set overhead fill", (0, 0, 3.5), (0, 0, 0), 130, 5.5)
+
+    bpy.ops.object.camera_add(location=(4.1, -4.7, 2.65))
+    camera = bpy.context.object
+    camera.name = "furniture set camera"
+    look_at(camera, (0, 0, 0.82))
+    camera.data.lens = 31
+    bpy.context.scene.camera = camera
+    bpy.context.scene.render.engine = "CYCLES"
+    bpy.context.scene.cycles.samples = 96
+    bpy.context.scene.render.resolution_x = 1280
+    bpy.context.scene.render.resolution_y = 720
+    bpy.context.scene.world.color = (0.78, 0.80, 0.82)
+    bpy.context.scene.view_settings.view_transform = "Filmic"
+    bpy.context.scene.view_settings.look = "Medium High Contrast"
+    bpy.context.scene.frame_set(1)
+
+    return make_result(
+        True,
+        message="Created furniture set scene.",
+        style=style,
+        chair_count=chair_count,
+        include_plant=include_plant,
+        include_lamp=include_lamp,
+    )
+
+
 def add_tree(index, x, y, trunk_mat, leaf_mat, height_offset=0.0):
     trunk_height = 1.0 + height_offset
     create_cylinder(f"tree {index} trunk", (x, y, trunk_height / 2), 0.13, trunk_height, trunk_mat, vertices=14)
@@ -1621,6 +1737,8 @@ def execute_command(payload):
         return action_create_plant_model(params)
     if action == "create_lamp_model":
         return action_create_lamp_model(params)
+    if action == "create_furniture_set":
+        return action_create_furniture_set(params)
     if action == "inspect_rig":
         return action_inspect_rig(params)
     if action == "render_scene":

@@ -1,0 +1,11 @@
+{
+  "action": "create_furniture_set",
+  "params": {
+    "table_length": 3.2,
+    "table_width": 1.55,
+    "chair_count": 4,
+    "include_plant": true,
+    "include_lamp": true,
+    "style": "compact_dining"
+  }
+}

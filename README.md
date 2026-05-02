@@ -14,6 +14,7 @@ This is not a cloud connector. Blender runs locally on your machine.
 - Create a reusable modern sofa model.
 - Create a reusable indoor plant model.
 - Create reusable floor, table, and ceiling lamp models with real Blender lights.
+- Create a composed furniture set scene.
 - Add reference images as textured planes for side-by-side modeling.
 - Apply user-provided image textures to Blender objects.
 - Create approximate scenes from structured reference-image plans.
@@ -167,6 +168,12 @@ Create a lamp model:
 
 ```powershell
 python bridge\codex_blender_bridge.py examples\create_lamp_model.json
+```
+
+Create a furniture set scene:
+
+```powershell
+python bridge\codex_blender_bridge.py examples\create_furniture_set.json
 ```
 
 Add a reference image plane:
@@ -373,6 +380,22 @@ Create lamp model:
 }
 ```
 
+Create furniture set:
+
+```json
+{
+  "action": "create_furniture_set",
+  "params": {
+    "table_length": 3.2,
+    "table_width": 1.55,
+    "chair_count": 4,
+    "include_plant": true,
+    "include_lamp": true,
+    "style": "compact_dining"
+  }
+}
+```
+
 Add reference image:
 
 ```json
@@ -537,6 +560,7 @@ Supported v0.20 actions:
 - `create_sofa_model`
 - `create_plant_model`
 - `create_lamp_model`
+- `create_furniture_set`
 - `add_reference_image`
 - `apply_texture_material`
 - `apply_material_preset`
@@ -573,6 +597,7 @@ When connected as a Codex plugin/MCP server, it exposes:
 - `blender_create_sofa_model`
 - `blender_create_plant_model`
 - `blender_create_lamp_model`
+- `blender_create_furniture_set`
 - `blender_add_reference_image`
 - `blender_apply_texture_material`
 - `blender_apply_material_preset`

@@ -222,6 +222,20 @@ TOOLS = [
         ),
     },
     {
+        "name": "blender_create_furniture_set",
+        "description": "Create a composed furniture scene with table, chairs, rug, plant, lamp, camera, and lighting.",
+        "inputSchema": json_schema(
+            {
+                "table_length": {"type": "number", "description": "Dining table length.", "default": 3.2},
+                "table_width": {"type": "number", "description": "Dining table width.", "default": 1.55},
+                "chair_count": {"type": "integer", "description": "Number of chairs.", "default": 4},
+                "include_plant": {"type": "boolean", "description": "Add potted plant.", "default": True},
+                "include_lamp": {"type": "boolean", "description": "Add floor lamp.", "default": True},
+                "style": {"type": "string", "description": "Style label.", "default": "compact_dining"},
+            }
+        ),
+    },
+    {
         "name": "blender_save_blend",
         "description": "Save the current Blender scene to a .blend file.",
         "inputSchema": json_schema(
@@ -743,6 +757,16 @@ def call_tool(name: str, arguments: dict[str, Any]) -> tuple[dict[str, Any], boo
             "style": arguments.get("style", "warm_modern"),
         }
         result = call_http("/command", {"action": "create_lamp_model", "params": params})
+    elif name == "blender_create_furniture_set":
+        params = {
+            "table_length": arguments.get("table_length", 3.2),
+            "table_width": arguments.get("table_width", 1.55),
+            "chair_count": arguments.get("chair_count", 4),
+            "include_plant": arguments.get("include_plant", True),
+            "include_lamp": arguments.get("include_lamp", True),
+            "style": arguments.get("style", "compact_dining"),
+        }
+        result = call_http("/command", {"action": "create_furniture_set", "params": params})
     elif name == "blender_save_blend":
         params = {"output": normalize_output_path(arguments.get("output", "scenes/scene.blend"))}
         result = call_http("/command", {"action": "save_blend", "params": params})
@@ -881,7 +905,7 @@ def handle_request(message: dict[str, Any]) -> dict[str, Any] | None:
             {
                 "protocolVersion": "2024-11-05",
                 "capabilities": {"tools": {}},
-                "serverInfo": {"name": "codex-blender", "version": "0.23.0"},
+                "serverInfo": {"name": "codex-blender", "version": "0.24.0"},
             },
         )
     if method == "tools/list":

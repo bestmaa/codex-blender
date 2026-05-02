@@ -179,6 +179,24 @@ Creates a reusable floor lamp, table lamp, or ceiling panel with visible mesh fi
 }
 ```
 
+### create_furniture_set
+
+Creates a composed furniture scene with a dining table, chairs, rug, plant, floor lamp, camera, and lighting.
+
+```json
+{
+  "action": "create_furniture_set",
+  "params": {
+    "table_length": 3.2,
+    "table_width": 1.55,
+    "chair_count": 4,
+    "include_plant": true,
+    "include_lamp": true,
+    "style": "compact_dining"
+  }
+}
+```
+
 ### add_reference_image
 
 Adds a local image as a reference plane in the current Blender scene. Use this before or after model creation when matching a generated/reference image.

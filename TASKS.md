@@ -331,7 +331,7 @@ Commit:
 
 ### 13. v0.24 Furniture Set Action
 
-Status: pending
+Status: completed
 
 Goal:
 Create a basic furniture scene from reusable primitives.
