@@ -30,11 +30,19 @@ def normalize_command_paths(payload: dict, base_dir: Path) -> dict:
     key = "path" if action in {"import_asset", "add_reference_image", "apply_texture_material"} else "output"
     value = params.get(key)
     if not isinstance(value, str) or not value or value.startswith("//"):
-        return payload
+        value = None
 
-    path = Path(value)
-    if not path.is_absolute():
-        params[key] = str((base_dir / path).resolve())
+    if value is not None:
+        path = Path(value)
+        if not path.is_absolute():
+            params[key] = str((base_dir / path).resolve())
+    if action == "apply_texture_material":
+        for texture_key in ("base_color_path", "roughness_path", "normal_path", "metallic_path", "alpha_path"):
+            texture_value = params.get(texture_key)
+            if isinstance(texture_value, str) and texture_value and not texture_value.startswith("//"):
+                texture_path = Path(texture_value)
+                if not texture_path.is_absolute():
+                    params[texture_key] = str((base_dir / texture_path).resolve())
     return payload
 
 

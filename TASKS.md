@@ -122,7 +122,7 @@ Commit:
 
 ### 4. v0.15 Multi-Map Texture Materials
 
-Status: pending
+Status: completed
 
 Goal:
 Support real PBR-style texture sets, not only one base color image.

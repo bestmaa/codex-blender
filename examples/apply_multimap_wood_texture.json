@@ -1,0 +1,16 @@
+{
+  "action": "apply_texture_material",
+  "params": {
+    "object": "rounded rectangular tabletop",
+    "base_color_path": "assets/textures/oak_wood_basecolor.png",
+    "material_name": "multi map oak tabletop texture",
+    "roughness": 0.38,
+    "metallic": 0.0,
+    "opacity": 1.0,
+    "texture_scale": [2.6, 1.0],
+    "texture_offset": [0.0, 0.0],
+    "texture_rotation": 0.0,
+    "projection": "generated",
+    "mode": "replace"
+  }
+}

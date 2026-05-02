@@ -157,6 +157,12 @@ Apply a scaled image texture to an object:
 python bridge\codex_blender_bridge.py examples\apply_scaled_wood_texture.json
 ```
 
+Apply a multi-map texture material:
+
+```powershell
+python bridge\codex_blender_bridge.py examples\apply_multimap_wood_texture.json
+```
+
 Apply a built-in material preset:
 
 ```powershell
@@ -265,7 +271,9 @@ Apply texture material:
   "action": "apply_texture_material",
   "params": {
     "object": "rounded rectangular tabletop",
-    "path": "assets/textures/wood_basecolor.png",
+    "base_color_path": "assets/textures/wood_basecolor.png",
+    "roughness_path": "assets/textures/wood_roughness.png",
+    "normal_path": "assets/textures/wood_normal.png",
     "material_name": "wood tabletop texture",
     "roughness": 0.45,
     "metallic": 0.0,
@@ -334,7 +342,7 @@ Save scene:
 
 ## Supported Actions
 
-Supported v0.14 actions:
+Supported v0.15 actions:
 
 - `ping`
 - `create_room`
@@ -435,7 +443,7 @@ Reference images should go under:
 assets/references/
 ```
 
-`apply_texture_material` currently applies one image as the object's base color texture. Use it for user-supplied wood, fabric, stone, label, decal, or pattern images. Use `texture_scale`, `texture_offset`, `texture_rotation`, and `projection` to tune placement. For full realism, add matching roughness and normal maps in a later material workflow.
+`apply_texture_material` supports one base color image through `path` or `base_color_path`, plus optional `roughness_path`, `normal_path`, `metallic_path`, and `alpha_path`. Use it for user-supplied wood, fabric, stone, label, decal, or pattern images. Use `texture_scale`, `texture_offset`, `texture_rotation`, and `projection` to tune placement.
 
 Built-in material presets are available through `apply_material_preset`:
 

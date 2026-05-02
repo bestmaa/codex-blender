@@ -1,7 +1,7 @@
 bl_info = {
     "name": "Codex Blender Bridge",
     "author": "Aditya",
-    "version": (0, 14, 0),
+    "version": (0, 15, 0),
     "blender": (3, 6, 0),
     "location": "View3D > Sidebar > Codex",
     "description": "Local HTTP bridge for sending Codex commands to Blender.",
@@ -146,6 +146,10 @@ def create_texture_material(
     texture_offset=(0.0, 0.0),
     texture_rotation=0.0,
     projection="uv",
+    roughness_image=None,
+    normal_image=None,
+    metallic_image=None,
+    alpha_image=None,
 ):
     mat = bpy.data.materials.new(name)
     mat.use_nodes = True
@@ -154,8 +158,6 @@ def create_texture_material(
     bsdf = nodes.get("Principled BSDF")
     coords = nodes.new(type="ShaderNodeTexCoord")
     mapping = nodes.new(type="ShaderNodeMapping")
-    texture = nodes.new(type="ShaderNodeTexImage")
-    texture.image = image
     coordinate_output = {
         "uv": "UV",
         "generated": "Generated",
@@ -167,16 +169,38 @@ def create_texture_material(
     mapping.inputs["Location"].default_value[0] = texture_offset[0]
     mapping.inputs["Location"].default_value[1] = texture_offset[1]
     mapping.inputs["Rotation"].default_value[2] = texture_rotation
-    mat.node_tree.links.new(mapping.outputs["Vector"], texture.inputs["Vector"])
+
+    def add_texture_node(texture_image, color_space="sRGB"):
+        texture = nodes.new(type="ShaderNodeTexImage")
+        texture.image = texture_image
+        texture.image.colorspace_settings.name = color_space
+        mat.node_tree.links.new(mapping.outputs["Vector"], texture.inputs["Vector"])
+        return texture
+
+    texture = add_texture_node(image)
     if bsdf:
         mat.node_tree.links.new(texture.outputs["Color"], bsdf.inputs["Base Color"])
-        if "Alpha" in bsdf.inputs:
+        if alpha_image is not None and "Alpha" in bsdf.inputs:
+            alpha_texture = add_texture_node(alpha_image, color_space="Non-Color")
+            mat.node_tree.links.new(alpha_texture.outputs["Color"], bsdf.inputs["Alpha"])
+        elif "Alpha" in bsdf.inputs:
             bsdf.inputs["Alpha"].default_value = opacity
             mat.node_tree.links.new(texture.outputs["Alpha"], bsdf.inputs["Alpha"])
         if "Roughness" in bsdf.inputs:
             bsdf.inputs["Roughness"].default_value = roughness
+            if roughness_image is not None:
+                roughness_texture = add_texture_node(roughness_image, color_space="Non-Color")
+                mat.node_tree.links.new(roughness_texture.outputs["Color"], bsdf.inputs["Roughness"])
         if "Metallic" in bsdf.inputs:
             bsdf.inputs["Metallic"].default_value = metallic
+            if metallic_image is not None:
+                metallic_texture = add_texture_node(metallic_image, color_space="Non-Color")
+                mat.node_tree.links.new(metallic_texture.outputs["Color"], bsdf.inputs["Metallic"])
+        if normal_image is not None and "Normal" in bsdf.inputs:
+            normal_texture = add_texture_node(normal_image, color_space="Non-Color")
+            normal_map = nodes.new(type="ShaderNodeNormalMap")
+            mat.node_tree.links.new(normal_texture.outputs["Color"], normal_map.inputs["Color"])
+            mat.node_tree.links.new(normal_map.outputs["Normal"], bsdf.inputs["Normal"])
     return mat
 
 
@@ -729,7 +753,8 @@ def action_add_reference_image(params):
 
 
 def action_apply_texture_material(params):
-    path = resolve_input_path(params.get("path"))
+    base_color_value = params.get("base_color_path") or params.get("path")
+    path = resolve_input_path(base_color_value, param_name="base_color_path")
     object_name = params.get("object")
     if not isinstance(object_name, str) or not object_name.strip():
         raise ValueError("params.object must be a non-empty string")
@@ -757,6 +782,13 @@ def action_apply_texture_material(params):
     if mode not in {"replace", "append"}:
         raise ValueError("params.mode must be 'replace' or 'append'")
 
+    optional_images = {}
+    for key in ("roughness_path", "normal_path", "metallic_path", "alpha_path"):
+        value = params.get(key)
+        if value is not None:
+            optional_path = resolve_input_path(value, param_name=key)
+            optional_images[key] = bpy.data.images.load(os.fspath(optional_path), check_existing=True)
+
     image = bpy.data.images.load(os.fspath(path), check_existing=True)
     material = create_texture_material(
         material_name,
@@ -768,6 +800,10 @@ def action_apply_texture_material(params):
         texture_offset=texture_offset,
         texture_rotation=texture_rotation,
         projection=projection,
+        roughness_image=optional_images.get("roughness_path"),
+        normal_image=optional_images.get("normal_path"),
+        metallic_image=optional_images.get("metallic_path"),
+        alpha_image=optional_images.get("alpha_path"),
     )
     if mode == "replace":
         obj.data.materials.clear()
@@ -784,6 +820,7 @@ def action_apply_texture_material(params):
         texture_offset=texture_offset,
         texture_rotation=texture_rotation,
         projection=projection,
+        maps=sorted(["base_color_path"] + list(optional_images)),
     )
 
 

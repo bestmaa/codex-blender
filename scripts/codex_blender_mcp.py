@@ -267,7 +267,27 @@ TOOLS = [
                 },
                 "path": {
                     "type": "string",
-                    "description": "Texture image path, such as assets/textures/wood.png.",
+                    "description": "Texture image path alias for base_color_path, such as assets/textures/wood.png.",
+                },
+                "base_color_path": {
+                    "type": "string",
+                    "description": "Base color texture image path.",
+                },
+                "roughness_path": {
+                    "type": "string",
+                    "description": "Optional roughness texture image path.",
+                },
+                "normal_path": {
+                    "type": "string",
+                    "description": "Optional normal map texture image path.",
+                },
+                "metallic_path": {
+                    "type": "string",
+                    "description": "Optional metallic texture image path.",
+                },
+                "alpha_path": {
+                    "type": "string",
+                    "description": "Optional alpha texture image path.",
                 },
                 "material_name": {
                     "type": "string",
@@ -321,7 +341,7 @@ TOOLS = [
                     "default": "replace",
                 },
             },
-            required=["object", "path"],
+            required=["object"],
         ),
     },
     {
@@ -491,6 +511,11 @@ def call_tool(name: str, arguments: dict[str, Any]) -> tuple[dict[str, Any], boo
         params = {
             "object": arguments.get("object"),
             "path": normalize_input_path(arguments.get("path")),
+            "base_color_path": normalize_input_path(arguments.get("base_color_path")),
+            "roughness_path": normalize_input_path(arguments.get("roughness_path")),
+            "normal_path": normalize_input_path(arguments.get("normal_path")),
+            "metallic_path": normalize_input_path(arguments.get("metallic_path")),
+            "alpha_path": normalize_input_path(arguments.get("alpha_path")),
             "material_name": arguments.get("material_name", "texture material"),
             "roughness": arguments.get("roughness", 0.55),
             "metallic": arguments.get("metallic", 0.0),
@@ -532,6 +557,8 @@ def call_tool(name: str, arguments: dict[str, Any]) -> tuple[dict[str, Any], boo
             if payload.get("action") == "apply_texture_material":
                 params = payload.setdefault("params", {})
                 params["path"] = normalize_input_path(params.get("path"))
+                for texture_key in ("base_color_path", "roughness_path", "normal_path", "metallic_path", "alpha_path"):
+                    params[texture_key] = normalize_input_path(params.get(texture_key))
             timeout = payload.get("params", {}).get("timeout_seconds", 300)
             result = call_http("/command", payload, timeout=timeout)
     else:
@@ -559,7 +586,7 @@ def handle_request(message: dict[str, Any]) -> dict[str, Any] | None:
             {
                 "protocolVersion": "2024-11-05",
                 "capabilities": {"tools": {}},
-                "serverInfo": {"name": "codex-blender", "version": "0.14.0"},
+                "serverInfo": {"name": "codex-blender", "version": "0.15.0"},
             },
         )
     if method == "tools/list":

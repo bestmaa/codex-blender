@@ -127,7 +127,9 @@ Applies a local image as a texture material on an existing Blender object. Use t
   "action": "apply_texture_material",
   "params": {
     "object": "rounded rectangular tabletop",
-    "path": "assets/textures/wood_basecolor.png",
+    "base_color_path": "assets/textures/wood_basecolor.png",
+    "roughness_path": "assets/textures/wood_roughness.png",
+    "normal_path": "assets/textures/wood_normal.png",
     "material_name": "wood tabletop texture",
     "roughness": 0.45,
     "metallic": 0.0,
