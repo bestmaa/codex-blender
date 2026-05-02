@@ -1,0 +1,13 @@
+{
+  "action": "create_table_model",
+  "params": {
+    "length": 3.6,
+    "width": 2.0,
+    "height": 1.55,
+    "top_thickness": 0.24,
+    "corner_roundness": 0.14,
+    "include_grain": true,
+    "wood_color": [0.78, 0.47, 0.25, 1],
+    "style": "modern_wood"
+  }
+}

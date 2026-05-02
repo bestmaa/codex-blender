@@ -109,6 +109,55 @@ TOOLS = [
         ),
     },
     {
+        "name": "blender_create_table_model",
+        "description": "Create a modern wooden table model with rounded tabletop, tapered legs, wood grain, camera, and lighting.",
+        "inputSchema": json_schema(
+            {
+                "length": {
+                    "type": "number",
+                    "description": "Table length in Blender units.",
+                    "default": 3.6,
+                },
+                "width": {
+                    "type": "number",
+                    "description": "Table width in Blender units.",
+                    "default": 2.0,
+                },
+                "height": {
+                    "type": "number",
+                    "description": "Table height in Blender units.",
+                    "default": 1.55,
+                },
+                "top_thickness": {
+                    "type": "number",
+                    "description": "Tabletop thickness in Blender units.",
+                    "default": 0.24,
+                },
+                "corner_roundness": {
+                    "type": "number",
+                    "description": "Bevel amount for the tabletop corners.",
+                    "default": 0.14,
+                },
+                "include_grain": {
+                    "type": "boolean",
+                    "description": "Add raised subtle wood grain lines on the tabletop.",
+                    "default": True,
+                },
+                "wood_color": {
+                    "type": "array",
+                    "items": {"type": "number"},
+                    "description": "Wood color as [r, g, b, a].",
+                    "default": [0.78, 0.47, 0.25, 1],
+                },
+                "style": {
+                    "type": "string",
+                    "description": "Style label to return in the result.",
+                    "default": "modern_wood",
+                },
+            }
+        ),
+    },
+    {
         "name": "blender_save_blend",
         "description": "Save the current Blender scene to a .blend file.",
         "inputSchema": json_schema(
@@ -152,6 +201,101 @@ TOOLS = [
                 },
             },
             required=["path"],
+        ),
+    },
+    {
+        "name": "blender_add_reference_image",
+        "description": "Add a local image as a reference plane in the current Blender scene.",
+        "inputSchema": json_schema(
+            {
+                "path": {
+                    "type": "string",
+                    "description": "Image path. Supports image formats Blender can load, such as .png and .jpg.",
+                },
+                "name": {
+                    "type": "string",
+                    "description": "Optional reference plane object name.",
+                    "default": "reference image",
+                },
+                "location": {
+                    "type": "array",
+                    "items": {"type": "number"},
+                    "minItems": 3,
+                    "maxItems": 3,
+                    "description": "Plane location as [x, y, z].",
+                    "default": [0, 2.2, 1.4],
+                },
+                "rotation": {
+                    "type": "array",
+                    "items": {"type": "number"},
+                    "minItems": 3,
+                    "maxItems": 3,
+                    "description": "Plane rotation in radians as [x, y, z].",
+                    "default": [1.5708, 0, 0],
+                },
+                "width": {
+                    "type": "number",
+                    "description": "Reference plane width in Blender units.",
+                    "default": 3.0,
+                },
+                "height": {
+                    "type": "number",
+                    "description": "Optional explicit plane height. If omitted, image aspect ratio is preserved.",
+                },
+                "opacity": {
+                    "type": "number",
+                    "description": "Reference image opacity from 0.05 to 1.0.",
+                    "default": 1.0,
+                },
+                "unlit": {
+                    "type": "boolean",
+                    "description": "Make the reference image visible independent of scene lighting.",
+                    "default": True,
+                },
+            },
+            required=["path"],
+        ),
+    },
+    {
+        "name": "blender_apply_texture_material",
+        "description": "Apply a local image file as a texture material on an existing Blender object.",
+        "inputSchema": json_schema(
+            {
+                "object": {
+                    "type": "string",
+                    "description": "Exact Blender object name to receive the material.",
+                },
+                "path": {
+                    "type": "string",
+                    "description": "Texture image path, such as assets/textures/wood.png.",
+                },
+                "material_name": {
+                    "type": "string",
+                    "description": "Optional material name.",
+                    "default": "texture material",
+                },
+                "roughness": {
+                    "type": "number",
+                    "description": "Material roughness from 0 to 1.",
+                    "default": 0.55,
+                },
+                "metallic": {
+                    "type": "number",
+                    "description": "Material metallic value from 0 to 1.",
+                    "default": 0.0,
+                },
+                "opacity": {
+                    "type": "number",
+                    "description": "Material opacity from 0.05 to 1.0.",
+                    "default": 1.0,
+                },
+                "mode": {
+                    "type": "string",
+                    "description": "Use replace to clear existing materials, or append to add a material slot.",
+                    "default": "replace",
+                },
+            },
+            required=["object", "path"],
         ),
     },
     {
@@ -253,6 +397,18 @@ def call_tool(name: str, arguments: dict[str, Any]) -> tuple[dict[str, Any], boo
             "style": arguments.get("style", "clean_suburban"),
         }
         result = call_http("/command", {"action": "create_outdoor_scene", "params": params})
+    elif name == "blender_create_table_model":
+        params = {
+            "length": arguments.get("length", 3.6),
+            "width": arguments.get("width", 2.0),
+            "height": arguments.get("height", 1.55),
+            "top_thickness": arguments.get("top_thickness", 0.24),
+            "corner_roundness": arguments.get("corner_roundness", 0.14),
+            "include_grain": arguments.get("include_grain", True),
+            "wood_color": arguments.get("wood_color", [0.78, 0.47, 0.25, 1]),
+            "style": arguments.get("style", "modern_wood"),
+        }
+        result = call_http("/command", {"action": "create_table_model", "params": params})
     elif name == "blender_save_blend":
         params = {"output": normalize_output_path(arguments.get("output", "scenes/scene.blend"))}
         result = call_http("/command", {"action": "save_blend", "params": params})
@@ -264,6 +420,30 @@ def call_tool(name: str, arguments: dict[str, Any]) -> tuple[dict[str, Any], boo
             "scale": arguments.get("scale", 1.0),
         }
         result = call_http("/command", {"action": "import_asset", "params": params})
+    elif name == "blender_add_reference_image":
+        params = {
+            "path": normalize_input_path(arguments.get("path")),
+            "name": arguments.get("name", "reference image"),
+            "location": arguments.get("location", [0, 2.2, 1.4]),
+            "rotation": arguments.get("rotation", [1.5708, 0, 0]),
+            "width": arguments.get("width", 3.0),
+            "opacity": arguments.get("opacity", 1.0),
+            "unlit": arguments.get("unlit", True),
+        }
+        if "height" in arguments:
+            params["height"] = arguments["height"]
+        result = call_http("/command", {"action": "add_reference_image", "params": params})
+    elif name == "blender_apply_texture_material":
+        params = {
+            "object": arguments.get("object"),
+            "path": normalize_input_path(arguments.get("path")),
+            "material_name": arguments.get("material_name", "texture material"),
+            "roughness": arguments.get("roughness", 0.55),
+            "metallic": arguments.get("metallic", 0.0),
+            "opacity": arguments.get("opacity", 1.0),
+            "mode": arguments.get("mode", "replace"),
+        }
+        result = call_http("/command", {"action": "apply_texture_material", "params": params})
     elif name == "blender_create_scene_from_reference":
         result = call_http("/command", {"action": "create_scene_from_reference", "params": arguments})
     elif name == "blender_inspect_rig":
@@ -278,6 +458,12 @@ def call_tool(name: str, arguments: dict[str, Any]) -> tuple[dict[str, Any], boo
                 default_output = "scenes/scene.blend" if payload.get("action") == "save_blend" else "renders/room.png"
                 params["output"] = normalize_output_path(params.get("output", default_output))
             if payload.get("action") == "import_asset":
+                params = payload.setdefault("params", {})
+                params["path"] = normalize_input_path(params.get("path"))
+            if payload.get("action") == "add_reference_image":
+                params = payload.setdefault("params", {})
+                params["path"] = normalize_input_path(params.get("path"))
+            if payload.get("action") == "apply_texture_material":
                 params = payload.setdefault("params", {})
                 params["path"] = normalize_input_path(params.get("path"))
             timeout = payload.get("params", {}).get("timeout_seconds", 300)
@@ -307,7 +493,7 @@ def handle_request(message: dict[str, Any]) -> dict[str, Any] | None:
             {
                 "protocolVersion": "2024-11-05",
                 "capabilities": {"tools": {}},
-                "serverInfo": {"name": "codex-blender", "version": "0.8.0"},
+                "serverInfo": {"name": "codex-blender", "version": "0.11.0"},
             },
         )
     if method == "tools/list":

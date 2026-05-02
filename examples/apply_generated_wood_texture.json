@@ -1,0 +1,12 @@
+{
+  "action": "apply_texture_material",
+  "params": {
+    "object": "rounded rectangular tabletop",
+    "path": "assets/textures/oak_wood_basecolor.png",
+    "material_name": "generated oak tabletop texture",
+    "roughness": 0.38,
+    "metallic": 0.0,
+    "opacity": 1.0,
+    "mode": "replace"
+  }
+}

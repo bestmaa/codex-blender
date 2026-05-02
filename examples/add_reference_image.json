@@ -1,0 +1,12 @@
+{
+  "action": "add_reference_image",
+  "params": {
+    "path": "assets/references/modern_table_reference.png",
+    "name": "table reference image",
+    "location": [0, 2.35, 1.55],
+    "rotation": [1.5708, 0, 0],
+    "width": 3.2,
+    "opacity": 0.85,
+    "unlit": true
+  }
+}

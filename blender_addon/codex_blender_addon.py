@@ -1,7 +1,7 @@
 bl_info = {
     "name": "Codex Blender Bridge",
     "author": "Aditya",
-    "version": (0, 8, 0),
+    "version": (0, 11, 0),
     "blender": (3, 6, 0),
     "location": "View3D > Sidebar > Codex",
     "description": "Local HTTP bridge for sending Codex commands to Blender.",
@@ -89,6 +89,16 @@ def create_cube(name, location, scale, material):
     return obj
 
 
+def create_rounded_cube(name, location, scale, material, bevel_width=0.04, bevel_segments=4):
+    obj = create_cube(name, location, scale, material)
+    if bevel_width > 0:
+        bevel = obj.modifiers.new("soft rounded edges", "BEVEL")
+        bevel.width = bevel_width
+        bevel.segments = bevel_segments
+        obj.modifiers.new("weighted normals", "WEIGHTED_NORMAL")
+    return obj
+
+
 def create_material(name, color, roughness=0.55, metallic=0.0, emission=None, strength=0.0):
     mat = bpy.data.materials.new(name)
     mat.use_nodes = True
@@ -103,6 +113,49 @@ def create_material(name, color, roughness=0.55, metallic=0.0, emission=None, st
     return mat
 
 
+def create_image_material(name, image, opacity=1.0, unlit=True):
+    mat = bpy.data.materials.new(name)
+    mat.use_nodes = True
+    mat.blend_method = "BLEND" if opacity < 1.0 else "OPAQUE"
+    mat.show_transparent_back = True
+    nodes = mat.node_tree.nodes
+    bsdf = nodes.get("Principled BSDF")
+    texture = nodes.new(type="ShaderNodeTexImage")
+    texture.image = image
+    if bsdf:
+        mat.node_tree.links.new(texture.outputs["Color"], bsdf.inputs["Base Color"])
+        if "Alpha" in bsdf.inputs:
+            bsdf.inputs["Alpha"].default_value = opacity
+            mat.node_tree.links.new(texture.outputs["Alpha"], bsdf.inputs["Alpha"])
+        if "Roughness" in bsdf.inputs:
+            bsdf.inputs["Roughness"].default_value = 0.8
+        if unlit and "Emission Color" in bsdf.inputs:
+            mat.node_tree.links.new(texture.outputs["Color"], bsdf.inputs["Emission Color"])
+        if unlit and "Emission Strength" in bsdf.inputs:
+            bsdf.inputs["Emission Strength"].default_value = 0.6
+    return mat
+
+
+def create_texture_material(name, image, roughness=0.55, metallic=0.0, opacity=1.0):
+    mat = bpy.data.materials.new(name)
+    mat.use_nodes = True
+    mat.blend_method = "BLEND" if opacity < 1.0 else "OPAQUE"
+    nodes = mat.node_tree.nodes
+    bsdf = nodes.get("Principled BSDF")
+    texture = nodes.new(type="ShaderNodeTexImage")
+    texture.image = image
+    if bsdf:
+        mat.node_tree.links.new(texture.outputs["Color"], bsdf.inputs["Base Color"])
+        if "Alpha" in bsdf.inputs:
+            bsdf.inputs["Alpha"].default_value = opacity
+            mat.node_tree.links.new(texture.outputs["Alpha"], bsdf.inputs["Alpha"])
+        if "Roughness" in bsdf.inputs:
+            bsdf.inputs["Roughness"].default_value = roughness
+        if "Metallic" in bsdf.inputs:
+            bsdf.inputs["Metallic"].default_value = metallic
+    return mat
+
+
 def add_area_light(name, location, rotation, power, size):
     bpy.ops.object.light_add(type="AREA", location=location, rotation=rotation)
     light = bpy.context.object
@@ -110,6 +163,11 @@ def add_area_light(name, location, rotation, power, size):
     light.data.energy = power
     light.data.size = size
     return light
+
+
+def look_at(obj, target):
+    direction = Vector(target) - obj.location
+    obj.rotation_euler = direction.to_track_quat("-Z", "Y").to_euler()
 
 
 def get_number(params, name, default, minimum=None, maximum=None):
@@ -192,6 +250,150 @@ def create_cone(name, location, radius1, radius2, depth, material, vertices=24):
     if material:
         obj.data.materials.append(material)
     return obj
+
+
+def create_table_leg(name, x, y, height, top_radius, bottom_radius, material, angle=5.0):
+    bpy.ops.mesh.primitive_cone_add(
+        vertices=4,
+        radius1=bottom_radius,
+        radius2=top_radius,
+        depth=height,
+        location=(x, y, height / 2),
+        rotation=(0, 0, math.radians(45)),
+    )
+    obj = bpy.context.object
+    obj.name = name
+    obj.rotation_euler[0] = math.radians(angle if x > 0 else -angle)
+    obj.rotation_euler[1] = math.radians(-angle if y > 0 else angle)
+    if material:
+        obj.data.materials.append(material)
+    bevel = obj.modifiers.new("slightly softened leg edges", "BEVEL")
+    bevel.width = 0.018
+    bevel.segments = 2
+    obj.modifiers.new("weighted normals", "WEIGHTED_NORMAL")
+    return obj
+
+
+def action_create_table_model(params):
+    clear_scene()
+
+    length = get_number(params, "length", 3.6, minimum=0.8, maximum=12)
+    width = get_number(params, "width", 2.0, minimum=0.5, maximum=8)
+    height = get_number(params, "height", 1.55, minimum=0.5, maximum=4)
+    top_thickness = get_number(params, "top_thickness", 0.24, minimum=0.06, maximum=0.8)
+    corner_roundness = get_number(params, "corner_roundness", 0.14, minimum=0, maximum=0.5)
+    include_grain = params.get("include_grain", True)
+    if not isinstance(include_grain, bool):
+        raise ValueError("params.include_grain must be a boolean")
+    style = params.get("style", "modern_wood")
+    if not isinstance(style, str):
+        raise ValueError("params.style must be a string")
+
+    wood_color = params.get("wood_color", [0.78, 0.47, 0.25, 1])
+    if not isinstance(wood_color, list) or len(wood_color) not in {3, 4}:
+        raise ValueError("params.wood_color must be [r, g, b] or [r, g, b, a]")
+    if len(wood_color) == 3:
+        wood_color = wood_color + [1]
+    if not all(isinstance(value, (int, float)) for value in wood_color):
+        raise ValueError("params.wood_color must contain only numbers")
+
+    wood_mat = create_material("warm natural wood", tuple(wood_color), roughness=0.42)
+    dark_wood_mat = create_material(
+        "dark end grain",
+        (wood_color[0] * 0.52, wood_color[1] * 0.48, wood_color[2] * 0.45, 1),
+        roughness=0.58,
+    )
+    grain_mat = create_material("subtle wood grain lines", (0.30, 0.16, 0.08, 1), roughness=0.78)
+    floor_mat = create_material("matte studio floor", (0.78, 0.76, 0.71, 1), roughness=0.65)
+    shadow_mat = create_material("soft contact shadow base", (0.38, 0.34, 0.30, 1), roughness=0.8)
+
+    create_rounded_cube("studio floor", (0, 0, -0.035), (length + 2.8, width + 2.7, 0.07), floor_mat, 0.02, 2)
+    create_rounded_cube("soft shadow pad", (0, 0, 0.01), (length + 0.4, width + 0.45, 0.018), shadow_mat, 0.10, 8)
+
+    top_z = height
+    create_rounded_cube(
+        "rounded rectangular tabletop",
+        (0, 0, top_z),
+        (length, width, top_thickness),
+        wood_mat,
+        corner_roundness,
+        10,
+    )
+    underside_z = top_z - top_thickness * 0.72
+    create_rounded_cube(
+        "darker tabletop underside",
+        (0, 0, underside_z),
+        (length * 0.92, width * 0.86, top_thickness * 0.55),
+        dark_wood_mat,
+        min(corner_roundness * 0.45, 0.08),
+        5,
+    )
+
+    leg_height = max(0.2, height - top_thickness * 0.58)
+    leg_x = length * 0.38
+    leg_y = width * 0.34
+    top_radius = min(length, width) * 0.055
+    bottom_radius = top_radius * 1.45
+    for leg_name, x, y in [
+        ("front left tapered leg", -leg_x, -leg_y),
+        ("front right tapered leg", leg_x, -leg_y),
+        ("back left tapered leg", -leg_x, leg_y),
+        ("back right tapered leg", leg_x, leg_y),
+    ]:
+        create_table_leg(leg_name, x, y, leg_height, top_radius, bottom_radius, dark_wood_mat)
+
+    apron_z = leg_height + top_thickness * 0.15
+    apron_depth = min(0.25, top_thickness * 1.05)
+    create_rounded_cube("front apron", (0, -width * 0.46, apron_z), (length * 0.84, 0.11, apron_depth), dark_wood_mat, 0.035, 4)
+    create_rounded_cube("back apron", (0, width * 0.46, apron_z), (length * 0.84, 0.11, apron_depth), dark_wood_mat, 0.035, 4)
+    create_rounded_cube("left side apron", (-length * 0.45, 0, apron_z), (0.11, width * 0.74, apron_depth), dark_wood_mat, 0.035, 4)
+    create_rounded_cube("right side apron", (length * 0.45, 0, apron_z), (0.11, width * 0.74, apron_depth), dark_wood_mat, 0.035, 4)
+
+    if include_grain:
+        grain_count = max(4, min(14, int(width * 5)))
+        for index in range(grain_count):
+            y = -width * 0.38 + (width * 0.76 / max(1, grain_count - 1)) * index
+            create_rounded_cube(
+                f"long subtle wood grain {index + 1}",
+                (0, y, top_z + top_thickness / 2 + 0.006),
+                (length * 0.86, 0.018, 0.012),
+                grain_mat,
+                0.006,
+                2,
+            )
+
+    add_area_light("large softbox key", (-length * 0.75, -width * 1.6, height * 2.7), (math.radians(58), 0, math.radians(-28)), 650, 4.0)
+    add_area_light("small cool rim light", (length * 0.8, width * 1.1, height * 1.9), (math.radians(70), 0, math.radians(132)), 120, 2.0)
+    add_area_light("overhead soft fill", (0, 0, height * 2.8), (0, 0, 0), 180, 5.5)
+
+    bpy.ops.object.camera_add(location=(length * 0.98, -width * 1.58, height * 1.55))
+    camera = bpy.context.object
+    camera.name = "table product camera"
+    look_at(camera, (0, 0, height * 0.70))
+    camera.data.lens = 45
+    camera.data.dof.use_dof = True
+    camera.data.dof.focus_distance = (Vector((0, 0, height * 0.70)) - camera.location).length
+    camera.data.dof.aperture_fstop = 8
+    bpy.context.scene.camera = camera
+
+    bpy.context.scene.render.engine = "CYCLES"
+    bpy.context.scene.cycles.samples = 96
+    bpy.context.scene.render.resolution_x = 1280
+    bpy.context.scene.render.resolution_y = 720
+    bpy.context.scene.world.color = (0.78, 0.80, 0.82)
+    bpy.context.scene.view_settings.view_transform = "Filmic"
+    bpy.context.scene.view_settings.look = "Medium High Contrast"
+    bpy.context.scene.frame_set(1)
+
+    return make_result(
+        True,
+        message="Created modern table model.",
+        style=style,
+        length=length,
+        width=width,
+        height=height,
+        include_grain=include_grain,
+    )
 
 
 def add_tree(index, x, y, trunk_mat, leaf_mat, height_offset=0.0):
@@ -452,6 +654,86 @@ def action_import_asset(params):
     )
 
 
+def action_add_reference_image(params):
+    path = resolve_input_path(params.get("path"))
+    name = params.get("name", path.stem)
+    if not isinstance(name, str) or not name.strip():
+        raise ValueError("params.name must be a non-empty string")
+
+    location = get_vector(params, "location", [0, 2.2, 1.4])
+    rotation = get_vector(params, "rotation", [math.radians(90), 0, 0])
+    width = get_number(params, "width", 3.0, minimum=0.1, maximum=100)
+    opacity = get_number(params, "opacity", 1.0, minimum=0.05, maximum=1.0)
+    unlit = params.get("unlit", True)
+    if not isinstance(unlit, bool):
+        raise ValueError("params.unlit must be a boolean")
+
+    image = bpy.data.images.load(os.fspath(path), check_existing=True)
+    image_width, image_height = image.size
+    aspect = image_height / image_width if image_width else 1.0
+    height = params.get("height")
+    if height is None:
+        height = width * aspect
+    elif not isinstance(height, (int, float)) or height <= 0:
+        raise ValueError("params.height must be a positive number")
+
+    bpy.ops.mesh.primitive_plane_add(size=1, location=location, rotation=rotation)
+    plane = bpy.context.object
+    plane.name = name
+    plane.dimensions = (width, height, 1)
+    bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
+    plane.data.materials.append(create_image_material(f"{name} material", image, opacity=opacity, unlit=unlit))
+
+    return make_result(
+        True,
+        message="Added reference image plane.",
+        path=os.fspath(path),
+        object=plane.name,
+        width=width,
+        height=height,
+        opacity=opacity,
+    )
+
+
+def action_apply_texture_material(params):
+    path = resolve_input_path(params.get("path"))
+    object_name = params.get("object")
+    if not isinstance(object_name, str) or not object_name.strip():
+        raise ValueError("params.object must be a non-empty string")
+
+    obj = bpy.data.objects.get(object_name)
+    if obj is None:
+        raise ValueError(f"Object not found: {object_name}")
+    if not hasattr(obj.data, "materials"):
+        raise ValueError(f"Object does not support materials: {object_name}")
+
+    material_name = params.get("material_name") or f"{object_name} texture material"
+    if not isinstance(material_name, str) or not material_name.strip():
+        raise ValueError("params.material_name must be a non-empty string")
+
+    roughness = get_number(params, "roughness", 0.55, minimum=0, maximum=1)
+    metallic = get_number(params, "metallic", 0.0, minimum=0, maximum=1)
+    opacity = get_number(params, "opacity", 1.0, minimum=0.05, maximum=1)
+    mode = params.get("mode", "replace")
+    if mode not in {"replace", "append"}:
+        raise ValueError("params.mode must be 'replace' or 'append'")
+
+    image = bpy.data.images.load(os.fspath(path), check_existing=True)
+    material = create_texture_material(material_name, image, roughness=roughness, metallic=metallic, opacity=opacity)
+    if mode == "replace":
+        obj.data.materials.clear()
+    obj.data.materials.append(material)
+
+    return make_result(
+        True,
+        message="Applied texture material.",
+        object=obj.name,
+        material=material.name,
+        path=os.fspath(path),
+        mode=mode,
+    )
+
+
 def material_from_plan(cache, name, color):
     key = name or json.dumps(color)
     if key not in cache:
@@ -566,6 +848,8 @@ def execute_command(payload):
         return action_create_room(params)
     if action == "create_outdoor_scene":
         return action_create_outdoor_scene(params)
+    if action == "create_table_model":
+        return action_create_table_model(params)
     if action == "inspect_rig":
         return action_inspect_rig(params)
     if action == "render_scene":
@@ -574,6 +858,10 @@ def execute_command(payload):
         return action_save_blend(params)
     if action == "import_asset":
         return action_import_asset(params)
+    if action == "add_reference_image":
+        return action_add_reference_image(params)
+    if action == "apply_texture_material":
+        return action_apply_texture_material(params)
     if action == "create_scene_from_reference":
         return action_create_scene_from_reference(params)
     if action == "run_python":

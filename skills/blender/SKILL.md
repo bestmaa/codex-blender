@@ -79,6 +79,64 @@ Creates an outdoor road scene with road, trees, street lights, camera, and light
 }
 ```
 
+### create_table_model
+
+Creates a reusable modern wooden table model with a rounded tabletop, tapered legs, subtle wood grain, camera, and lighting.
+
+```json
+{
+  "action": "create_table_model",
+  "params": {
+    "length": 3.6,
+    "width": 2.0,
+    "height": 1.55,
+    "top_thickness": 0.24,
+    "corner_roundness": 0.14,
+    "include_grain": true,
+    "wood_color": [0.78, 0.47, 0.25, 1],
+    "style": "modern_wood"
+  }
+}
+```
+
+### add_reference_image
+
+Adds a local image as a reference plane in the current Blender scene. Use this before or after model creation when matching a generated/reference image.
+
+```json
+{
+  "action": "add_reference_image",
+  "params": {
+    "path": "assets/references/modern_table_reference.png",
+    "name": "table reference image",
+    "location": [0, 2.35, 1.55],
+    "rotation": [1.5708, 0, 0],
+    "width": 3.2,
+    "opacity": 0.85,
+    "unlit": true
+  }
+}
+```
+
+### apply_texture_material
+
+Applies a local image as a texture material on an existing Blender object. Use this when the user provides a wood, fabric, stone, label, decal, or pattern image.
+
+```json
+{
+  "action": "apply_texture_material",
+  "params": {
+    "object": "rounded rectangular tabletop",
+    "path": "assets/textures/wood_basecolor.png",
+    "material_name": "wood tabletop texture",
+    "roughness": 0.45,
+    "metallic": 0.0,
+    "opacity": 1.0,
+    "mode": "replace"
+  }
+}
+```
+
 ### render_scene
 
 Renders the current scene from the active camera to a PNG file.

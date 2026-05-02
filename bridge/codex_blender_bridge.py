@@ -23,11 +23,11 @@ def load_payload(value: str) -> dict:
 
 def normalize_command_paths(payload: dict, base_dir: Path) -> dict:
     action = payload.get("action")
-    if action not in {"render_scene", "save_blend", "import_asset"}:
+    if action not in {"render_scene", "save_blend", "import_asset", "add_reference_image", "apply_texture_material"}:
         return payload
 
     params = payload.setdefault("params", {})
-    key = "path" if action == "import_asset" else "output"
+    key = "path" if action in {"import_asset", "add_reference_image", "apply_texture_material"} else "output"
     value = params.get(key)
     if not isinstance(value, str) or not value or value.startswith("//"):
         return payload

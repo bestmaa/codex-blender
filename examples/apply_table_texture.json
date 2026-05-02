@@ -1,0 +1,12 @@
+{
+  "action": "apply_texture_material",
+  "params": {
+    "object": "rounded rectangular tabletop",
+    "path": "assets/references/modern_table_reference.png",
+    "material_name": "tabletop image texture",
+    "roughness": 0.45,
+    "metallic": 0.0,
+    "opacity": 1.0,
+    "mode": "replace"
+  }
+}

@@ -9,6 +9,9 @@ This is not a cloud connector. Blender runs locally on your machine.
 - Start and stop a local Blender bridge at `http://127.0.0.1:8765`.
 - Create a starter room scene.
 - Create an outdoor road scene with trees and street lights.
+- Create a reusable modern wooden table model.
+- Add reference images as textured planes for side-by-side modeling.
+- Apply user-provided image textures to Blender objects.
 - Create approximate scenes from structured reference-image plans.
 - Import local `.glb`, `.gltf`, `.fbx`, and `.obj` assets.
 - Render the current scene to PNG.
@@ -130,6 +133,24 @@ Create an outdoor road scene:
 python bridge\codex_blender_bridge.py examples\create_outdoor_scene.json
 ```
 
+Create a modern table model:
+
+```powershell
+python bridge\codex_blender_bridge.py examples\create_table_model.json
+```
+
+Add a reference image plane:
+
+```powershell
+python bridge\codex_blender_bridge.py examples\add_reference_image.json
+```
+
+Apply an image texture to an object:
+
+```powershell
+python bridge\codex_blender_bridge.py examples\apply_table_texture.json
+```
+
 Import a local asset:
 
 ```powershell
@@ -190,6 +211,58 @@ Create outdoor scene:
 }
 ```
 
+Create table model:
+
+```json
+{
+  "action": "create_table_model",
+  "params": {
+    "length": 3.6,
+    "width": 2.0,
+    "height": 1.55,
+    "top_thickness": 0.24,
+    "corner_roundness": 0.14,
+    "include_grain": true,
+    "wood_color": [0.78, 0.47, 0.25, 1],
+    "style": "modern_wood"
+  }
+}
+```
+
+Add reference image:
+
+```json
+{
+  "action": "add_reference_image",
+  "params": {
+    "path": "assets/references/modern_table_reference.png",
+    "name": "table reference image",
+    "location": [0, 2.35, 1.55],
+    "rotation": [1.5708, 0, 0],
+    "width": 3.2,
+    "opacity": 0.85,
+    "unlit": true
+  }
+}
+```
+
+Apply texture material:
+
+```json
+{
+  "action": "apply_texture_material",
+  "params": {
+    "object": "rounded rectangular tabletop",
+    "path": "assets/textures/wood_basecolor.png",
+    "material_name": "wood tabletop texture",
+    "roughness": 0.45,
+    "metallic": 0.0,
+    "opacity": 1.0,
+    "mode": "replace"
+  }
+}
+```
+
 Import asset:
 
 ```json
@@ -231,11 +304,14 @@ Save scene:
 
 ## Supported Actions
 
-Supported v0.8 actions:
+Supported v0.11 actions:
 
 - `ping`
 - `create_room`
 - `create_outdoor_scene`
+- `create_table_model`
+- `add_reference_image`
+- `apply_texture_material`
 - `create_scene_from_reference`
 - `import_asset`
 - `render_scene`
@@ -260,6 +336,9 @@ When connected as a Codex plugin/MCP server, it exposes:
 - `blender_health`
 - `blender_create_room`
 - `blender_create_outdoor_scene`
+- `blender_create_table_model`
+- `blender_add_reference_image`
+- `blender_apply_texture_material`
 - `blender_create_scene_from_reference`
 - `blender_import_asset`
 - `blender_render_scene`
@@ -301,6 +380,30 @@ If asset import fails:
 - Put models under `assets/models/`.
 - Use a supported file type: `.glb`, `.gltf`, `.fbx`, or `.obj`.
 - Use a relative path like `assets/models/car.glb`, or an absolute path.
+
+## Textures
+
+For quick blockouts, simple procedural colors are enough. For closer visual matches, put texture files under:
+
+```text
+assets/textures/
+```
+
+Recommended texture maps:
+
+- `basecolor` or `albedo`: visible color.
+- `roughness`: shine control.
+- `normal`: fake surface detail such as wood grain or fabric weave.
+- `metallic`: metal/non-metal control.
+- `alpha`: transparency, useful for glass, decals, and cutouts.
+
+Reference images should go under:
+
+```text
+assets/references/
+```
+
+`apply_texture_material` currently applies one image as the object's base color texture. Use it for user-supplied wood, fabric, stone, label, decal, or pattern images. For full realism, add matching roughness and normal maps in a later material workflow.
 
 If render or save output goes to the wrong place:
 
