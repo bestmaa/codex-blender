@@ -49,6 +49,8 @@ scenes/         generated .blend files
 
 ## Install The Blender Add-On
 
+### From Source
+
 1. Open Blender.
 2. Go to `Edit > Preferences > Add-ons > Install`.
 3. Select:
@@ -61,6 +63,20 @@ blender_addon/codex_blender_addon.py
 5. In the 3D Viewport, press `N` to open the sidebar.
 6. Open the `Codex` tab.
 7. Click `Start Bridge`.
+
+### From ZIP
+
+Build an installable ZIP:
+
+```powershell
+python scripts\package_addon.py
+```
+
+Then install the generated ZIP from `dist/` in Blender:
+
+```text
+Edit > Preferences > Add-ons > Install
+```
 
 Check that the bridge is running:
 
