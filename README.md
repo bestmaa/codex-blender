@@ -1,77 +1,87 @@
 # Codex Blender
 
-Codex Blender is an open-source starter plugin for controlling Blender from Codex through local Python scripts and a localhost bridge.
+Codex Blender is an open-source local bridge for controlling Blender from Codex or a terminal command. It runs a small HTTP server inside Blender, then accepts structured JSON commands for scene creation, asset import, rendering, saving, and inspection.
 
-The first version is intentionally simple:
+This is not a cloud connector. Blender runs locally on your machine.
 
-- A Blender add-on starts a local HTTP server inside Blender.
-- A bridge script sends JSON commands from the terminal or Codex workflow.
-- Commands execute through Blender's Python API.
-- Examples cover room creation, outdoor scene creation, asset import, scene rendering, scene saving, and rig inspection.
+## Features
 
-## Project Status
+- Start and stop a local Blender bridge at `http://127.0.0.1:8765`.
+- Create a starter room scene.
+- Create an outdoor road scene with trees and street lights.
+- Import local `.glb`, `.gltf`, `.fbx`, and `.obj` assets.
+- Render the current scene to PNG.
+- Save the current scene to `.blend`.
+- Inspect armatures and bone names.
+- Use a development-only reload button to refresh add-on code without reinstalling.
 
-This is an early scaffold. It is not a cloud connector yet. It is a local bridge that can become a proper Codex plugin workflow over time.
+## Requirements
 
-## Layout
+- Blender 3.6 or newer.
+- Python available from your terminal.
+- Codex is optional. The bridge can be used directly from a terminal.
+
+## Project Layout
 
 ```text
 codex-blender/
   .codex-plugin/plugin.json
-  skills/blender/SKILL.md
+  .mcp.json
   blender_addon/codex_blender_addon.py
   bridge/codex_blender_bridge.py
-  examples/create_room.json
-  examples/create_outdoor_scene.json
-  examples/import_asset.json
-  examples/render_scene.json
-  examples/save_blend.json
-  examples/inspect_rig.json
+  scripts/codex_blender_mcp.py
+  skills/blender/SKILL.md
+  examples/
+  assets/models/
+  renders/
+  scenes/
 ```
 
-## Setup
+Use these folders by convention:
 
-### Blender
+```text
+assets/models/  3D input assets
+renders/        generated PNG renders
+scenes/         generated .blend files
+```
+
+`renders/` and `scenes/` are ignored by Git.
+
+## Install The Blender Add-On
 
 1. Open Blender.
 2. Go to `Edit > Preferences > Add-ons > Install`.
-3. Select `blender_addon/codex_blender_addon.py`.
-4. Enable the add-on named `Codex Blender Bridge`.
-5. In Blender, open the sidebar panel: `View3D > Sidebar > Codex`.
-6. Click `Start Bridge`.
-
-By default the bridge listens on:
+3. Select:
 
 ```text
-http://127.0.0.1:8765
+blender_addon/codex_blender_addon.py
 ```
 
-During development, enable `Developer Mode`, set `Source File` in the Codex sidebar to this repository's `blender_addon/codex_blender_addon.py`, then click `Reload Bridge Code` after editing the add-on. This reloads the bridge without uninstalling and reinstalling the add-on. Developer controls are hidden by default for normal use.
+4. Enable `Codex Blender Bridge`.
+5. In the 3D Viewport, press `N` to open the sidebar.
+6. Open the `Codex` tab.
+7. Click `Start Bridge`.
 
-### Codex
+Check that the bridge is running:
 
-This repository includes a local MCP server in `.mcp.json`. When this plugin is enabled in Codex, it exposes tools for:
-
-- `blender_health`
-- `blender_create_room`
-- `blender_create_outdoor_scene`
-- `blender_import_asset`
-- `blender_render_scene`
-- `blender_save_blend`
-- `blender_inspect_rig`
-- `blender_command`
-
-The Blender add-on still needs to be running before those tools can control Blender.
-
-## Send A Command
-
-From this project folder:
-
-```bash
-python3 bridge/codex_blender_bridge.py examples/create_room.json
+```powershell
+Invoke-RestMethod -Uri http://127.0.0.1:8765/health
 ```
 
-On Windows PowerShell:
+Expected response:
+
+```json
+{
+  "ok": true,
+  "message": "Codex Blender Bridge is healthy."
+}
+```
+
+## Use From Terminal
+
+Run commands from the project folder.
+
+Create a starter room:
 
 ```powershell
 python bridge\codex_blender_bridge.py examples\create_room.json
@@ -89,23 +99,27 @@ Import a local asset:
 python bridge\codex_blender_bridge.py examples\import_asset.json
 ```
 
-Render the current Blender scene:
+Render the current scene:
 
 ```powershell
 python bridge\codex_blender_bridge.py examples\render_scene.json
 ```
 
-Relative render outputs are resolved from the folder where the bridge command is run. From the project folder, `renders/room.png` writes to `codex-blender/renders/room.png`.
-
-Save the current Blender scene:
+Save the current scene:
 
 ```powershell
 python bridge\codex_blender_bridge.py examples\save_blend.json
 ```
 
-Relative `.blend` outputs are resolved from the folder where the bridge command is run. From the project folder, `scenes/scene.blend` writes to `codex-blender/scenes/scene.blend`.
+Inspect rigs:
 
-## Command Shape
+```powershell
+python bridge\codex_blender_bridge.py examples\inspect_rig.json
+```
+
+## Example Commands
+
+Create room:
 
 ```json
 {
@@ -115,6 +129,62 @@ Relative `.blend` outputs are resolved from the folder where the bridge command 
   }
 }
 ```
+
+Create outdoor scene:
+
+```json
+{
+  "action": "create_outdoor_scene",
+  "params": {
+    "road_length": 32,
+    "road_width": 5,
+    "tree_count": 12,
+    "street_light_count": 6,
+    "style": "clean_suburban"
+  }
+}
+```
+
+Import asset:
+
+```json
+{
+  "action": "import_asset",
+  "params": {
+    "path": "assets/models/sample_pyramid.obj",
+    "location": [0, 0, 0],
+    "rotation": [0, 0, 0],
+    "scale": 1.0
+  }
+}
+```
+
+Render scene:
+
+```json
+{
+  "action": "render_scene",
+  "params": {
+    "output": "renders/room.png",
+    "resolution": [1280, 720],
+    "samples": 32,
+    "timeout_seconds": 300
+  }
+}
+```
+
+Save scene:
+
+```json
+{
+  "action": "save_blend",
+  "params": {
+    "output": "scenes/scene.blend"
+  }
+}
+```
+
+## Supported Actions
 
 Supported v0.7 actions:
 
@@ -127,13 +197,74 @@ Supported v0.7 actions:
 - `inspect_rig`
 - `run_python`
 
-`run_python` is powerful and unsafe. Use it only with trusted local commands.
+`run_python` executes arbitrary Python inside Blender. Use it only with trusted local commands.
+
+## Codex Skill And MCP
+
+This repository includes:
+
+```text
+skills/blender/SKILL.md
+scripts/codex_blender_mcp.py
+.mcp.json
+```
+
+When connected as a Codex plugin/MCP server, it exposes:
+
+- `blender_health`
+- `blender_create_room`
+- `blender_create_outdoor_scene`
+- `blender_import_asset`
+- `blender_render_scene`
+- `blender_save_blend`
+- `blender_inspect_rig`
+- `blender_command`
+
+The Blender add-on must still be enabled and the bridge must be running.
+
+## Development Mode
+
+Normal users only need `Start Bridge` and `Stop Bridge`.
+
+For add-on development:
+
+1. Enable `Developer Mode` in the add-on preferences or sidebar.
+2. Set `Source File` to this repository's `blender_addon/codex_blender_addon.py`.
+3. Click `Reload Bridge Code` after changing the add-on.
+
+This avoids uninstalling and reinstalling the add-on during development.
+
+## Troubleshooting
+
+If the bridge is not reachable:
+
+- Make sure Blender is open.
+- Make sure `Codex Blender Bridge` is enabled.
+- Click `Start Bridge` in the `Codex` sidebar tab.
+- Check `http://127.0.0.1:8765/health`.
+
+If an action says `Unsupported action`:
+
+- Blender is running an older loaded copy of the add-on.
+- In development mode, click `Reload Bridge Code`.
+- For normal users, restart Blender or reinstall the updated add-on.
+
+If asset import fails:
+
+- Put models under `assets/models/`.
+- Use a supported file type: `.glb`, `.gltf`, `.fbx`, or `.obj`.
+- Use a relative path like `assets/models/car.glb`, or an absolute path.
+
+If render or save output goes to the wrong place:
+
+- Run the bridge command from the project folder.
+- Use explicit output paths such as `renders/room.png` or `scenes/scene.blend`.
 
 ## Roadmap
 
-- Prompt-to-command templates for common Blender workflows.
-- Asset import and scene fitting.
+- More reusable scene-building actions.
+- Asset fitting and placement helpers.
 - Material and texture helpers.
 - Rigged model animation helpers.
-- Render automation.
-- MCP server integration for richer Codex tool calls.
+- Packaging for easier local installation.
+- A cleaner Codex plugin installation flow.
