@@ -195,7 +195,7 @@ Commit:
 
 ### 7. v0.18 Export GLB
 
-Status: pending
+Status: completed
 
 Goal:
 Allow generated scenes/models to be exported for use outside Blender.

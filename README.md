@@ -14,6 +14,7 @@ This is not a cloud connector. Blender runs locally on your machine.
 - Apply user-provided image textures to Blender objects.
 - Create approximate scenes from structured reference-image plans.
 - Import local `.glb`, `.gltf`, `.fbx`, and `.obj` assets.
+- Export scenes/models to `.glb`.
 - Render the current scene to PNG.
 - Save the current scene to `.blend`.
 - Inspect armatures and bone names.
@@ -44,12 +45,13 @@ codex-blender/
 Use these folders by convention:
 
 ```text
-assets/models/  3D input assets
-renders/        generated PNG renders
-scenes/         generated .blend files
+  assets/models/  3D input assets
+  exports/        generated model exports
+  renders/        generated PNG renders
+  scenes/         generated .blend files
 ```
 
-`renders/` and `scenes/` are ignored by Git.
+`exports/`, `renders/`, and `scenes/` are ignored by Git.
 
 ## Install The Blender Add-On
 
@@ -179,6 +181,12 @@ Set up a side-by-side compare view:
 
 ```powershell
 python bridge\codex_blender_bridge.py examples\setup_compare_view.json
+```
+
+Export the current scene to GLB:
+
+```powershell
+python bridge\codex_blender_bridge.py examples\export_table_glb.json
 ```
 
 Import a local asset:
@@ -347,6 +355,19 @@ Set up compare view:
 }
 ```
 
+Export GLB:
+
+```json
+{
+  "action": "export_glb",
+  "params": {
+    "output": "exports/modern_table.glb",
+    "selected_only": false,
+    "include_materials": true
+  }
+}
+```
+
 Import asset:
 
 ```json
@@ -388,7 +409,7 @@ Save scene:
 
 ## Supported Actions
 
-Supported v0.17 actions:
+Supported v0.18 actions:
 
 - `ping`
 - `create_room`
@@ -399,6 +420,7 @@ Supported v0.17 actions:
 - `apply_material_preset`
 - `setup_reference_camera`
 - `setup_compare_view`
+- `export_glb`
 - `create_scene_from_reference`
 - `import_asset`
 - `render_scene`
@@ -429,6 +451,7 @@ When connected as a Codex plugin/MCP server, it exposes:
 - `blender_apply_material_preset`
 - `blender_setup_reference_camera`
 - `blender_setup_compare_view`
+- `blender_export_glb`
 - `blender_create_scene_from_reference`
 - `blender_import_asset`
 - `blender_render_scene`

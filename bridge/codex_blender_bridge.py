@@ -23,7 +23,7 @@ def load_payload(value: str) -> dict:
 
 def normalize_command_paths(payload: dict, base_dir: Path) -> dict:
     action = payload.get("action")
-    if action not in {"render_scene", "save_blend", "import_asset", "add_reference_image", "apply_texture_material"}:
+    if action not in {"render_scene", "save_blend", "export_glb", "import_asset", "add_reference_image", "apply_texture_material"}:
         return payload
 
     params = payload.setdefault("params", {})

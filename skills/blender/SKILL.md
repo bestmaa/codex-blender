@@ -226,6 +226,21 @@ Saves the current Blender scene to a `.blend` file.
 }
 ```
 
+### export_glb
+
+Exports the current scene or selected objects to a `.glb` file.
+
+```json
+{
+  "action": "export_glb",
+  "params": {
+    "output": "exports/modern_table.glb",
+    "selected_only": false,
+    "include_materials": true
+  }
+}
+```
+
 ### import_asset
 
 Imports a local 3D asset. Supports `.glb`, `.gltf`, `.fbx`, and `.obj`.
