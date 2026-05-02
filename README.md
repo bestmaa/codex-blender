@@ -66,6 +66,20 @@ blender_addon/codex_blender_addon.py
 
 ### From ZIP
 
+Download the latest add-on ZIP from GitHub Releases:
+
+```text
+https://github.com/bestmaa/codex-blender/releases
+```
+
+For v0.7.0, download:
+
+```text
+codex_blender_addon_v0.7.0.zip
+```
+
+Or build it locally:
+
 Build an installable ZIP:
 
 ```powershell
