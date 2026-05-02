@@ -177,6 +177,26 @@ Sets the active camera to frame a reference/model comparison target.
 }
 ```
 
+### setup_compare_view
+
+Places a reference image plane and camera for side-by-side or background comparison renders.
+
+```json
+{
+  "action": "setup_compare_view",
+  "params": {
+    "reference_object": "table reference image",
+    "mode": "side_by_side",
+    "reference_location": [2.25, 2.15, 1.55],
+    "reference_width": 2.5,
+    "camera_location": [4.8, -5.8, 2.65],
+    "target": [0.55, 0.55, 1.25],
+    "lens": 30,
+    "resolution": [1280, 720]
+  }
+}
+```
+
 ### render_scene
 
 Renders the current scene from the active camera to a PNG file.

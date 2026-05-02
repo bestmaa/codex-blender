@@ -175,6 +175,12 @@ Set up a reference camera:
 python bridge\codex_blender_bridge.py examples\setup_reference_camera.json
 ```
 
+Set up a side-by-side compare view:
+
+```powershell
+python bridge\codex_blender_bridge.py examples\setup_compare_view.json
+```
+
 Import a local asset:
 
 ```powershell
@@ -323,6 +329,24 @@ Set up reference camera:
 }
 ```
 
+Set up compare view:
+
+```json
+{
+  "action": "setup_compare_view",
+  "params": {
+    "reference_object": "table reference image",
+    "mode": "side_by_side",
+    "reference_location": [2.25, 2.15, 1.55],
+    "reference_width": 2.5,
+    "camera_location": [4.8, -5.8, 2.65],
+    "target": [0.55, 0.55, 1.25],
+    "lens": 30,
+    "resolution": [1280, 720]
+  }
+}
+```
+
 Import asset:
 
 ```json
@@ -364,7 +388,7 @@ Save scene:
 
 ## Supported Actions
 
-Supported v0.16 actions:
+Supported v0.17 actions:
 
 - `ping`
 - `create_room`
@@ -374,6 +398,7 @@ Supported v0.16 actions:
 - `apply_texture_material`
 - `apply_material_preset`
 - `setup_reference_camera`
+- `setup_compare_view`
 - `create_scene_from_reference`
 - `import_asset`
 - `render_scene`
@@ -403,6 +428,7 @@ When connected as a Codex plugin/MCP server, it exposes:
 - `blender_apply_texture_material`
 - `blender_apply_material_preset`
 - `blender_setup_reference_camera`
+- `blender_setup_compare_view`
 - `blender_create_scene_from_reference`
 - `blender_import_asset`
 - `blender_render_scene`

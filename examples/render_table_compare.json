@@ -1,0 +1,9 @@
+{
+  "action": "render_scene",
+  "params": {
+    "output": "renders/table_compare.png",
+    "resolution": [1280, 720],
+    "samples": 64,
+    "timeout_seconds": 300
+  }
+}

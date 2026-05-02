@@ -1,7 +1,7 @@
 bl_info = {
     "name": "Codex Blender Bridge",
     "author": "Aditya",
-    "version": (0, 16, 0),
+    "version": (0, 17, 0),
     "blender": (3, 6, 0),
     "location": "View3D > Sidebar > Codex",
     "description": "Local HTTP bridge for sending Codex commands to Blender.",
@@ -952,6 +952,70 @@ def action_setup_reference_camera(params):
     )
 
 
+def action_setup_compare_view(params):
+    reference_object = params.get("reference_object")
+    if not isinstance(reference_object, str) or not reference_object.strip():
+        raise ValueError("params.reference_object must be a non-empty string")
+    reference = bpy.data.objects.get(reference_object)
+    if reference is None:
+        raise ValueError(f"Reference object not found: {reference_object}")
+
+    mode = params.get("mode", "side_by_side")
+    if mode not in {"side_by_side", "background"}:
+        raise ValueError("params.mode must be 'side_by_side' or 'background'")
+
+    if mode == "side_by_side":
+        reference_location = get_vector(params, "reference_location", [2.25, 2.15, 1.55])
+        reference_width = get_number(params, "reference_width", 2.5, minimum=0.1, maximum=100)
+        camera_location = get_vector(params, "camera_location", [4.8, -5.8, 2.65])
+        target = get_vector(params, "target", [0.55, 0.55, 1.25])
+        lens = get_number(params, "lens", 30, minimum=1, maximum=300)
+    else:
+        reference_location = get_vector(params, "reference_location", [0, 2.65, 1.65])
+        reference_width = get_number(params, "reference_width", 3.6, minimum=0.1, maximum=100)
+        camera_location = get_vector(params, "camera_location", [4.2, -5.4, 2.45])
+        target = get_vector(params, "target", [0.0, 0.2, 1.15])
+        lens = get_number(params, "lens", 32, minimum=1, maximum=300)
+
+    reference.location = reference_location
+    reference.rotation_euler = get_vector(params, "reference_rotation", [math.radians(90), 0, 0])
+    height = reference.dimensions.y if reference.dimensions.y else reference_width
+    aspect = height / reference.dimensions.x if reference.dimensions.x else 1.0
+    reference.dimensions = (reference_width, reference_width * aspect, 1)
+    bpy.context.view_layer.objects.active = reference
+    reference.select_set(True)
+    bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
+    reference.select_set(False)
+
+    if bpy.context.scene.camera is None:
+        bpy.ops.object.camera_add(location=camera_location)
+        camera = bpy.context.object
+        camera.name = "compare camera"
+        bpy.context.scene.camera = camera
+    else:
+        camera = bpy.context.scene.camera
+        camera.location = camera_location
+    look_at(camera, target)
+    camera.data.lens = lens
+
+    resolution = params.get("resolution")
+    if resolution is not None:
+        set_resolution({"resolution": resolution})
+
+    return make_result(
+        True,
+        message="Set up compare view.",
+        mode=mode,
+        reference_object=reference.name,
+        camera=camera.name,
+        reference_location=reference_location,
+        reference_width=reference_width,
+        camera_location=camera_location,
+        target=target,
+        lens=lens,
+    )
+
+
 def material_from_plan(cache, name, color):
     key = name or json.dumps(color)
     if key not in cache:
@@ -1084,6 +1148,8 @@ def execute_command(payload):
         return action_apply_material_preset(params)
     if action == "setup_reference_camera":
         return action_setup_reference_camera(params)
+    if action == "setup_compare_view":
+        return action_setup_compare_view(params)
     if action == "create_scene_from_reference":
         return action_create_scene_from_reference(params)
     if action == "run_python":

@@ -174,7 +174,7 @@ Commit:
 
 ### 6. v0.17 Reference Overlay Compare Render
 
-Status: pending
+Status: completed
 
 Goal:
 Create a practical compare render that shows reference and 3D model together.

@@ -420,6 +420,66 @@ TOOLS = [
         ),
     },
     {
+        "name": "blender_setup_compare_view",
+        "description": "Place a reference image plane and camera for side-by-side or background comparison renders.",
+        "inputSchema": json_schema(
+            {
+                "reference_object": {
+                    "type": "string",
+                    "description": "Reference plane object name.",
+                    "default": "table reference image",
+                },
+                "mode": {
+                    "type": "string",
+                    "description": "Compare mode: side_by_side or background.",
+                    "default": "side_by_side",
+                },
+                "reference_location": {
+                    "type": "array",
+                    "items": {"type": "number"},
+                    "minItems": 3,
+                    "maxItems": 3,
+                    "description": "Reference plane location.",
+                    "default": [2.25, 2.15, 1.55],
+                },
+                "reference_width": {
+                    "type": "number",
+                    "description": "Reference plane width.",
+                    "default": 2.5,
+                },
+                "camera_location": {
+                    "type": "array",
+                    "items": {"type": "number"},
+                    "minItems": 3,
+                    "maxItems": 3,
+                    "description": "Camera location.",
+                    "default": [4.8, -5.8, 2.65],
+                },
+                "target": {
+                    "type": "array",
+                    "items": {"type": "number"},
+                    "minItems": 3,
+                    "maxItems": 3,
+                    "description": "Camera look-at target.",
+                    "default": [0.55, 0.55, 1.25],
+                },
+                "lens": {
+                    "type": "number",
+                    "description": "Camera lens in millimeters.",
+                    "default": 30,
+                },
+                "resolution": {
+                    "type": "array",
+                    "items": {"type": "integer"},
+                    "minItems": 2,
+                    "maxItems": 2,
+                    "description": "Optional render resolution.",
+                    "default": [1280, 720],
+                },
+            }
+        ),
+    },
+    {
         "name": "blender_create_scene_from_reference",
         "description": "Create an approximate Blender scene from a structured reference-image scene plan.",
         "inputSchema": json_schema(
@@ -592,6 +652,18 @@ def call_tool(name: str, arguments: dict[str, Any]) -> tuple[dict[str, Any], boo
             "create_target": arguments.get("create_target", True),
         }
         result = call_http("/command", {"action": "setup_reference_camera", "params": params})
+    elif name == "blender_setup_compare_view":
+        params = {
+            "reference_object": arguments.get("reference_object", "table reference image"),
+            "mode": arguments.get("mode", "side_by_side"),
+            "reference_location": arguments.get("reference_location", [2.25, 2.15, 1.55]),
+            "reference_width": arguments.get("reference_width", 2.5),
+            "camera_location": arguments.get("camera_location", [4.8, -5.8, 2.65]),
+            "target": arguments.get("target", [0.55, 0.55, 1.25]),
+            "lens": arguments.get("lens", 30),
+            "resolution": arguments.get("resolution", [1280, 720]),
+        }
+        result = call_http("/command", {"action": "setup_compare_view", "params": params})
     elif name == "blender_create_scene_from_reference":
         result = call_http("/command", {"action": "create_scene_from_reference", "params": arguments})
     elif name == "blender_inspect_rig":
@@ -643,7 +715,7 @@ def handle_request(message: dict[str, Any]) -> dict[str, Any] | None:
             {
                 "protocolVersion": "2024-11-05",
                 "capabilities": {"tools": {}},
-                "serverInfo": {"name": "codex-blender", "version": "0.16.0"},
+                "serverInfo": {"name": "codex-blender", "version": "0.17.0"},
             },
         )
     if method == "tools/list":
