@@ -373,6 +373,53 @@ TOOLS = [
         ),
     },
     {
+        "name": "blender_setup_reference_camera",
+        "description": "Set the active camera to frame a reference/model comparison target.",
+        "inputSchema": json_schema(
+            {
+                "reference_object": {
+                    "type": "string",
+                    "description": "Optional reference plane object name to validate.",
+                    "default": "table reference image",
+                },
+                "camera_location": {
+                    "type": "array",
+                    "items": {"type": "number"},
+                    "minItems": 3,
+                    "maxItems": 3,
+                    "description": "Camera location as [x, y, z].",
+                    "default": [4.2, -5.4, 2.45],
+                },
+                "target": {
+                    "type": "array",
+                    "items": {"type": "number"},
+                    "minItems": 3,
+                    "maxItems": 3,
+                    "description": "Camera look-at target as [x, y, z].",
+                    "default": [0, 0, 1.1],
+                },
+                "lens": {
+                    "type": "number",
+                    "description": "Camera lens in millimeters.",
+                    "default": 35,
+                },
+                "resolution": {
+                    "type": "array",
+                    "items": {"type": "integer"},
+                    "minItems": 2,
+                    "maxItems": 2,
+                    "description": "Optional render resolution as [width, height].",
+                    "default": [1280, 720],
+                },
+                "create_target": {
+                    "type": "boolean",
+                    "description": "Create a visible empty at the look-at target.",
+                    "default": True,
+                },
+            }
+        ),
+    },
+    {
         "name": "blender_create_scene_from_reference",
         "description": "Create an approximate Blender scene from a structured reference-image scene plan.",
         "inputSchema": json_schema(
@@ -535,6 +582,16 @@ def call_tool(name: str, arguments: dict[str, Any]) -> tuple[dict[str, Any], boo
             "mode": arguments.get("mode", "replace"),
         }
         result = call_http("/command", {"action": "apply_material_preset", "params": params})
+    elif name == "blender_setup_reference_camera":
+        params = {
+            "reference_object": arguments.get("reference_object", "table reference image"),
+            "camera_location": arguments.get("camera_location", [4.2, -5.4, 2.45]),
+            "target": arguments.get("target", [0, 0, 1.1]),
+            "lens": arguments.get("lens", 35),
+            "resolution": arguments.get("resolution", [1280, 720]),
+            "create_target": arguments.get("create_target", True),
+        }
+        result = call_http("/command", {"action": "setup_reference_camera", "params": params})
     elif name == "blender_create_scene_from_reference":
         result = call_http("/command", {"action": "create_scene_from_reference", "params": arguments})
     elif name == "blender_inspect_rig":
@@ -586,7 +643,7 @@ def handle_request(message: dict[str, Any]) -> dict[str, Any] | None:
             {
                 "protocolVersion": "2024-11-05",
                 "capabilities": {"tools": {}},
-                "serverInfo": {"name": "codex-blender", "version": "0.15.0"},
+                "serverInfo": {"name": "codex-blender", "version": "0.16.0"},
             },
         )
     if method == "tools/list":

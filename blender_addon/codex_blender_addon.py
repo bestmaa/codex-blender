@@ -1,7 +1,7 @@
 bl_info = {
     "name": "Codex Blender Bridge",
     "author": "Aditya",
-    "version": (0, 15, 0),
+    "version": (0, 16, 0),
     "blender": (3, 6, 0),
     "location": "View3D > Sidebar > Codex",
     "description": "Local HTTP bridge for sending Codex commands to Blender.",
@@ -906,6 +906,52 @@ def action_apply_material_preset(params):
     )
 
 
+def action_setup_reference_camera(params):
+    reference_object = params.get("reference_object")
+    if reference_object is not None:
+        if not isinstance(reference_object, str) or not reference_object.strip():
+            raise ValueError("params.reference_object must be a non-empty string")
+        if bpy.data.objects.get(reference_object) is None:
+            raise ValueError(f"Reference object not found: {reference_object}")
+
+    camera_location = get_vector(params, "camera_location", [4.2, -5.4, 2.45])
+    target = get_vector(params, "target", [0.0, 0.0, 1.1])
+    lens = get_number(params, "lens", 35, minimum=1, maximum=300)
+    create_target = params.get("create_target", True)
+    if not isinstance(create_target, bool):
+        raise ValueError("params.create_target must be a boolean")
+
+    if create_target:
+        bpy.ops.object.empty_add(type="PLAIN_AXES", location=target)
+        target_obj = bpy.context.object
+        target_obj.name = "reference camera target"
+
+    if bpy.context.scene.camera is None:
+        bpy.ops.object.camera_add(location=camera_location)
+        camera = bpy.context.object
+        camera.name = "reference camera"
+        bpy.context.scene.camera = camera
+    else:
+        camera = bpy.context.scene.camera
+        camera.location = camera_location
+    look_at(camera, target)
+    camera.data.lens = lens
+
+    resolution = params.get("resolution")
+    if resolution is not None:
+        set_resolution({"resolution": resolution})
+
+    return make_result(
+        True,
+        message="Set up reference camera.",
+        camera=camera.name,
+        reference_object=reference_object,
+        camera_location=camera_location,
+        target=target,
+        lens=lens,
+    )
+
+
 def material_from_plan(cache, name, color):
     key = name or json.dumps(color)
     if key not in cache:
@@ -1036,6 +1082,8 @@ def execute_command(payload):
         return action_apply_texture_material(params)
     if action == "apply_material_preset":
         return action_apply_material_preset(params)
+    if action == "setup_reference_camera":
+        return action_setup_reference_camera(params)
     if action == "create_scene_from_reference":
         return action_create_scene_from_reference(params)
     if action == "run_python":

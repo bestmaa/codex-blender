@@ -159,6 +159,24 @@ Applies a built-in material preset to an existing Blender object. Available pres
 }
 ```
 
+### setup_reference_camera
+
+Sets the active camera to frame a reference/model comparison target.
+
+```json
+{
+  "action": "setup_reference_camera",
+  "params": {
+    "reference_object": "table reference image",
+    "camera_location": [4.2, -5.4, 2.45],
+    "target": [0.0, 0.2, 1.15],
+    "lens": 32,
+    "resolution": [1280, 720],
+    "create_target": true
+  }
+}
+```
+
 ### render_scene
 
 Renders the current scene from the active camera to a PNG file.

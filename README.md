@@ -169,6 +169,12 @@ Apply a built-in material preset:
 python bridge\codex_blender_bridge.py examples\apply_material_preset.json
 ```
 
+Set up a reference camera:
+
+```powershell
+python bridge\codex_blender_bridge.py examples\setup_reference_camera.json
+```
+
 Import a local asset:
 
 ```powershell
@@ -301,6 +307,22 @@ Apply material preset:
 }
 ```
 
+Set up reference camera:
+
+```json
+{
+  "action": "setup_reference_camera",
+  "params": {
+    "reference_object": "table reference image",
+    "camera_location": [4.2, -5.4, 2.45],
+    "target": [0.0, 0.2, 1.15],
+    "lens": 32,
+    "resolution": [1280, 720],
+    "create_target": true
+  }
+}
+```
+
 Import asset:
 
 ```json
@@ -342,7 +364,7 @@ Save scene:
 
 ## Supported Actions
 
-Supported v0.15 actions:
+Supported v0.16 actions:
 
 - `ping`
 - `create_room`
@@ -351,6 +373,7 @@ Supported v0.15 actions:
 - `add_reference_image`
 - `apply_texture_material`
 - `apply_material_preset`
+- `setup_reference_camera`
 - `create_scene_from_reference`
 - `import_asset`
 - `render_scene`
@@ -379,6 +402,7 @@ When connected as a Codex plugin/MCP server, it exposes:
 - `blender_add_reference_image`
 - `blender_apply_texture_material`
 - `blender_apply_material_preset`
+- `blender_setup_reference_camera`
 - `blender_create_scene_from_reference`
 - `blender_import_asset`
 - `blender_render_scene`

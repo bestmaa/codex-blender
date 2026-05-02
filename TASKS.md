@@ -148,7 +148,7 @@ Commit:
 
 ### 5. v0.16 Reference Image Camera Helper
 
-Status: pending
+Status: completed
 
 Goal:
 Make image matching easier by adding a helper to place camera and reference plane together.
