@@ -21,6 +21,7 @@ Use this skill for Blender automation through the local Codex Blender bridge.
 4. Use generated Blender Python only when a structured action is not enough.
 5. Save reusable command examples under `examples/`.
 6. For rigged models, first run `inspect_rig`, then generate animation against the discovered bone names.
+7. After add-on code changes, use Blender's `Reload Bridge Code` button before testing new actions.
 
 ## Safety
 

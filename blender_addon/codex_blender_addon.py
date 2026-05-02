@@ -1,7 +1,7 @@
 bl_info = {
     "name": "Codex Blender Bridge",
     "author": "Aditya",
-    "version": (0, 3, 0),
+    "version": (0, 4, 0),
     "blender": (3, 6, 0),
     "location": "View3D > Sidebar > Codex",
     "description": "Local HTTP bridge for sending Codex commands to Blender.",
@@ -25,6 +25,7 @@ from mathutils import Vector
 HOST = "127.0.0.1"
 PORT = 8765
 DEFAULT_COMMAND_TIMEOUT = 300
+DEFAULT_SOURCE_PATH = r"\\wsl.localhost\Ubuntu\home\aditya\projects\codex-blender\blender_addon\codex_blender_addon.py"
 
 _server = None
 _server_thread = None
@@ -42,6 +43,34 @@ def make_result(ok, **values):
     data = {"ok": ok}
     data.update(values)
     return data
+
+
+def get_addon_preferences():
+    addon = bpy.context.preferences.addons.get(__name__)
+    return addon.preferences if addon else None
+
+
+def get_reload_source_path():
+    preferences = get_addon_preferences()
+    if preferences and preferences.source_path:
+        return preferences.source_path
+    if DEFAULT_SOURCE_PATH and Path(DEFAULT_SOURCE_PATH).exists():
+        return DEFAULT_SOURCE_PATH
+    return __file__
+
+
+def reload_bridge_code(source_path):
+    path = Path(source_path)
+    if not path.exists():
+        raise FileNotFoundError(f"Reload source not found: {source_path}")
+
+    was_running = is_bridge_running()
+    stop_bridge()
+    source = path.read_text(encoding="utf-8")
+    exec(compile(source, os.fspath(path), "exec"), globals(), globals())
+    if was_running:
+        start_bridge()
+    return path
 
 
 def clear_scene():
@@ -477,6 +506,36 @@ class CODEXBLENDER_OT_stop_bridge(bpy.types.Operator):
         return {"FINISHED"}
 
 
+class CODEXBLENDER_OT_reload_bridge_code(bpy.types.Operator):
+    bl_idname = "codex_blender.reload_bridge_code"
+    bl_label = "Reload Bridge Code"
+
+    def execute(self, _context):
+        try:
+            path = reload_bridge_code(get_reload_source_path())
+        except Exception as exc:
+            self.report({"ERROR"}, str(exc))
+            return {"CANCELLED"}
+
+        self.report({"INFO"}, f"Reloaded bridge code from {path}")
+        return {"FINISHED"}
+
+
+class CODEXBLENDER_AddonPreferences(bpy.types.AddonPreferences):
+    bl_idname = __name__
+
+    source_path: bpy.props.StringProperty(
+        name="Source File",
+        description="Development source file to reload without reinstalling the add-on",
+        default=DEFAULT_SOURCE_PATH,
+        subtype="FILE_PATH",
+    )
+
+    def draw(self, _context):
+        layout = self.layout
+        layout.prop(self, "source_path")
+
+
 class CODEXBLENDER_PT_panel(bpy.types.Panel):
     bl_label = "Codex Blender"
     bl_idname = "CODEXBLENDER_PT_panel"
@@ -492,11 +551,17 @@ class CODEXBLENDER_PT_panel(bpy.types.Panel):
         row = layout.row(align=True)
         row.operator("codex_blender.start_bridge")
         row.operator("codex_blender.stop_bridge")
+        layout.operator("codex_blender.reload_bridge_code")
+        preferences = get_addon_preferences()
+        if preferences:
+            layout.prop(preferences, "source_path")
 
 
 CLASSES = (
+    CODEXBLENDER_AddonPreferences,
     CODEXBLENDER_OT_start_bridge,
     CODEXBLENDER_OT_stop_bridge,
+    CODEXBLENDER_OT_reload_bridge_code,
     CODEXBLENDER_PT_panel,
 )
 
