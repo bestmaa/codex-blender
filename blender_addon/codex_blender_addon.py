@@ -1,7 +1,7 @@
 bl_info = {
     "name": "Codex Blender Bridge",
     "author": "Aditya",
-    "version": (0, 6, 0),
+    "version": (0, 7, 0),
     "blender": (3, 6, 0),
     "location": "View3D > Sidebar > Codex",
     "description": "Local HTTP bridge for sending Codex commands to Blender.",
@@ -328,6 +328,31 @@ def resolve_output_path(value):
     return path
 
 
+def resolve_input_path(value, param_name="path"):
+    if not isinstance(value, str) or not value.strip():
+        raise ValueError(f"params.{param_name} must be a non-empty string")
+
+    if value.startswith("//"):
+        path = Path(bpy.path.abspath(value))
+    else:
+        path = Path(value)
+        if not path.is_absolute():
+            path = Path(__file__).resolve().parents[1] / path
+
+    if not path.exists():
+        raise FileNotFoundError(f"Asset not found: {path}")
+    return path
+
+
+def get_vector(params, name, default, length=3):
+    value = params.get(name, default)
+    if not isinstance(value, list) or len(value) != length:
+        raise ValueError(f"params.{name} must be a list with {length} numbers")
+    if not all(isinstance(item, (int, float)) for item in value):
+        raise ValueError(f"params.{name} must contain only numbers")
+    return tuple(value)
+
+
 def set_resolution(params):
     resolution = params.get("resolution", [1280, 720])
     if (
@@ -377,6 +402,56 @@ def action_save_blend(params):
     return make_result(True, message="Saved Blender scene.", output=os.fspath(output_path))
 
 
+def set_import_transform(objects, location, rotation, scale):
+    for obj in objects:
+        obj.location = location
+        obj.rotation_euler = rotation
+        obj.scale = scale
+
+
+def import_obj(path):
+    if hasattr(bpy.ops.wm, "obj_import"):
+        bpy.ops.wm.obj_import(filepath=os.fspath(path))
+    else:
+        bpy.ops.import_scene.obj(filepath=os.fspath(path))
+
+
+def action_import_asset(params):
+    path = resolve_input_path(params.get("path"))
+    location = get_vector(params, "location", [0, 0, 0])
+    rotation = get_vector(params, "rotation", [0, 0, 0])
+    scale_value = params.get("scale", 1.0)
+    if isinstance(scale_value, (int, float)):
+        scale = (scale_value, scale_value, scale_value)
+    else:
+        scale = get_vector(params, "scale", [1, 1, 1])
+
+    before = set(bpy.data.objects)
+    suffix = path.suffix.lower()
+    if suffix in {".glb", ".gltf"}:
+        bpy.ops.import_scene.gltf(filepath=os.fspath(path))
+    elif suffix == ".fbx":
+        bpy.ops.import_scene.fbx(filepath=os.fspath(path))
+    elif suffix == ".obj":
+        import_obj(path)
+    else:
+        return make_result(False, error=f"Unsupported asset type: {suffix}")
+
+    imported = [obj for obj in bpy.data.objects if obj not in before]
+    set_import_transform(imported, location, rotation, scale)
+    for obj in imported:
+        obj.select_set(True)
+    if imported:
+        bpy.context.view_layer.objects.active = imported[0]
+
+    return make_result(
+        True,
+        message="Imported asset.",
+        path=os.fspath(path),
+        objects=[obj.name for obj in imported],
+    )
+
+
 def action_run_python(params):
     code = params.get("code", "")
     if not isinstance(code, str) or not code.strip():
@@ -405,6 +480,8 @@ def execute_command(payload):
         return action_render_scene(params)
     if action == "save_blend":
         return action_save_blend(params)
+    if action == "import_asset":
+        return action_import_asset(params)
     if action == "run_python":
         return action_run_python(params)
     return make_result(False, error=f"Unsupported action: {action}")

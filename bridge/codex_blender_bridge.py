@@ -21,18 +21,20 @@ def load_payload(value: str) -> dict:
     return json.loads(value)
 
 
-def normalize_command_output(payload: dict, base_dir: Path) -> dict:
-    if payload.get("action") not in {"render_scene", "save_blend"}:
+def normalize_command_paths(payload: dict, base_dir: Path) -> dict:
+    action = payload.get("action")
+    if action not in {"render_scene", "save_blend", "import_asset"}:
         return payload
 
     params = payload.setdefault("params", {})
-    output = params.get("output")
-    if not isinstance(output, str) or not output or output.startswith("//"):
+    key = "path" if action == "import_asset" else "output"
+    value = params.get(key)
+    if not isinstance(value, str) or not value or value.startswith("//"):
         return payload
 
-    output_path = Path(output)
-    if not output_path.is_absolute():
-        params["output"] = str((base_dir / output_path).resolve())
+    path = Path(value)
+    if not path.is_absolute():
+        params[key] = str((base_dir / path).resolve())
     return payload
 
 
@@ -56,7 +58,7 @@ def main() -> int:
     args = parser.parse_args()
 
     try:
-        payload = normalize_command_output(load_payload(args.payload), Path.cwd())
+        payload = normalize_command_paths(load_payload(args.payload), Path.cwd())
         result = send_command(payload, args.url, args.timeout)
     except json.JSONDecodeError as exc:
         print(f"Invalid JSON: {exc}", file=sys.stderr)

@@ -1,0 +1,9 @@
+{
+  "action": "import_asset",
+  "params": {
+    "path": "assets/models/sample_pyramid.obj",
+    "location": [0, 0, 0],
+    "rotation": [0, 0, 0],
+    "scale": 1.0
+  }
+}

@@ -122,6 +122,39 @@ TOOLS = [
         ),
     },
     {
+        "name": "blender_import_asset",
+        "description": "Import a local 3D asset into the current Blender scene.",
+        "inputSchema": json_schema(
+            {
+                "path": {
+                    "type": "string",
+                    "description": "Asset path. Supports .glb, .gltf, .fbx, and .obj.",
+                },
+                "location": {
+                    "type": "array",
+                    "items": {"type": "number"},
+                    "minItems": 3,
+                    "maxItems": 3,
+                    "description": "Import location as [x, y, z].",
+                    "default": [0, 0, 0],
+                },
+                "rotation": {
+                    "type": "array",
+                    "items": {"type": "number"},
+                    "minItems": 3,
+                    "maxItems": 3,
+                    "description": "Import rotation in radians as [x, y, z].",
+                    "default": [0, 0, 0],
+                },
+                "scale": {
+                    "description": "Uniform number scale or [x, y, z] scale.",
+                    "default": 1.0,
+                },
+            },
+            required=["path"],
+        ),
+    },
+    {
         "name": "blender_inspect_rig",
         "description": "Return armature and bone names from the current Blender scene.",
         "inputSchema": json_schema({}),
@@ -172,6 +205,10 @@ def normalize_output_path(value: Any) -> Any:
     return str((OUTPUT_BASE_DIR / output_path).resolve())
 
 
+def normalize_input_path(value: Any) -> Any:
+    return normalize_output_path(value)
+
+
 def call_tool(name: str, arguments: dict[str, Any]) -> tuple[dict[str, Any], bool]:
     if name == "blender_health":
         result = call_http("/health")
@@ -200,6 +237,14 @@ def call_tool(name: str, arguments: dict[str, Any]) -> tuple[dict[str, Any], boo
     elif name == "blender_save_blend":
         params = {"output": normalize_output_path(arguments.get("output", "scenes/scene.blend"))}
         result = call_http("/command", {"action": "save_blend", "params": params})
+    elif name == "blender_import_asset":
+        params = {
+            "path": normalize_input_path(arguments.get("path")),
+            "location": arguments.get("location", [0, 0, 0]),
+            "rotation": arguments.get("rotation", [0, 0, 0]),
+            "scale": arguments.get("scale", 1.0),
+        }
+        result = call_http("/command", {"action": "import_asset", "params": params})
     elif name == "blender_inspect_rig":
         result = call_http("/command", {"action": "inspect_rig"})
     elif name == "blender_command":
@@ -211,6 +256,9 @@ def call_tool(name: str, arguments: dict[str, Any]) -> tuple[dict[str, Any], boo
                 params = payload.setdefault("params", {})
                 default_output = "scenes/scene.blend" if payload.get("action") == "save_blend" else "renders/room.png"
                 params["output"] = normalize_output_path(params.get("output", default_output))
+            if payload.get("action") == "import_asset":
+                params = payload.setdefault("params", {})
+                params["path"] = normalize_input_path(params.get("path"))
             timeout = payload.get("params", {}).get("timeout_seconds", 300)
             result = call_http("/command", payload, timeout=timeout)
     else:
@@ -238,7 +286,7 @@ def handle_request(message: dict[str, Any]) -> dict[str, Any] | None:
             {
                 "protocolVersion": "2024-11-05",
                 "capabilities": {"tools": {}},
-                "serverInfo": {"name": "codex-blender", "version": "0.6.0"},
+                "serverInfo": {"name": "codex-blender", "version": "0.7.0"},
             },
         )
     if method == "tools/list":

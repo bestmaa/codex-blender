@@ -108,6 +108,22 @@ Saves the current Blender scene to a `.blend` file.
 }
 ```
 
+### import_asset
+
+Imports a local 3D asset. Supports `.glb`, `.gltf`, `.fbx`, and `.obj`.
+
+```json
+{
+  "action": "import_asset",
+  "params": {
+    "path": "assets/models/sample_pyramid.obj",
+    "location": [0, 0, 0],
+    "rotation": [0, 0, 0],
+    "scale": 1.0
+  }
+}
+```
+
 ### run_python
 
 Runs trusted Blender Python.
