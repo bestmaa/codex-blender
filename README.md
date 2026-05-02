@@ -21,6 +21,7 @@ This is not a cloud connector. Blender runs locally on your machine.
 - Inspect current scene objects before editing.
 - Move, rotate, scale, and resize named scene objects.
 - Duplicate and arrange repeated objects.
+- Add simple object keyframe animations.
 - Add reference images as textured planes for side-by-side modeling.
 - Apply user-provided image textures to Blender objects.
 - Create approximate scenes from structured reference-image plans.
@@ -216,6 +217,12 @@ Duplicate a table leg:
 
 ```powershell
 python bridge\codex_blender_bridge.py examples\duplicate_table_leg.json
+```
+
+Animate the table top:
+
+```powershell
+python bridge\codex_blender_bridge.py examples\animate_tabletop.json
 ```
 
 Add a reference image plane:
@@ -515,6 +522,23 @@ Duplicate object:
 }
 ```
 
+Animate object:
+
+```json
+{
+  "action": "animate_object",
+  "params": {
+    "object": "rounded rectangular tabletop",
+    "frame_start": 1,
+    "frame_end": 80,
+    "location_start": [0, 0, 1.55],
+    "location_end": [0, 0, 1.9],
+    "rotation_start": [0, 0, 0],
+    "rotation_end": [0, 0, 0.35]
+  }
+}
+```
+
 Add reference image:
 
 ```json
@@ -686,6 +710,7 @@ Supported v0.20 actions:
 - `inspect_scene`
 - `transform_object`
 - `duplicate_object`
+- `animate_object`
 - `add_reference_image`
 - `apply_texture_material`
 - `apply_material_preset`
@@ -729,6 +754,7 @@ When connected as a Codex plugin/MCP server, it exposes:
 - `blender_inspect_scene`
 - `blender_transform_object`
 - `blender_duplicate_object`
+- `blender_animate_object`
 - `blender_add_reference_image`
 - `blender_apply_texture_material`
 - `blender_apply_material_preset`

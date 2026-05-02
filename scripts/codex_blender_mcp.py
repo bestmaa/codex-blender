@@ -306,6 +306,24 @@ TOOLS = [
         ),
     },
     {
+        "name": "blender_animate_object",
+        "description": "Create simple location, rotation, and scale keyframes for an object.",
+        "inputSchema": json_schema(
+            {
+                "object": {"type": "string", "description": "Object name to animate."},
+                "frame_start": {"type": "integer", "description": "Start frame.", "default": 1},
+                "frame_end": {"type": "integer", "description": "End frame.", "default": 80},
+                "location_start": {"type": "array", "items": {"type": "number"}},
+                "location_end": {"type": "array", "items": {"type": "number"}},
+                "rotation_start": {"type": "array", "items": {"type": "number"}},
+                "rotation_end": {"type": "array", "items": {"type": "number"}},
+                "scale_start": {"type": "array", "items": {"type": "number"}},
+                "scale_end": {"type": "array", "items": {"type": "number"}},
+            },
+            required=["object"],
+        ),
+    },
+    {
         "name": "blender_save_blend",
         "description": "Save the current Blender scene to a .blend file.",
         "inputSchema": json_schema(
@@ -877,6 +895,23 @@ def call_tool(name: str, arguments: dict[str, Any]) -> tuple[dict[str, Any], boo
             "name_prefix": arguments.get("name_prefix", "duplicate"),
         }
         result = call_http("/command", {"action": "duplicate_object", "params": params})
+    elif name == "blender_animate_object":
+        params = {
+            "object": arguments.get("object"),
+            "frame_start": arguments.get("frame_start", 1),
+            "frame_end": arguments.get("frame_end", 80),
+        }
+        for key in (
+            "location_start",
+            "location_end",
+            "rotation_start",
+            "rotation_end",
+            "scale_start",
+            "scale_end",
+        ):
+            if key in arguments:
+                params[key] = arguments[key]
+        result = call_http("/command", {"action": "animate_object", "params": params})
     elif name == "blender_save_blend":
         params = {"output": normalize_output_path(arguments.get("output", "scenes/scene.blend"))}
         result = call_http("/command", {"action": "save_blend", "params": params})
@@ -1015,7 +1050,7 @@ def handle_request(message: dict[str, Any]) -> dict[str, Any] | None:
             {
                 "protocolVersion": "2024-11-05",
                 "capabilities": {"tools": {}},
-                "serverInfo": {"name": "codex-blender", "version": "0.30.0"},
+                "serverInfo": {"name": "codex-blender", "version": "0.31.0"},
             },
         )
     if method == "tools/list":

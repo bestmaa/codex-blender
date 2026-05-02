@@ -1,7 +1,7 @@
 bl_info = {
     "name": "Codex Blender Bridge",
     "author": "Aditya",
-    "version": (0, 30, 0),
+    "version": (0, 31, 0),
     "blender": (3, 6, 0),
     "location": "View3D > Sidebar > Codex",
     "description": "Local HTTP bridge for sending Codex commands to Blender.",
@@ -1608,6 +1608,60 @@ def action_duplicate_object(params):
     )
 
 
+def action_animate_object(params):
+    name = params.get("object")
+    if not isinstance(name, str) or not name.strip():
+        raise ValueError("params.object must be a non-empty string")
+    obj = bpy.data.objects.get(name)
+    if obj is None:
+        raise ValueError(f"Object not found: {name}")
+    frame_start = get_int(params, "frame_start", 1, minimum=0, maximum=100000)
+    frame_end = get_int(params, "frame_end", 80, minimum=0, maximum=100000)
+    if frame_end <= frame_start:
+        raise ValueError("params.frame_end must be greater than frame_start")
+
+    channels = []
+    if "location_start" in params or "location_end" in params:
+        start = get_vector(params, "location_start", [obj.location.x, obj.location.y, obj.location.z])
+        end = get_vector(params, "location_end", [obj.location.x, obj.location.y, obj.location.z])
+        obj.location = start
+        obj.keyframe_insert(data_path="location", frame=frame_start)
+        obj.location = end
+        obj.keyframe_insert(data_path="location", frame=frame_end)
+        channels.append("location")
+    if "rotation_start" in params or "rotation_end" in params:
+        start = get_vector(params, "rotation_start", [obj.rotation_euler.x, obj.rotation_euler.y, obj.rotation_euler.z])
+        end = get_vector(params, "rotation_end", [obj.rotation_euler.x, obj.rotation_euler.y, obj.rotation_euler.z])
+        obj.rotation_euler = start
+        obj.keyframe_insert(data_path="rotation_euler", frame=frame_start)
+        obj.rotation_euler = end
+        obj.keyframe_insert(data_path="rotation_euler", frame=frame_end)
+        channels.append("rotation")
+    if "scale_start" in params or "scale_end" in params:
+        start = get_vector(params, "scale_start", [obj.scale.x, obj.scale.y, obj.scale.z])
+        end = get_vector(params, "scale_end", [obj.scale.x, obj.scale.y, obj.scale.z])
+        obj.scale = start
+        obj.keyframe_insert(data_path="scale", frame=frame_start)
+        obj.scale = end
+        obj.keyframe_insert(data_path="scale", frame=frame_end)
+        channels.append("scale")
+    if not channels:
+        raise ValueError("Provide at least one location, rotation, or scale start/end pair")
+
+    bpy.context.scene.frame_start = frame_start
+    bpy.context.scene.frame_end = frame_end
+    bpy.context.scene.frame_set(frame_start)
+
+    return make_result(
+        True,
+        message="Animated object.",
+        object=obj.name,
+        channels=channels,
+        frame_start=frame_start,
+        frame_end=frame_end,
+    )
+
+
 def action_add_reference_image(params):
     path = resolve_input_path(params.get("path"))
     name = params.get("name", path.stem)
@@ -2063,6 +2117,8 @@ def execute_command(payload):
         return action_transform_object(params)
     if action == "duplicate_object":
         return action_duplicate_object(params)
+    if action == "animate_object":
+        return action_animate_object(params)
     if action == "add_reference_image":
         return action_add_reference_image(params)
     if action == "apply_texture_material":

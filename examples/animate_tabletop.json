@@ -1,0 +1,12 @@
+{
+  "action": "animate_object",
+  "params": {
+    "object": "rounded rectangular tabletop",
+    "frame_start": 1,
+    "frame_end": 80,
+    "location_start": [0, 0, 1.55],
+    "location_end": [0, 0, 1.9],
+    "rotation_start": [0, 0, 0],
+    "rotation_end": [0, 0, 0.35]
+  }
+}

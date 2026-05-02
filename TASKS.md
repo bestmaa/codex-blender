@@ -497,7 +497,7 @@ Commit:
 
 ### 20. v0.31 Animation Basics
 
-Status: pending
+Status: completed
 
 Goal:
 Add simple object animation support.

@@ -286,6 +286,25 @@ Duplicates an existing object multiple times with an offset and stable name pref
 }
 ```
 
+### animate_object
+
+Creates simple location, rotation, or scale keyframes for an existing object.
+
+```json
+{
+  "action": "animate_object",
+  "params": {
+    "object": "rounded rectangular tabletop",
+    "frame_start": 1,
+    "frame_end": 80,
+    "location_start": [0, 0, 1.55],
+    "location_end": [0, 0, 1.9],
+    "rotation_start": [0, 0, 0],
+    "rotation_end": [0, 0, 0.35]
+  }
+}
+```
+
 ### add_reference_image
 
 Adds a local image as a reference plane in the current Blender scene. Use this before or after model creation when matching a generated/reference image.
