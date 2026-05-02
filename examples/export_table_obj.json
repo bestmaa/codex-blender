@@ -1,0 +1,7 @@
+{
+  "action": "export_obj",
+  "params": {
+    "output": "exports/modern_table.obj",
+    "selected_only": false
+  }
+}

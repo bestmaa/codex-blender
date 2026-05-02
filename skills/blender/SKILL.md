@@ -241,6 +241,20 @@ Exports the current scene or selected objects to a `.glb` file.
 }
 ```
 
+### export_obj
+
+Exports the current scene or selected objects to an `.obj` file.
+
+```json
+{
+  "action": "export_obj",
+  "params": {
+    "output": "exports/modern_table.obj",
+    "selected_only": false
+  }
+}
+```
+
 ### import_asset
 
 Imports a local 3D asset. Supports `.glb`, `.gltf`, `.fbx`, and `.obj`.

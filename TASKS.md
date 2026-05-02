@@ -221,7 +221,7 @@ Commit:
 
 ### 8. v0.19 Export OBJ
 
-Status: pending
+Status: completed
 
 Goal:
 Add a simple OBJ export path for compatibility.

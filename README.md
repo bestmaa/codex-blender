@@ -14,7 +14,7 @@ This is not a cloud connector. Blender runs locally on your machine.
 - Apply user-provided image textures to Blender objects.
 - Create approximate scenes from structured reference-image plans.
 - Import local `.glb`, `.gltf`, `.fbx`, and `.obj` assets.
-- Export scenes/models to `.glb`.
+- Export scenes/models to `.glb` and `.obj`.
 - Render the current scene to PNG.
 - Save the current scene to `.blend`.
 - Inspect armatures and bone names.
@@ -187,6 +187,12 @@ Export the current scene to GLB:
 
 ```powershell
 python bridge\codex_blender_bridge.py examples\export_table_glb.json
+```
+
+Export the current scene to OBJ:
+
+```powershell
+python bridge\codex_blender_bridge.py examples\export_table_obj.json
 ```
 
 Import a local asset:
@@ -368,6 +374,18 @@ Export GLB:
 }
 ```
 
+Export OBJ:
+
+```json
+{
+  "action": "export_obj",
+  "params": {
+    "output": "exports/modern_table.obj",
+    "selected_only": false
+  }
+}
+```
+
 Import asset:
 
 ```json
@@ -409,7 +427,7 @@ Save scene:
 
 ## Supported Actions
 
-Supported v0.18 actions:
+Supported v0.19 actions:
 
 - `ping`
 - `create_room`
@@ -421,6 +439,7 @@ Supported v0.18 actions:
 - `setup_reference_camera`
 - `setup_compare_view`
 - `export_glb`
+- `export_obj`
 - `create_scene_from_reference`
 - `import_asset`
 - `render_scene`
@@ -452,6 +471,7 @@ When connected as a Codex plugin/MCP server, it exposes:
 - `blender_setup_reference_camera`
 - `blender_setup_compare_view`
 - `blender_export_glb`
+- `blender_export_obj`
 - `blender_create_scene_from_reference`
 - `blender_import_asset`
 - `blender_render_scene`

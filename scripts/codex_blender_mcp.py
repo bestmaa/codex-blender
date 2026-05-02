@@ -194,6 +194,24 @@ TOOLS = [
         ),
     },
     {
+        "name": "blender_export_obj",
+        "description": "Export the current Blender scene or selected objects to an .obj file.",
+        "inputSchema": json_schema(
+            {
+                "output": {
+                    "type": "string",
+                    "description": "Output .obj path, relative to the plugin folder or absolute.",
+                    "default": "exports/scene.obj",
+                },
+                "selected_only": {
+                    "type": "boolean",
+                    "description": "Export only selected objects.",
+                    "default": False,
+                },
+            }
+        ),
+    },
+    {
         "name": "blender_import_asset",
         "description": "Import a local 3D asset into the current Blender scene.",
         "inputSchema": json_schema(
@@ -623,6 +641,12 @@ def call_tool(name: str, arguments: dict[str, Any]) -> tuple[dict[str, Any], boo
             "include_materials": arguments.get("include_materials", True),
         }
         result = call_http("/command", {"action": "export_glb", "params": params})
+    elif name == "blender_export_obj":
+        params = {
+            "output": normalize_output_path(arguments.get("output", "exports/scene.obj")),
+            "selected_only": arguments.get("selected_only", False),
+        }
+        result = call_http("/command", {"action": "export_obj", "params": params})
     elif name == "blender_import_asset":
         params = {
             "path": normalize_input_path(arguments.get("path")),
@@ -703,9 +727,9 @@ def call_tool(name: str, arguments: dict[str, Any]) -> tuple[dict[str, Any], boo
         if not isinstance(payload, dict):
             result = {"ok": False, "error": "payload must be an object"}
         else:
-            if payload.get("action") in {"render_scene", "save_blend", "export_glb"}:
+            if payload.get("action") in {"render_scene", "save_blend", "export_glb", "export_obj"}:
                 params = payload.setdefault("params", {})
-                default_output = "scenes/scene.blend" if payload.get("action") == "save_blend" else "exports/scene.glb" if payload.get("action") == "export_glb" else "renders/room.png"
+                default_output = "scenes/scene.blend" if payload.get("action") == "save_blend" else "exports/scene.glb" if payload.get("action") == "export_glb" else "exports/scene.obj" if payload.get("action") == "export_obj" else "renders/room.png"
                 params["output"] = normalize_output_path(params.get("output", default_output))
             if payload.get("action") == "import_asset":
                 params = payload.setdefault("params", {})
@@ -745,7 +769,7 @@ def handle_request(message: dict[str, Any]) -> dict[str, Any] | None:
             {
                 "protocolVersion": "2024-11-05",
                 "capabilities": {"tools": {}},
-                "serverInfo": {"name": "codex-blender", "version": "0.18.0"},
+                "serverInfo": {"name": "codex-blender", "version": "0.19.0"},
             },
         )
     if method == "tools/list":

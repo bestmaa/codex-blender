@@ -1,7 +1,7 @@
 bl_info = {
     "name": "Codex Blender Bridge",
     "author": "Aditya",
-    "version": (0, 18, 0),
+    "version": (0, 19, 0),
     "blender": (3, 6, 0),
     "location": "View3D > Sidebar > Codex",
     "description": "Local HTTP bridge for sending Codex commands to Blender.",
@@ -688,6 +688,28 @@ def action_export_glb(params):
     )
 
 
+def action_export_obj(params):
+    output_path = resolve_output_path(params.get("output") or "exports/scene.obj")
+    if output_path.suffix.lower() != ".obj":
+        output_path = output_path.with_suffix(".obj")
+
+    selected_only = params.get("selected_only", False)
+    if not isinstance(selected_only, bool):
+        raise ValueError("params.selected_only must be a boolean")
+
+    if hasattr(bpy.ops.wm, "obj_export"):
+        bpy.ops.wm.obj_export(filepath=os.fspath(output_path), export_selected_objects=selected_only)
+    else:
+        bpy.ops.export_scene.obj(filepath=os.fspath(output_path), use_selection=selected_only)
+
+    return make_result(
+        True,
+        message="Exported OBJ.",
+        output=os.fspath(output_path),
+        selected_only=selected_only,
+    )
+
+
 def set_import_transform(objects, location, rotation, scale):
     for obj in objects:
         obj.location = location
@@ -1167,6 +1189,8 @@ def execute_command(payload):
         return action_save_blend(params)
     if action == "export_glb":
         return action_export_glb(params)
+    if action == "export_obj":
+        return action_export_obj(params)
     if action == "import_asset":
         return action_import_asset(params)
     if action == "add_reference_image":
