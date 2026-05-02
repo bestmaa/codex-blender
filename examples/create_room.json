@@ -1,0 +1,7 @@
+{
+  "action": "create_room",
+  "params": {
+    "style": "modern_neon"
+  }
+}
+

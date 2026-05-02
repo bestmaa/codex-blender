@@ -1,0 +1,45 @@
+{
+  "name": "codex-blender",
+  "version": "0.1.0",
+  "description": "Local Codex plugin scaffold for controlling Blender through scripts and a localhost bridge.",
+  "author": {
+    "name": "Aditya",
+    "email": "",
+    "url": ""
+  },
+  "homepage": "https://github.com/aditya/codex-blender",
+  "repository": "https://github.com/aditya/codex-blender",
+  "license": "MIT",
+  "keywords": [
+    "codex",
+    "blender",
+    "3d",
+    "automation"
+  ],
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json",
+  "interface": {
+    "displayName": "Codex Blender",
+    "shortDescription": "Control Blender locally from Codex with Python and JSON commands.",
+    "longDescription": "Codex Blender provides a local Blender add-on, bridge scripts, and Codex skill instructions for scene creation, asset import, material setup, rig inspection, animation, and rendering workflows.",
+    "developerName": "Aditya",
+    "category": "Productivity",
+    "capabilities": [
+      "Interactive",
+      "Write",
+      "Local automation"
+    ],
+    "websiteURL": "https://github.com/aditya/codex-blender",
+    "privacyPolicyURL": "https://github.com/aditya/codex-blender",
+    "termsOfServiceURL": "https://github.com/aditya/codex-blender",
+    "defaultPrompt": [
+      "Create a modern room scene in Blender.",
+      "Import this 3D model into Blender and fit it into the scene.",
+      "Inspect the rig bones in this Blender model and create a simple animation."
+    ],
+    "brandColor": "#2563EB",
+    "composerIcon": "./assets/icon.png",
+    "logo": "./assets/logo.png",
+    "screenshots": []
+  }
+}
