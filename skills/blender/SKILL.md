@@ -95,6 +95,19 @@ Renders the current scene from the active camera to a PNG file.
 }
 ```
 
+### save_blend
+
+Saves the current Blender scene to a `.blend` file.
+
+```json
+{
+  "action": "save_blend",
+  "params": {
+    "output": "scenes/scene.blend"
+  }
+}
+```
+
 ### run_python
 
 Runs trusted Blender Python.

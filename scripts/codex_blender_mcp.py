@@ -109,6 +109,19 @@ TOOLS = [
         ),
     },
     {
+        "name": "blender_save_blend",
+        "description": "Save the current Blender scene to a .blend file.",
+        "inputSchema": json_schema(
+            {
+                "output": {
+                    "type": "string",
+                    "description": "Output .blend path, relative to the plugin folder or absolute.",
+                    "default": "scenes/scene.blend",
+                }
+            }
+        ),
+    },
+    {
         "name": "blender_inspect_rig",
         "description": "Return armature and bone names from the current Blender scene.",
         "inputSchema": json_schema({}),
@@ -184,6 +197,9 @@ def call_tool(name: str, arguments: dict[str, Any]) -> tuple[dict[str, Any], boo
             "style": arguments.get("style", "clean_suburban"),
         }
         result = call_http("/command", {"action": "create_outdoor_scene", "params": params})
+    elif name == "blender_save_blend":
+        params = {"output": normalize_output_path(arguments.get("output", "scenes/scene.blend"))}
+        result = call_http("/command", {"action": "save_blend", "params": params})
     elif name == "blender_inspect_rig":
         result = call_http("/command", {"action": "inspect_rig"})
     elif name == "blender_command":
@@ -191,9 +207,10 @@ def call_tool(name: str, arguments: dict[str, Any]) -> tuple[dict[str, Any], boo
         if not isinstance(payload, dict):
             result = {"ok": False, "error": "payload must be an object"}
         else:
-            if payload.get("action") == "render_scene":
+            if payload.get("action") in {"render_scene", "save_blend"}:
                 params = payload.setdefault("params", {})
-                params["output"] = normalize_output_path(params.get("output", "renders/room.png"))
+                default_output = "scenes/scene.blend" if payload.get("action") == "save_blend" else "renders/room.png"
+                params["output"] = normalize_output_path(params.get("output", default_output))
             timeout = payload.get("params", {}).get("timeout_seconds", 300)
             result = call_http("/command", payload, timeout=timeout)
     else:
@@ -221,7 +238,7 @@ def handle_request(message: dict[str, Any]) -> dict[str, Any] | None:
             {
                 "protocolVersion": "2024-11-05",
                 "capabilities": {"tools": {}},
-                "serverInfo": {"name": "codex-blender", "version": "0.3.0"},
+                "serverInfo": {"name": "codex-blender", "version": "0.6.0"},
             },
         )
     if method == "tools/list":

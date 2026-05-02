@@ -1,7 +1,7 @@
 bl_info = {
     "name": "Codex Blender Bridge",
     "author": "Aditya",
-    "version": (0, 5, 0),
+    "version": (0, 6, 0),
     "blender": (3, 6, 0),
     "location": "View3D > Sidebar > Codex",
     "description": "Local HTTP bridge for sending Codex commands to Blender.",
@@ -368,6 +368,15 @@ def action_render_scene(params):
     )
 
 
+def action_save_blend(params):
+    output_path = resolve_output_path(params.get("output") or "scenes/scene.blend")
+    if output_path.suffix.lower() != ".blend":
+        output_path = output_path.with_suffix(".blend")
+
+    bpy.ops.wm.save_as_mainfile(filepath=os.fspath(output_path))
+    return make_result(True, message="Saved Blender scene.", output=os.fspath(output_path))
+
+
 def action_run_python(params):
     code = params.get("code", "")
     if not isinstance(code, str) or not code.strip():
@@ -394,6 +403,8 @@ def execute_command(payload):
         return action_inspect_rig(params)
     if action == "render_scene":
         return action_render_scene(params)
+    if action == "save_blend":
+        return action_save_blend(params)
     if action == "run_python":
         return action_run_python(params)
     return make_result(False, error=f"Unsupported action: {action}")

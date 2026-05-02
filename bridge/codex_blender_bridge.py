@@ -21,8 +21,8 @@ def load_payload(value: str) -> dict:
     return json.loads(value)
 
 
-def normalize_render_output(payload: dict, base_dir: Path) -> dict:
-    if payload.get("action") != "render_scene":
+def normalize_command_output(payload: dict, base_dir: Path) -> dict:
+    if payload.get("action") not in {"render_scene", "save_blend"}:
         return payload
 
     params = payload.setdefault("params", {})
@@ -56,7 +56,7 @@ def main() -> int:
     args = parser.parse_args()
 
     try:
-        payload = normalize_render_output(load_payload(args.payload), Path.cwd())
+        payload = normalize_command_output(load_payload(args.payload), Path.cwd())
         result = send_command(payload, args.url, args.timeout)
     except json.JSONDecodeError as exc:
         print(f"Invalid JSON: {exc}", file=sys.stderr)
