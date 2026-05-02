@@ -1,7 +1,7 @@
 bl_info = {
     "name": "Codex Blender Bridge",
     "author": "Aditya",
-    "version": (0, 4, 0),
+    "version": (0, 5, 0),
     "blender": (3, 6, 0),
     "location": "View3D > Sidebar > Codex",
     "description": "Local HTTP bridge for sending Codex commands to Blender.",
@@ -524,6 +524,12 @@ class CODEXBLENDER_OT_reload_bridge_code(bpy.types.Operator):
 class CODEXBLENDER_AddonPreferences(bpy.types.AddonPreferences):
     bl_idname = __name__
 
+    developer_mode: bpy.props.BoolProperty(
+        name="Developer Mode",
+        description="Show add-on development controls such as bridge code reload",
+        default=False,
+    )
+
     source_path: bpy.props.StringProperty(
         name="Source File",
         description="Development source file to reload without reinstalling the add-on",
@@ -533,7 +539,9 @@ class CODEXBLENDER_AddonPreferences(bpy.types.AddonPreferences):
 
     def draw(self, _context):
         layout = self.layout
-        layout.prop(self, "source_path")
+        layout.prop(self, "developer_mode")
+        if self.developer_mode:
+            layout.prop(self, "source_path")
 
 
 class CODEXBLENDER_PT_panel(bpy.types.Panel):
@@ -551,10 +559,11 @@ class CODEXBLENDER_PT_panel(bpy.types.Panel):
         row = layout.row(align=True)
         row.operator("codex_blender.start_bridge")
         row.operator("codex_blender.stop_bridge")
-        layout.operator("codex_blender.reload_bridge_code")
         preferences = get_addon_preferences()
-        if preferences:
+        if preferences and preferences.developer_mode:
+            layout.separator()
             layout.prop(preferences, "source_path")
+            layout.operator("codex_blender.reload_bridge_code")
 
 
 CLASSES = (

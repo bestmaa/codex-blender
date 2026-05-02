@@ -44,7 +44,7 @@ By default the bridge listens on:
 http://127.0.0.1:8765
 ```
 
-During development, set `Source File` in the Codex sidebar to this repository's `blender_addon/codex_blender_addon.py`, then click `Reload Bridge Code` after editing the add-on. This reloads the bridge without uninstalling and reinstalling the add-on.
+During development, enable `Developer Mode`, set `Source File` in the Codex sidebar to this repository's `blender_addon/codex_blender_addon.py`, then click `Reload Bridge Code` after editing the add-on. This reloads the bridge without uninstalling and reinstalling the add-on. Developer controls are hidden by default for normal use.
 
 ### Codex
 
@@ -98,7 +98,7 @@ Relative render outputs are resolved from the folder where the bridge command is
 }
 ```
 
-Supported v0.4 actions:
+Supported v0.5 actions:
 
 - `ping`
 - `create_room`
