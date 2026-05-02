@@ -225,6 +225,22 @@ Lists local files from `assets/models/`, `assets/textures/`, and `assets/referen
 }
 ```
 
+### fit_object_to_bounds
+
+Scales and places an existing object inside target bounds. Use after `import_asset` when an asset is too large, too small, or not sitting on the floor.
+
+```json
+{
+  "action": "fit_object_to_bounds",
+  "params": {
+    "object": "sample_pyramid",
+    "target_size": [1.5, 1.5, 1.5],
+    "target_location": [0, 0, 0],
+    "align_to_floor": true
+  }
+}
+```
+
 ### add_reference_image
 
 Adds a local image as a reference plane in the current Blender scene. Use this before or after model creation when matching a generated/reference image.

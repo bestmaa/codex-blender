@@ -1,0 +1,9 @@
+{
+  "action": "fit_object_to_bounds",
+  "params": {
+    "object": "sample_pyramid",
+    "target_size": [1.5, 1.5, 1.5],
+    "target_location": [0, 0, 0],
+    "align_to_floor": true
+  }
+}

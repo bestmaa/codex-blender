@@ -401,7 +401,7 @@ Commit:
 
 ### 16. v0.27 Asset Placement Helpers
 
-Status: pending
+Status: completed
 
 Goal:
 Make imported assets easier to place and scale.

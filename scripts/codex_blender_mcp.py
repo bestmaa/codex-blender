@@ -256,6 +256,19 @@ TOOLS = [
         ),
     },
     {
+        "name": "blender_fit_object_to_bounds",
+        "description": "Scale and place an object inside target bounds, optionally aligning its bottom to the floor.",
+        "inputSchema": json_schema(
+            {
+                "object": {"type": "string", "description": "Object name to fit."},
+                "target_size": {"description": "Target size as a number or [x, y, z].", "default": [1, 1, 1]},
+                "target_location": {"type": "array", "items": {"type": "number"}, "default": [0, 0, 0]},
+                "align_to_floor": {"type": "boolean", "description": "Align object bottom to target_location z.", "default": True},
+            },
+            required=["object"],
+        ),
+    },
+    {
         "name": "blender_save_blend",
         "description": "Save the current Blender scene to a .blend file.",
         "inputSchema": json_schema(
@@ -799,6 +812,14 @@ def call_tool(name: str, arguments: dict[str, Any]) -> tuple[dict[str, Any], boo
             "extension": arguments.get("extension"),
         }
         result = call_http("/command", {"action": "list_assets", "params": params})
+    elif name == "blender_fit_object_to_bounds":
+        params = {
+            "object": arguments.get("object"),
+            "target_size": arguments.get("target_size", [1, 1, 1]),
+            "target_location": arguments.get("target_location", [0, 0, 0]),
+            "align_to_floor": arguments.get("align_to_floor", True),
+        }
+        result = call_http("/command", {"action": "fit_object_to_bounds", "params": params})
     elif name == "blender_save_blend":
         params = {"output": normalize_output_path(arguments.get("output", "scenes/scene.blend"))}
         result = call_http("/command", {"action": "save_blend", "params": params})
@@ -937,7 +958,7 @@ def handle_request(message: dict[str, Any]) -> dict[str, Any] | None:
             {
                 "protocolVersion": "2024-11-05",
                 "capabilities": {"tools": {}},
-                "serverInfo": {"name": "codex-blender", "version": "0.26.0"},
+                "serverInfo": {"name": "codex-blender", "version": "0.27.0"},
             },
         )
     if method == "tools/list":

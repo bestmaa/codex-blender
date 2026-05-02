@@ -1,7 +1,7 @@
 bl_info = {
     "name": "Codex Blender Bridge",
     "author": "Aditya",
-    "version": (0, 26, 0),
+    "version": (0, 27, 0),
     "blender": (3, 6, 0),
     "location": "View3D > Sidebar > Codex",
     "description": "Local HTTP bridge for sending Codex commands to Blender.",
@@ -1273,7 +1273,7 @@ def resolve_input_path(value, param_name="path"):
     else:
         path = Path(value)
         if not path.is_absolute():
-            path = Path(__file__).resolve().parents[1] / path
+            path = get_project_root() / path
 
     if not path.exists():
         raise FileNotFoundError(f"Asset not found: {path}")
@@ -1443,6 +1443,60 @@ def action_import_asset(params):
         message="Imported asset.",
         path=os.fspath(path),
         objects=[obj.name for obj in imported],
+    )
+
+
+def action_fit_object_to_bounds(params):
+    name = params.get("object")
+    if not isinstance(name, str) or not name.strip():
+        raise ValueError("params.object must be a non-empty string")
+    obj = bpy.data.objects.get(name)
+    if obj is None:
+        raise ValueError(f"Object not found: {name}")
+
+    target_location = get_vector(params, "target_location", [0, 0, 0])
+    target_size_value = params.get("target_size", [1, 1, 1])
+    if isinstance(target_size_value, (int, float)):
+        if target_size_value <= 0:
+            raise ValueError("params.target_size must be positive")
+        target_size = (target_size_value, target_size_value, target_size_value)
+    else:
+        target_size = get_vector(params, "target_size", [1, 1, 1])
+        if any(value <= 0 for value in target_size):
+            raise ValueError("params.target_size values must be positive")
+
+    align_to_floor = params.get("align_to_floor", True)
+    if not isinstance(align_to_floor, bool):
+        raise ValueError("params.align_to_floor must be a boolean")
+
+    bpy.context.view_layer.update()
+    dimensions = obj.dimensions
+    ratios = [
+        target / current
+        for target, current in zip(target_size, dimensions)
+        if current > 0
+    ]
+    if not ratios:
+        raise ValueError(f"Object has no measurable bounds: {name}")
+    scale_factor = min(ratios)
+    obj.scale = tuple(component * scale_factor for component in obj.scale)
+    obj.location = target_location
+    bpy.context.view_layer.update()
+
+    if align_to_floor:
+        min_z = min((obj.matrix_world @ Vector(corner)).z for corner in obj.bound_box)
+        obj.location.z += target_location[2] - min_z
+        bpy.context.view_layer.update()
+
+    return make_result(
+        True,
+        message="Fit object to bounds.",
+        object=obj.name,
+        target_size=target_size,
+        target_location=target_location,
+        align_to_floor=align_to_floor,
+        dimensions=tuple(round(value, 5) for value in obj.dimensions),
+        location=tuple(round(value, 5) for value in obj.location),
     )
 
 
@@ -1893,6 +1947,8 @@ def execute_command(payload):
         return action_export_obj(params)
     if action == "import_asset":
         return action_import_asset(params)
+    if action == "fit_object_to_bounds":
+        return action_fit_object_to_bounds(params)
     if action == "add_reference_image":
         return action_add_reference_image(params)
     if action == "apply_texture_material":
