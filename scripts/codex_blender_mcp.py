@@ -289,6 +289,32 @@ TOOLS = [
                     "description": "Material opacity from 0.05 to 1.0.",
                     "default": 1.0,
                 },
+                "texture_scale": {
+                    "type": "array",
+                    "items": {"type": "number"},
+                    "minItems": 2,
+                    "maxItems": 2,
+                    "description": "Texture mapping scale as [x, y].",
+                    "default": [1.0, 1.0],
+                },
+                "texture_offset": {
+                    "type": "array",
+                    "items": {"type": "number"},
+                    "minItems": 2,
+                    "maxItems": 2,
+                    "description": "Texture mapping offset as [x, y].",
+                    "default": [0.0, 0.0],
+                },
+                "texture_rotation": {
+                    "type": "number",
+                    "description": "Texture mapping rotation in radians.",
+                    "default": 0.0,
+                },
+                "projection": {
+                    "type": "string",
+                    "description": "Texture coordinate projection: uv, generated, or object.",
+                    "default": "uv",
+                },
                 "mode": {
                     "type": "string",
                     "description": "Use replace to clear existing materials, or append to add a material slot.",
@@ -441,6 +467,10 @@ def call_tool(name: str, arguments: dict[str, Any]) -> tuple[dict[str, Any], boo
             "roughness": arguments.get("roughness", 0.55),
             "metallic": arguments.get("metallic", 0.0),
             "opacity": arguments.get("opacity", 1.0),
+            "texture_scale": arguments.get("texture_scale", [1.0, 1.0]),
+            "texture_offset": arguments.get("texture_offset", [0.0, 0.0]),
+            "texture_rotation": arguments.get("texture_rotation", 0.0),
+            "projection": arguments.get("projection", "uv"),
             "mode": arguments.get("mode", "replace"),
         }
         result = call_http("/command", {"action": "apply_texture_material", "params": params})
@@ -493,7 +523,7 @@ def handle_request(message: dict[str, Any]) -> dict[str, Any] | None:
             {
                 "protocolVersion": "2024-11-05",
                 "capabilities": {"tools": {}},
-                "serverInfo": {"name": "codex-blender", "version": "0.11.0"},
+                "serverInfo": {"name": "codex-blender", "version": "0.13.0"},
             },
         )
     if method == "tools/list":

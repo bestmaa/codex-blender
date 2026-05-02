@@ -151,6 +151,12 @@ Apply an image texture to an object:
 python bridge\codex_blender_bridge.py examples\apply_table_texture.json
 ```
 
+Apply a scaled image texture to an object:
+
+```powershell
+python bridge\codex_blender_bridge.py examples\apply_scaled_wood_texture.json
+```
+
 Import a local asset:
 
 ```powershell
@@ -258,6 +264,10 @@ Apply texture material:
     "roughness": 0.45,
     "metallic": 0.0,
     "opacity": 1.0,
+    "texture_scale": [1.0, 1.0],
+    "texture_offset": [0.0, 0.0],
+    "texture_rotation": 0.0,
+    "projection": "uv",
     "mode": "replace"
   }
 }
@@ -304,7 +314,7 @@ Save scene:
 
 ## Supported Actions
 
-Supported v0.11 actions:
+Supported v0.13 actions:
 
 - `ping`
 - `create_room`
@@ -403,7 +413,7 @@ Reference images should go under:
 assets/references/
 ```
 
-`apply_texture_material` currently applies one image as the object's base color texture. Use it for user-supplied wood, fabric, stone, label, decal, or pattern images. For full realism, add matching roughness and normal maps in a later material workflow.
+`apply_texture_material` currently applies one image as the object's base color texture. Use it for user-supplied wood, fabric, stone, label, decal, or pattern images. Use `texture_scale`, `texture_offset`, `texture_rotation`, and `projection` to tune placement. For full realism, add matching roughness and normal maps in a later material workflow.
 
 If render or save output goes to the wrong place:
 

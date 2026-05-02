@@ -69,7 +69,7 @@ Commit:
 
 ### 2. v0.13 UV Texture Controls
 
-Status: pending
+Status: completed
 
 Goal:
 Improve texture application so user-provided images can be scaled, rotated, and positioned on a mesh surface.

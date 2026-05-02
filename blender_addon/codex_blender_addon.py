@@ -1,7 +1,7 @@
 bl_info = {
     "name": "Codex Blender Bridge",
     "author": "Aditya",
-    "version": (0, 11, 0),
+    "version": (0, 13, 0),
     "blender": (3, 6, 0),
     "location": "View3D > Sidebar > Codex",
     "description": "Local HTTP bridge for sending Codex commands to Blender.",
@@ -136,14 +136,38 @@ def create_image_material(name, image, opacity=1.0, unlit=True):
     return mat
 
 
-def create_texture_material(name, image, roughness=0.55, metallic=0.0, opacity=1.0):
+def create_texture_material(
+    name,
+    image,
+    roughness=0.55,
+    metallic=0.0,
+    opacity=1.0,
+    texture_scale=(1.0, 1.0),
+    texture_offset=(0.0, 0.0),
+    texture_rotation=0.0,
+    projection="uv",
+):
     mat = bpy.data.materials.new(name)
     mat.use_nodes = True
     mat.blend_method = "BLEND" if opacity < 1.0 else "OPAQUE"
     nodes = mat.node_tree.nodes
     bsdf = nodes.get("Principled BSDF")
+    coords = nodes.new(type="ShaderNodeTexCoord")
+    mapping = nodes.new(type="ShaderNodeMapping")
     texture = nodes.new(type="ShaderNodeTexImage")
     texture.image = image
+    coordinate_output = {
+        "uv": "UV",
+        "generated": "Generated",
+        "object": "Object",
+    }[projection]
+    mat.node_tree.links.new(coords.outputs[coordinate_output], mapping.inputs["Vector"])
+    mapping.inputs["Scale"].default_value[0] = texture_scale[0]
+    mapping.inputs["Scale"].default_value[1] = texture_scale[1]
+    mapping.inputs["Location"].default_value[0] = texture_offset[0]
+    mapping.inputs["Location"].default_value[1] = texture_offset[1]
+    mapping.inputs["Rotation"].default_value[2] = texture_rotation
+    mat.node_tree.links.new(mapping.outputs["Vector"], texture.inputs["Vector"])
     if bsdf:
         mat.node_tree.links.new(texture.outputs["Color"], bsdf.inputs["Base Color"])
         if "Alpha" in bsdf.inputs:
@@ -555,6 +579,15 @@ def get_vector(params, name, default, length=3):
     return tuple(value)
 
 
+def get_vector2(params, name, default):
+    value = params.get(name, default)
+    if not isinstance(value, list) or len(value) != 2:
+        raise ValueError(f"params.{name} must be a list with 2 numbers")
+    if not all(isinstance(item, (int, float)) for item in value):
+        raise ValueError(f"params.{name} must contain only numbers")
+    return tuple(value)
+
+
 def set_resolution(params):
     resolution = params.get("resolution", [1280, 720])
     if (
@@ -714,12 +747,28 @@ def action_apply_texture_material(params):
     roughness = get_number(params, "roughness", 0.55, minimum=0, maximum=1)
     metallic = get_number(params, "metallic", 0.0, minimum=0, maximum=1)
     opacity = get_number(params, "opacity", 1.0, minimum=0.05, maximum=1)
+    texture_scale = get_vector2(params, "texture_scale", [1.0, 1.0])
+    texture_offset = get_vector2(params, "texture_offset", [0.0, 0.0])
+    texture_rotation = get_number(params, "texture_rotation", 0.0)
+    projection = params.get("projection", "uv")
+    if projection not in {"uv", "generated", "object"}:
+        raise ValueError("params.projection must be 'uv', 'generated', or 'object'")
     mode = params.get("mode", "replace")
     if mode not in {"replace", "append"}:
         raise ValueError("params.mode must be 'replace' or 'append'")
 
     image = bpy.data.images.load(os.fspath(path), check_existing=True)
-    material = create_texture_material(material_name, image, roughness=roughness, metallic=metallic, opacity=opacity)
+    material = create_texture_material(
+        material_name,
+        image,
+        roughness=roughness,
+        metallic=metallic,
+        opacity=opacity,
+        texture_scale=texture_scale,
+        texture_offset=texture_offset,
+        texture_rotation=texture_rotation,
+        projection=projection,
+    )
     if mode == "replace":
         obj.data.materials.clear()
     obj.data.materials.append(material)
@@ -731,6 +780,10 @@ def action_apply_texture_material(params):
         material=material.name,
         path=os.fspath(path),
         mode=mode,
+        texture_scale=texture_scale,
+        texture_offset=texture_offset,
+        texture_rotation=texture_rotation,
+        projection=projection,
     )
 
 

@@ -132,6 +132,10 @@ Applies a local image as a texture material on an existing Blender object. Use t
     "roughness": 0.45,
     "metallic": 0.0,
     "opacity": 1.0,
+    "texture_scale": [1.0, 1.0],
+    "texture_offset": [0.0, 0.0],
+    "texture_rotation": 0.0,
+    "projection": "uv",
     "mode": "replace"
   }
 }
