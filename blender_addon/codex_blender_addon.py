@@ -1,7 +1,7 @@
 bl_info = {
     "name": "Codex Blender Bridge",
     "author": "Aditya",
-    "version": (0, 29, 0),
+    "version": (0, 30, 0),
     "blender": (3, 6, 0),
     "location": "View3D > Sidebar > Codex",
     "description": "Local HTTP bridge for sending Codex commands to Blender.",
@@ -1570,6 +1570,44 @@ def action_transform_object(params):
     )
 
 
+def action_duplicate_object(params):
+    name = params.get("object")
+    if not isinstance(name, str) or not name.strip():
+        raise ValueError("params.object must be a non-empty string")
+    source = bpy.data.objects.get(name)
+    if source is None:
+        raise ValueError(f"Object not found: {name}")
+    count = get_int(params, "count", 3, minimum=1, maximum=100)
+    offset = get_vector(params, "offset", [1, 0, 0])
+    name_prefix = params.get("name_prefix", f"{source.name} copy")
+    if not isinstance(name_prefix, str) or not name_prefix.strip():
+        raise ValueError("params.name_prefix must be a non-empty string")
+
+    collection = source.users_collection[0] if source.users_collection else bpy.context.collection
+    created = []
+    for index in range(1, count + 1):
+        duplicate = source.copy()
+        if source.data:
+            duplicate.data = source.data.copy()
+        duplicate.name = f"{name_prefix} {index}"
+        duplicate.location = (
+            source.location.x + offset[0] * index,
+            source.location.y + offset[1] * index,
+            source.location.z + offset[2] * index,
+        )
+        collection.objects.link(duplicate)
+        created.append(duplicate.name)
+
+    return make_result(
+        True,
+        message="Duplicated object.",
+        source=source.name,
+        objects=created,
+        count=len(created),
+        offset=offset,
+    )
+
+
 def action_add_reference_image(params):
     path = resolve_input_path(params.get("path"))
     name = params.get("name", path.stem)
@@ -2023,6 +2061,8 @@ def execute_command(payload):
         return action_inspect_scene(params)
     if action == "transform_object":
         return action_transform_object(params)
+    if action == "duplicate_object":
+        return action_duplicate_object(params)
     if action == "add_reference_image":
         return action_add_reference_image(params)
     if action == "apply_texture_material":

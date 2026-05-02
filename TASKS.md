@@ -473,7 +473,7 @@ Commit:
 
 ### 19. v0.30 Object Duplication And Arrangement
 
-Status: pending
+Status: completed
 
 Goal:
 Support repeated objects such as chair sets.

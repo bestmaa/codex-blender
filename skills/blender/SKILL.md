@@ -270,6 +270,22 @@ Moves, rotates, scales, or resizes an existing object. Unspecified transform fie
 }
 ```
 
+### duplicate_object
+
+Duplicates an existing object multiple times with an offset and stable name prefix.
+
+```json
+{
+  "action": "duplicate_object",
+  "params": {
+    "object": "front left tapered leg",
+    "count": 3,
+    "offset": [0.45, 0, 0],
+    "name_prefix": "extra table leg"
+  }
+}
+```
+
 ### add_reference_image
 
 Adds a local image as a reference plane in the current Blender scene. Use this before or after model creation when matching a generated/reference image.

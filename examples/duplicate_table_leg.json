@@ -1,0 +1,9 @@
+{
+  "action": "duplicate_object",
+  "params": {
+    "object": "front left tapered leg",
+    "count": 3,
+    "offset": [0.45, 0, 0],
+    "name_prefix": "extra table leg"
+  }
+}
