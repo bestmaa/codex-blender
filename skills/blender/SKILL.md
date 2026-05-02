@@ -211,6 +211,20 @@ Creates a reusable room layout preset. Supported presets are `studio`, `living_r
 }
 ```
 
+### list_assets
+
+Lists local files from `assets/models/`, `assets/textures/`, and `assets/references/`.
+
+```json
+{
+  "action": "list_assets",
+  "params": {
+    "type": "texture",
+    "extension": "png"
+  }
+}
+```
+
 ### add_reference_image
 
 Adds a local image as a reference plane in the current Blender scene. Use this before or after model creation when matching a generated/reference image.

@@ -1,7 +1,7 @@
 bl_info = {
     "name": "Codex Blender Bridge",
     "author": "Aditya",
-    "version": (0, 25, 0),
+    "version": (0, 26, 0),
     "blender": (3, 6, 0),
     "location": "View3D > Sidebar > Codex",
     "description": "Local HTTP bridge for sending Codex commands to Blender.",
@@ -71,6 +71,13 @@ def reload_bridge_code(source_path):
     if was_running:
         start_bridge()
     return path
+
+
+def get_project_root():
+    source_path = Path(get_reload_source_path())
+    if source_path.name == "codex_blender_addon.py" and source_path.parent.name == "blender_addon":
+        return source_path.parent.parent
+    return source_path.parent
 
 
 def clear_scene():
@@ -1083,6 +1090,46 @@ def action_create_room_layout(params):
     return make_result(True, message="Created room layout.", preset=preset, style=style)
 
 
+def action_list_assets(params):
+    asset_type = params.get("type")
+    if asset_type is not None and not isinstance(asset_type, str):
+        raise ValueError("params.type must be a string")
+    extension = params.get("extension")
+    if extension is not None and not isinstance(extension, str):
+        raise ValueError("params.extension must be a string")
+
+    selected_type = asset_type.lower() if asset_type else None
+    selected_extension = extension.lower().lstrip(".") if extension else None
+    asset_dirs = {
+        "model": get_project_root() / "assets" / "models",
+        "texture": get_project_root() / "assets" / "textures",
+        "reference": get_project_root() / "assets" / "references",
+    }
+    assets = []
+    for kind, folder in asset_dirs.items():
+        if selected_type and selected_type not in {kind, kind + "s"}:
+            continue
+        if not folder.exists():
+            continue
+        for path in sorted(folder.iterdir()):
+            if not path.is_file():
+                continue
+            suffix = path.suffix.lower().lstrip(".")
+            if selected_extension and suffix != selected_extension:
+                continue
+            assets.append(
+                {
+                    "name": path.name,
+                    "type": kind,
+                    "extension": suffix,
+                    "size": path.stat().st_size,
+                    "path": path.relative_to(get_project_root()).as_posix(),
+                }
+            )
+
+    return make_result(True, message="Listed assets.", assets=assets, count=len(assets))
+
+
 def add_tree(index, x, y, trunk_mat, leaf_mat, height_offset=0.0):
     trunk_height = 1.0 + height_offset
     create_cylinder(f"tree {index} trunk", (x, y, trunk_height / 2), 0.13, trunk_height, trunk_mat, vertices=14)
@@ -1832,6 +1879,8 @@ def execute_command(payload):
         return action_create_furniture_set(params)
     if action == "create_room_layout":
         return action_create_room_layout(params)
+    if action == "list_assets":
+        return action_list_assets(params)
     if action == "inspect_rig":
         return action_inspect_rig(params)
     if action == "render_scene":

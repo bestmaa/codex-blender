@@ -246,6 +246,16 @@ TOOLS = [
         ),
     },
     {
+        "name": "blender_list_assets",
+        "description": "List local assets from assets/models, assets/textures, and assets/references.",
+        "inputSchema": json_schema(
+            {
+                "type": {"type": "string", "description": "Optional asset type: model, texture, or reference."},
+                "extension": {"type": "string", "description": "Optional extension filter, for example obj or png."},
+            }
+        ),
+    },
+    {
         "name": "blender_save_blend",
         "description": "Save the current Blender scene to a .blend file.",
         "inputSchema": json_schema(
@@ -783,6 +793,12 @@ def call_tool(name: str, arguments: dict[str, Any]) -> tuple[dict[str, Any], boo
             "style": arguments.get("style", "clean_modern"),
         }
         result = call_http("/command", {"action": "create_room_layout", "params": params})
+    elif name == "blender_list_assets":
+        params = {
+            "type": arguments.get("type"),
+            "extension": arguments.get("extension"),
+        }
+        result = call_http("/command", {"action": "list_assets", "params": params})
     elif name == "blender_save_blend":
         params = {"output": normalize_output_path(arguments.get("output", "scenes/scene.blend"))}
         result = call_http("/command", {"action": "save_blend", "params": params})
@@ -921,7 +937,7 @@ def handle_request(message: dict[str, Any]) -> dict[str, Any] | None:
             {
                 "protocolVersion": "2024-11-05",
                 "capabilities": {"tools": {}},
-                "serverInfo": {"name": "codex-blender", "version": "0.25.0"},
+                "serverInfo": {"name": "codex-blender", "version": "0.26.0"},
             },
         )
     if method == "tools/list":

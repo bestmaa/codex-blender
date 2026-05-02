@@ -16,6 +16,7 @@ This is not a cloud connector. Blender runs locally on your machine.
 - Create reusable floor, table, and ceiling lamp models with real Blender lights.
 - Create a composed furniture set scene.
 - Create reusable room layout presets.
+- List local model, texture, and reference assets.
 - Add reference images as textured planes for side-by-side modeling.
 - Apply user-provided image textures to Blender objects.
 - Create approximate scenes from structured reference-image plans.
@@ -181,6 +182,12 @@ Create a room layout preset:
 
 ```powershell
 python bridge\codex_blender_bridge.py examples\create_room_layout.json
+```
+
+List local assets:
+
+```powershell
+python bridge\codex_blender_bridge.py examples\list_assets.json
 ```
 
 Add a reference image plane:
@@ -415,6 +422,18 @@ Create room layout:
 }
 ```
 
+List assets:
+
+```json
+{
+  "action": "list_assets",
+  "params": {
+    "type": "texture",
+    "extension": "png"
+  }
+}
+```
+
 Add reference image:
 
 ```json
@@ -581,6 +600,7 @@ Supported v0.20 actions:
 - `create_lamp_model`
 - `create_furniture_set`
 - `create_room_layout`
+- `list_assets`
 - `add_reference_image`
 - `apply_texture_material`
 - `apply_material_preset`
@@ -619,6 +639,7 @@ When connected as a Codex plugin/MCP server, it exposes:
 - `blender_create_lamp_model`
 - `blender_create_furniture_set`
 - `blender_create_room_layout`
+- `blender_list_assets`
 - `blender_add_reference_image`
 - `blender_apply_texture_material`
 - `blender_apply_material_preset`

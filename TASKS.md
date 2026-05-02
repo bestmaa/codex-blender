@@ -377,7 +377,7 @@ Commit:
 
 ### 15. v0.26 Asset Library Helpers
 
-Status: pending
+Status: completed
 
 Goal:
 Make local assets easier to discover and import.
