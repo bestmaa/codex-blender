@@ -1,0 +1,9 @@
+{
+  "action": "render_scene",
+  "params": {
+    "output": "renders/room_layout.png",
+    "resolution": [1280, 720],
+    "samples": 96,
+    "timeout_seconds": 300
+  }
+}

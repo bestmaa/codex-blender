@@ -15,6 +15,7 @@ This is not a cloud connector. Blender runs locally on your machine.
 - Create a reusable indoor plant model.
 - Create reusable floor, table, and ceiling lamp models with real Blender lights.
 - Create a composed furniture set scene.
+- Create reusable room layout presets.
 - Add reference images as textured planes for side-by-side modeling.
 - Apply user-provided image textures to Blender objects.
 - Create approximate scenes from structured reference-image plans.
@@ -174,6 +175,12 @@ Create a furniture set scene:
 
 ```powershell
 python bridge\codex_blender_bridge.py examples\create_furniture_set.json
+```
+
+Create a room layout preset:
+
+```powershell
+python bridge\codex_blender_bridge.py examples\create_room_layout.json
 ```
 
 Add a reference image plane:
@@ -396,6 +403,18 @@ Create furniture set:
 }
 ```
 
+Create room layout:
+
+```json
+{
+  "action": "create_room_layout",
+  "params": {
+    "preset": "living_room",
+    "style": "clean_modern"
+  }
+}
+```
+
 Add reference image:
 
 ```json
@@ -561,6 +580,7 @@ Supported v0.20 actions:
 - `create_plant_model`
 - `create_lamp_model`
 - `create_furniture_set`
+- `create_room_layout`
 - `add_reference_image`
 - `apply_texture_material`
 - `apply_material_preset`
@@ -598,6 +618,7 @@ When connected as a Codex plugin/MCP server, it exposes:
 - `blender_create_plant_model`
 - `blender_create_lamp_model`
 - `blender_create_furniture_set`
+- `blender_create_room_layout`
 - `blender_add_reference_image`
 - `blender_apply_texture_material`
 - `blender_apply_material_preset`

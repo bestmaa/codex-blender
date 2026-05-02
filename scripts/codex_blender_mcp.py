@@ -236,6 +236,16 @@ TOOLS = [
         ),
     },
     {
+        "name": "blender_create_room_layout",
+        "description": "Create a reusable room layout preset: studio, living_room, office, or gallery.",
+        "inputSchema": json_schema(
+            {
+                "preset": {"type": "string", "description": "studio, living_room, office, or gallery.", "default": "living_room"},
+                "style": {"type": "string", "description": "Style label.", "default": "clean_modern"},
+            }
+        ),
+    },
+    {
         "name": "blender_save_blend",
         "description": "Save the current Blender scene to a .blend file.",
         "inputSchema": json_schema(
@@ -767,6 +777,12 @@ def call_tool(name: str, arguments: dict[str, Any]) -> tuple[dict[str, Any], boo
             "style": arguments.get("style", "compact_dining"),
         }
         result = call_http("/command", {"action": "create_furniture_set", "params": params})
+    elif name == "blender_create_room_layout":
+        params = {
+            "preset": arguments.get("preset", "living_room"),
+            "style": arguments.get("style", "clean_modern"),
+        }
+        result = call_http("/command", {"action": "create_room_layout", "params": params})
     elif name == "blender_save_blend":
         params = {"output": normalize_output_path(arguments.get("output", "scenes/scene.blend"))}
         result = call_http("/command", {"action": "save_blend", "params": params})
@@ -905,7 +921,7 @@ def handle_request(message: dict[str, Any]) -> dict[str, Any] | None:
             {
                 "protocolVersion": "2024-11-05",
                 "capabilities": {"tools": {}},
-                "serverInfo": {"name": "codex-blender", "version": "0.24.0"},
+                "serverInfo": {"name": "codex-blender", "version": "0.25.0"},
             },
         )
     if method == "tools/list":

@@ -1,0 +1,7 @@
+{
+  "action": "create_room_layout",
+  "params": {
+    "preset": "living_room",
+    "style": "clean_modern"
+  }
+}

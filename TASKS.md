@@ -352,7 +352,7 @@ Commit:
 
 ### 14. v0.25 Room Layout Presets
 
-Status: pending
+Status: completed
 
 Goal:
 Create reusable room layout presets.

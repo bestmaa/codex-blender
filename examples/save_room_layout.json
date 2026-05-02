@@ -1,0 +1,6 @@
+{
+  "action": "save_blend",
+  "params": {
+    "output": "scenes/room_layout.blend"
+  }
+}

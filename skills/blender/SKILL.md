@@ -197,6 +197,20 @@ Creates a composed furniture scene with a dining table, chairs, rug, plant, floo
 }
 ```
 
+### create_room_layout
+
+Creates a reusable room layout preset. Supported presets are `studio`, `living_room`, `office`, and `gallery`.
+
+```json
+{
+  "action": "create_room_layout",
+  "params": {
+    "preset": "living_room",
+    "style": "clean_modern"
+  }
+}
+```
+
 ### add_reference_image
 
 Adds a local image as a reference plane in the current Blender scene. Use this before or after model creation when matching a generated/reference image.

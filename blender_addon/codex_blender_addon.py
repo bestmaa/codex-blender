@@ -1,7 +1,7 @@
 bl_info = {
     "name": "Codex Blender Bridge",
     "author": "Aditya",
-    "version": (0, 24, 0),
+    "version": (0, 25, 0),
     "blender": (3, 6, 0),
     "location": "View3D > Sidebar > Codex",
     "description": "Local HTTP bridge for sending Codex commands to Blender.",
@@ -992,6 +992,97 @@ def action_create_furniture_set(params):
     )
 
 
+def action_create_room_layout(params):
+    clear_scene()
+
+    preset = params.get("preset", "living_room")
+    if not isinstance(preset, str):
+        raise ValueError("params.preset must be a string")
+    preset = preset.lower()
+    if preset not in {"studio", "living_room", "office", "gallery"}:
+        raise ValueError("params.preset must be studio, living_room, office, or gallery")
+    style = params.get("style", "clean_modern")
+    if not isinstance(style, str):
+        raise ValueError("params.style must be a string")
+
+    floor_mat = create_material("layout warm floor", (0.72, 0.68, 0.60, 1), roughness=0.7)
+    wall_mat = create_material("layout soft white walls", (0.80, 0.82, 0.80, 1), roughness=0.82)
+    accent_mat = create_material("layout accent surface", (0.36, 0.48, 0.56, 1), roughness=0.78)
+    wood_mat = create_material("layout warm wood", (0.68, 0.42, 0.22, 1), roughness=0.52)
+    fabric_mat = create_material("layout soft fabric", (0.42, 0.54, 0.62, 1), roughness=0.88)
+    dark_mat = create_material("layout dark metal", (0.16, 0.16, 0.15, 1), roughness=0.35, metallic=0.5)
+    glow_mat = create_material("layout warm glow", (1.0, 0.74, 0.34, 1), roughness=0.2, emission=(1.0, 0.66, 0.26, 1), strength=1.5)
+
+    room_width = 5.8 if preset != "gallery" else 7.2
+    room_depth = 4.7 if preset != "gallery" else 4.2
+    wall_height = 2.9
+    create_rounded_cube("layout floor", (0, 0, -0.035), (room_width, room_depth, 0.07), floor_mat, 0.01, 1)
+    create_cube("layout back wall", (0, room_depth / 2, wall_height / 2), (room_width, 0.10, wall_height), wall_mat)
+    create_cube("layout left wall", (-room_width / 2, 0, wall_height / 2), (0.10, room_depth, wall_height), wall_mat)
+    create_cube("layout right wall", (room_width / 2, 0, wall_height / 2), (0.10, room_depth, wall_height), wall_mat)
+
+    if preset == "studio":
+        create_rounded_cube("studio murphy bed", (-1.4, 1.45, 0.46), (1.75, 1.15, 0.22), fabric_mat, 0.06, 5)
+        create_rounded_cube("studio work table", (1.15, 1.3, 0.78), (1.55, 0.72, 0.12), wood_mat, 0.04, 4)
+        create_rounded_cube("studio storage unit", (2.0, -0.35, 0.78), (0.58, 1.15, 1.45), accent_mat, 0.04, 4)
+        create_rounded_cube("studio rug", (-0.25, -0.55, 0.015), (3.4, 1.65, 0.025), fabric_mat, 0.08, 6)
+        camera_location = (3.6, -3.4, 2.0)
+        target = (0.0, 0.55, 0.75)
+    elif preset == "office":
+        create_rounded_cube("office desk", (0, 1.25, 0.82), (2.3, 0.78, 0.12), wood_mat, 0.04, 4)
+        create_rounded_cube("office monitor", (0, 1.58, 1.22), (0.88, 0.06, 0.52), dark_mat, 0.025, 3)
+        create_rounded_cube("office chair seat", (0, 0.35, 0.58), (0.74, 0.66, 0.13), fabric_mat, 0.06, 6)
+        create_rounded_cube("office chair back", (0, 0.64, 1.02), (0.72, 0.10, 0.62), fabric_mat, 0.06, 6)
+        create_rounded_cube("office shelf", (-2.25, 1.25, 1.1), (0.58, 1.05, 1.9), accent_mat, 0.035, 3)
+        camera_location = (3.4, -3.2, 2.05)
+        target = (0.0, 0.9, 0.95)
+    elif preset == "gallery":
+        for index, x in enumerate([-2.2, 0.0, 2.2], start=1):
+            create_rounded_cube(f"gallery framed artwork {index}", (x, room_depth / 2 - 0.065, 1.55), (1.0, 0.035, 0.78), accent_mat, 0.025, 3)
+            create_rounded_cube(f"gallery pedestal {index}", (x, 0.35, 0.48), (0.58, 0.58, 0.9), wall_mat, 0.035, 3)
+        create_rounded_cube("gallery bench", (0, -1.35, 0.36), (2.2, 0.42, 0.20), wood_mat, 0.06, 5)
+        for x in [-2.2, 0.0, 2.2]:
+            add_area_light(f"gallery wall wash {x:.1f}", (x, 1.45, 2.45), (math.radians(78), 0, 0), 50, 0.8)
+        camera_location = (3.8, -3.1, 1.8)
+        target = (0.0, 0.55, 1.15)
+    else:
+        create_rounded_cube("living room sofa", (-0.95, 1.25, 0.58), (2.25, 0.82, 0.42), fabric_mat, 0.08, 6)
+        create_rounded_cube("living room sofa back", (-0.95, 1.63, 1.0), (2.25, 0.16, 0.72), fabric_mat, 0.08, 6)
+        create_rounded_cube("living room coffee table", (0.15, 0.05, 0.42), (1.45, 0.72, 0.10), wood_mat, 0.04, 4)
+        create_rounded_cube("living room media unit", (1.85, 1.78, 0.52), (1.2, 0.28, 0.42), dark_mat, 0.035, 3)
+        create_rounded_cube("living room rug", (-0.25, 0.2, 0.015), (3.3, 1.85, 0.025), fabric_mat, 0.08, 6)
+        create_cylinder("living room floor lamp base", (1.95, -0.95, 0.04), 0.22, 0.08, dark_mat, vertices=32)
+        create_cylinder("living room floor lamp pole", (1.95, -0.95, 0.95), 0.032, 1.8, dark_mat, vertices=16)
+        create_cone("living room floor lamp shade", (1.95, -0.95, 1.9), 0.34, 0.48, 0.38, glow_mat, vertices=32)
+        bpy.ops.object.light_add(type="POINT", location=(1.95, -0.95, 1.85))
+        lamp = bpy.context.object
+        lamp.name = "living room lamp light"
+        lamp.data.energy = 280
+        lamp.data.shadow_soft_size = 1.4
+        camera_location = (3.6, -3.4, 2.0)
+        target = (-0.25, 0.65, 0.85)
+
+    add_area_light("layout large window light", (-room_width * 0.35, -room_depth * 0.65, 2.7), (math.radians(58), 0, math.radians(-28)), 340, 4.0)
+    add_area_light("layout ceiling fill", (0, 0, 2.8), (0, 0, 0), 70, 5.2)
+
+    bpy.ops.object.camera_add(location=camera_location)
+    camera = bpy.context.object
+    camera.name = f"{preset} layout camera"
+    look_at(camera, target)
+    camera.data.lens = 30
+    bpy.context.scene.camera = camera
+    bpy.context.scene.render.engine = "CYCLES"
+    bpy.context.scene.cycles.samples = 96
+    bpy.context.scene.render.resolution_x = 1280
+    bpy.context.scene.render.resolution_y = 720
+    bpy.context.scene.world.color = (0.78, 0.80, 0.82)
+    bpy.context.scene.view_settings.view_transform = "Filmic"
+    bpy.context.scene.view_settings.look = "Medium High Contrast"
+    bpy.context.scene.frame_set(1)
+
+    return make_result(True, message="Created room layout.", preset=preset, style=style)
+
+
 def add_tree(index, x, y, trunk_mat, leaf_mat, height_offset=0.0):
     trunk_height = 1.0 + height_offset
     create_cylinder(f"tree {index} trunk", (x, y, trunk_height / 2), 0.13, trunk_height, trunk_mat, vertices=14)
@@ -1739,6 +1830,8 @@ def execute_command(payload):
         return action_create_lamp_model(params)
     if action == "create_furniture_set":
         return action_create_furniture_set(params)
+    if action == "create_room_layout":
+        return action_create_room_layout(params)
     if action == "inspect_rig":
         return action_inspect_rig(params)
     if action == "render_scene":
