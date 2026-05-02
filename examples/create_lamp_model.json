@@ -1,0 +1,12 @@
+{
+  "action": "create_lamp_model",
+  "params": {
+    "lamp_type": "floor",
+    "height": 2.4,
+    "shade_radius": 0.38,
+    "power": 520,
+    "metal_color": [0.23, 0.23, 0.22, 1],
+    "shade_color": [0.95, 0.86, 0.68, 1],
+    "style": "warm_modern"
+  }
+}

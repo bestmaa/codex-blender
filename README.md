@@ -13,6 +13,7 @@ This is not a cloud connector. Blender runs locally on your machine.
 - Create a reusable modern chair model.
 - Create a reusable modern sofa model.
 - Create a reusable indoor plant model.
+- Create reusable floor, table, and ceiling lamp models with real Blender lights.
 - Add reference images as textured planes for side-by-side modeling.
 - Apply user-provided image textures to Blender objects.
 - Create approximate scenes from structured reference-image plans.
@@ -160,6 +161,12 @@ Create an indoor plant model:
 
 ```powershell
 python bridge\codex_blender_bridge.py examples\create_plant_model.json
+```
+
+Create a lamp model:
+
+```powershell
+python bridge\codex_blender_bridge.py examples\create_lamp_model.json
 ```
 
 Add a reference image plane:
@@ -349,6 +356,23 @@ Create plant model:
 }
 ```
 
+Create lamp model:
+
+```json
+{
+  "action": "create_lamp_model",
+  "params": {
+    "lamp_type": "floor",
+    "height": 2.4,
+    "shade_radius": 0.38,
+    "power": 520,
+    "metal_color": [0.23, 0.23, 0.22, 1],
+    "shade_color": [0.95, 0.86, 0.68, 1],
+    "style": "warm_modern"
+  }
+}
+```
+
 Add reference image:
 
 ```json
@@ -512,6 +536,7 @@ Supported v0.20 actions:
 - `create_chair_model`
 - `create_sofa_model`
 - `create_plant_model`
+- `create_lamp_model`
 - `add_reference_image`
 - `apply_texture_material`
 - `apply_material_preset`
@@ -547,6 +572,7 @@ When connected as a Codex plugin/MCP server, it exposes:
 - `blender_create_chair_model`
 - `blender_create_sofa_model`
 - `blender_create_plant_model`
+- `blender_create_lamp_model`
 - `blender_add_reference_image`
 - `blender_apply_texture_material`
 - `blender_apply_material_preset`

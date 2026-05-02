@@ -310,7 +310,7 @@ Commit:
 
 ### 12. v0.23 Lamp And Light Fixture Action
 
-Status: pending
+Status: completed
 
 Goal:
 Add reusable lamps/light fixtures for scenes.

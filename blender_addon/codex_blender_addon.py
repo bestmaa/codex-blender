@@ -1,7 +1,7 @@
 bl_info = {
     "name": "Codex Blender Bridge",
     "author": "Aditya",
-    "version": (0, 22, 0),
+    "version": (0, 23, 0),
     "blender": (3, 6, 0),
     "location": "View3D > Sidebar > Codex",
     "description": "Local HTTP bridge for sending Codex commands to Blender.",
@@ -792,6 +792,90 @@ def action_create_plant_model(params):
     )
 
 
+def action_create_lamp_model(params):
+    clear_scene()
+
+    lamp_type = params.get("lamp_type", "floor")
+    if not isinstance(lamp_type, str):
+        raise ValueError("params.lamp_type must be a string")
+    lamp_type = lamp_type.lower()
+    if lamp_type not in {"floor", "table", "ceiling_panel"}:
+        raise ValueError("params.lamp_type must be floor, table, or ceiling_panel")
+
+    height = get_number(params, "height", 2.4 if lamp_type == "floor" else 1.0, minimum=0.25, maximum=6)
+    shade_radius = get_number(params, "shade_radius", 0.38 if lamp_type != "ceiling_panel" else 1.05, minimum=0.08, maximum=3)
+    power = get_number(params, "power", 520, minimum=0, maximum=5000)
+    style = params.get("style", "warm_modern")
+    if not isinstance(style, str):
+        raise ValueError("params.style must be a string")
+
+    metal_color = params.get("metal_color", [0.23, 0.23, 0.22, 1])
+    if not isinstance(metal_color, list) or len(metal_color) not in {3, 4}:
+        raise ValueError("params.metal_color must be [r, g, b] or [r, g, b, a]")
+    if len(metal_color) == 3:
+        metal_color = metal_color + [1]
+
+    shade_color = params.get("shade_color", [0.95, 0.86, 0.68, 1])
+    if not isinstance(shade_color, list) or len(shade_color) not in {3, 4}:
+        raise ValueError("params.shade_color must be [r, g, b] or [r, g, b, a]")
+    if len(shade_color) == 3:
+        shade_color = shade_color + [1]
+
+    metal_mat = create_material("lamp dark metal", tuple(metal_color), roughness=0.34, metallic=0.7)
+    shade_mat = create_material("lamp warm shade", tuple(shade_color), roughness=0.72, emission=(1.0, 0.78, 0.42, 1), strength=0.25)
+    glow_mat = create_material("lamp visible warm glow", (1.0, 0.72, 0.32, 1), roughness=0.2, emission=(1.0, 0.66, 0.26, 1), strength=2.4)
+    floor_mat = create_material("lamp studio floor", (0.78, 0.76, 0.71, 1), roughness=0.65)
+
+    create_rounded_cube("lamp studio floor", (0, 0, -0.035), (4.5, 4.5, 0.07), floor_mat, 0.02, 2)
+
+    if lamp_type == "ceiling_panel":
+        create_rounded_cube("ceiling panel body", (0, 0, height), (shade_radius * 2.2, shade_radius * 0.9, 0.10), shade_mat, 0.05, 6)
+        create_rounded_cube("ceiling panel diffuser glow", (0, 0, height - 0.06), (shade_radius * 2.0, shade_radius * 0.72, 0.035), glow_mat, 0.04, 5)
+        add_area_light("ceiling panel light", (0, 0, height - 0.12), (0, 0, 0), power, shade_radius * 2.0)
+        camera_location = (2.5, -3.6, height * 0.72)
+        target = (0, 0, height * 0.55)
+    else:
+        base_radius = shade_radius * (0.55 if lamp_type == "floor" else 0.45)
+        pole_height = height * (0.72 if lamp_type == "floor" else 0.62)
+        shade_z = pole_height + shade_radius * 0.55
+        create_cylinder(f"{lamp_type} lamp round base", (0, 0, 0.045), base_radius, 0.09, metal_mat, vertices=36)
+        create_cylinder(f"{lamp_type} lamp slim pole", (0, 0, pole_height / 2), shade_radius * 0.055, pole_height, metal_mat, vertices=18)
+        create_cone(f"{lamp_type} lamp shade", (0, 0, shade_z), shade_radius * 0.82, shade_radius * 1.12, shade_radius * 0.72, shade_mat, vertices=40)
+        create_cylinder(f"{lamp_type} lamp bulb glow", (0, 0, shade_z - shade_radius * 0.08), shade_radius * 0.22, shade_radius * 0.30, glow_mat, vertices=24)
+        bpy.ops.object.light_add(type="POINT", location=(0, 0, shade_z - shade_radius * 0.06))
+        light = bpy.context.object
+        light.name = f"{lamp_type} lamp warm point light"
+        light.data.energy = power
+        light.data.shadow_soft_size = shade_radius * 2.2
+        add_area_light(f"{lamp_type} lamp soft spill", (-1.2, -1.8, height * 1.25), (math.radians(58), 0, math.radians(-28)), power * 0.35, 2.5)
+        camera_location = (2.1, -3.2, height * 0.75)
+        target = (0, 0, height * 0.45)
+
+    bpy.ops.object.camera_add(location=camera_location)
+    camera = bpy.context.object
+    camera.name = "lamp product camera"
+    look_at(camera, target)
+    camera.data.lens = 42 if lamp_type == "table" else 36
+    bpy.context.scene.camera = camera
+    bpy.context.scene.render.engine = "CYCLES"
+    bpy.context.scene.cycles.samples = 96
+    bpy.context.scene.render.resolution_x = 1280
+    bpy.context.scene.render.resolution_y = 720
+    bpy.context.scene.world.color = (0.12, 0.12, 0.12)
+    bpy.context.scene.view_settings.view_transform = "Filmic"
+    bpy.context.scene.view_settings.look = "Medium High Contrast"
+    bpy.context.scene.frame_set(1)
+
+    return make_result(
+        True,
+        message="Created lamp model.",
+        style=style,
+        lamp_type=lamp_type,
+        height=height,
+        power=power,
+    )
+
+
 def add_tree(index, x, y, trunk_mat, leaf_mat, height_offset=0.0):
     trunk_height = 1.0 + height_offset
     create_cylinder(f"tree {index} trunk", (x, y, trunk_height / 2), 0.13, trunk_height, trunk_mat, vertices=14)
@@ -1535,6 +1619,8 @@ def execute_command(payload):
         return action_create_sofa_model(params)
     if action == "create_plant_model":
         return action_create_plant_model(params)
+    if action == "create_lamp_model":
+        return action_create_lamp_model(params)
     if action == "inspect_rig":
         return action_inspect_rig(params)
     if action == "render_scene":

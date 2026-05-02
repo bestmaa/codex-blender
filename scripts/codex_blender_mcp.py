@@ -207,6 +207,21 @@ TOOLS = [
         ),
     },
     {
+        "name": "blender_create_lamp_model",
+        "description": "Create a reusable floor lamp, table lamp, or ceiling light panel with visible lighting.",
+        "inputSchema": json_schema(
+            {
+                "lamp_type": {"type": "string", "description": "floor, table, or ceiling_panel.", "default": "floor"},
+                "height": {"type": "number", "description": "Lamp height.", "default": 2.4},
+                "shade_radius": {"type": "number", "description": "Shade or panel radius/size.", "default": 0.38},
+                "power": {"type": "number", "description": "Light power.", "default": 520},
+                "metal_color": {"type": "array", "items": {"type": "number"}, "default": [0.23, 0.23, 0.22, 1]},
+                "shade_color": {"type": "array", "items": {"type": "number"}, "default": [0.95, 0.86, 0.68, 1]},
+                "style": {"type": "string", "description": "Style label.", "default": "warm_modern"},
+            }
+        ),
+    },
+    {
         "name": "blender_save_blend",
         "description": "Save the current Blender scene to a .blend file.",
         "inputSchema": json_schema(
@@ -717,6 +732,17 @@ def call_tool(name: str, arguments: dict[str, Any]) -> tuple[dict[str, Any], boo
             "style": arguments.get("style", "indoor_potted"),
         }
         result = call_http("/command", {"action": "create_plant_model", "params": params})
+    elif name == "blender_create_lamp_model":
+        params = {
+            "lamp_type": arguments.get("lamp_type", "floor"),
+            "height": arguments.get("height", 2.4),
+            "shade_radius": arguments.get("shade_radius", 0.38),
+            "power": arguments.get("power", 520),
+            "metal_color": arguments.get("metal_color", [0.23, 0.23, 0.22, 1]),
+            "shade_color": arguments.get("shade_color", [0.95, 0.86, 0.68, 1]),
+            "style": arguments.get("style", "warm_modern"),
+        }
+        result = call_http("/command", {"action": "create_lamp_model", "params": params})
     elif name == "blender_save_blend":
         params = {"output": normalize_output_path(arguments.get("output", "scenes/scene.blend"))}
         result = call_http("/command", {"action": "save_blend", "params": params})
@@ -855,7 +881,7 @@ def handle_request(message: dict[str, Any]) -> dict[str, Any] | None:
             {
                 "protocolVersion": "2024-11-05",
                 "capabilities": {"tools": {}},
-                "serverInfo": {"name": "codex-blender", "version": "0.22.0"},
+                "serverInfo": {"name": "codex-blender", "version": "0.23.0"},
             },
         )
     if method == "tools/list":

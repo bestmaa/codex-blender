@@ -160,6 +160,25 @@ Creates a reusable indoor plant model with a pot, stems, broad leaves, camera, a
 }
 ```
 
+### create_lamp_model
+
+Creates a reusable floor lamp, table lamp, or ceiling panel with visible mesh fixtures and real Blender lights.
+
+```json
+{
+  "action": "create_lamp_model",
+  "params": {
+    "lamp_type": "floor",
+    "height": 2.4,
+    "shade_radius": 0.38,
+    "power": 520,
+    "metal_color": [0.23, 0.23, 0.22, 1],
+    "shade_color": [0.95, 0.86, 0.68, 1],
+    "style": "warm_modern"
+  }
+}
+```
+
 ### add_reference_image
 
 Adds a local image as a reference plane in the current Blender scene. Use this before or after model creation when matching a generated/reference image.
