@@ -289,7 +289,7 @@ Commit:
 
 ### 11. v0.22 Plant Model Action
 
-Status: pending
+Status: completed
 
 Goal:
 Add a reusable indoor plant model.

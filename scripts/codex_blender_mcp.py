@@ -191,6 +191,22 @@ TOOLS = [
         ),
     },
     {
+        "name": "blender_create_plant_model",
+        "description": "Create an indoor potted plant model with pot, stems, leaf clusters, camera, and lighting.",
+        "inputSchema": json_schema(
+            {
+                "height": {"type": "number", "description": "Plant total height.", "default": 2.1},
+                "pot_radius": {"type": "number", "description": "Pot radius.", "default": 0.42},
+                "pot_height": {"type": "number", "description": "Pot height.", "default": 0.58},
+                "leaf_count": {"type": "integer", "description": "Number of broad leaves.", "default": 18},
+                "stem_count": {"type": "integer", "description": "Number of stems.", "default": 5},
+                "leaf_color": {"type": "array", "items": {"type": "number"}, "default": [0.20, 0.55, 0.34, 1]},
+                "pot_color": {"type": "array", "items": {"type": "number"}, "default": [0.70, 0.62, 0.52, 1]},
+                "style": {"type": "string", "description": "Style label.", "default": "indoor_potted"},
+            }
+        ),
+    },
+    {
         "name": "blender_save_blend",
         "description": "Save the current Blender scene to a .blend file.",
         "inputSchema": json_schema(
@@ -689,6 +705,18 @@ def call_tool(name: str, arguments: dict[str, Any]) -> tuple[dict[str, Any], boo
             "style": arguments.get("style", "modern_couch"),
         }
         result = call_http("/command", {"action": "create_sofa_model", "params": params})
+    elif name == "blender_create_plant_model":
+        params = {
+            "height": arguments.get("height", 2.1),
+            "pot_radius": arguments.get("pot_radius", 0.42),
+            "pot_height": arguments.get("pot_height", 0.58),
+            "leaf_count": arguments.get("leaf_count", 18),
+            "stem_count": arguments.get("stem_count", 5),
+            "leaf_color": arguments.get("leaf_color", [0.20, 0.55, 0.34, 1]),
+            "pot_color": arguments.get("pot_color", [0.70, 0.62, 0.52, 1]),
+            "style": arguments.get("style", "indoor_potted"),
+        }
+        result = call_http("/command", {"action": "create_plant_model", "params": params})
     elif name == "blender_save_blend":
         params = {"output": normalize_output_path(arguments.get("output", "scenes/scene.blend"))}
         result = call_http("/command", {"action": "save_blend", "params": params})
@@ -827,7 +855,7 @@ def handle_request(message: dict[str, Any]) -> dict[str, Any] | None:
             {
                 "protocolVersion": "2024-11-05",
                 "capabilities": {"tools": {}},
-                "serverInfo": {"name": "codex-blender", "version": "0.21.0"},
+                "serverInfo": {"name": "codex-blender", "version": "0.22.0"},
             },
         )
     if method == "tools/list":

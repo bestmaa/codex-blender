@@ -1,7 +1,7 @@
 bl_info = {
     "name": "Codex Blender Bridge",
     "author": "Aditya",
-    "version": (0, 21, 0),
+    "version": (0, 22, 0),
     "blender": (3, 6, 0),
     "location": "View3D > Sidebar > Codex",
     "description": "Local HTTP bridge for sending Codex commands to Blender.",
@@ -667,6 +667,128 @@ def action_create_sofa_model(params):
         depth=depth,
         height=height,
         cushion_count=cushion_count,
+    )
+
+
+def create_leaf(name, location, scale, rotation, material):
+    bpy.ops.mesh.primitive_uv_sphere_add(segments=24, ring_count=12, location=location, rotation=rotation)
+    obj = bpy.context.object
+    obj.name = name
+    obj.scale = scale
+    bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
+    if material:
+        obj.data.materials.append(material)
+    obj.modifiers.new("leaf smooth normals", "WEIGHTED_NORMAL")
+    return obj
+
+
+def action_create_plant_model(params):
+    clear_scene()
+
+    height = get_number(params, "height", 2.1, minimum=0.5, maximum=6)
+    pot_radius = get_number(params, "pot_radius", 0.42, minimum=0.12, maximum=2)
+    pot_height = get_number(params, "pot_height", 0.58, minimum=0.18, maximum=2)
+    leaf_count = get_int(params, "leaf_count", 18, minimum=4, maximum=80)
+    stem_count = get_int(params, "stem_count", 5, minimum=1, maximum=16)
+    style = params.get("style", "indoor_potted")
+    if not isinstance(style, str):
+        raise ValueError("params.style must be a string")
+
+    leaf_color = params.get("leaf_color", [0.20, 0.55, 0.34, 1])
+    if not isinstance(leaf_color, list) or len(leaf_color) not in {3, 4}:
+        raise ValueError("params.leaf_color must be [r, g, b] or [r, g, b, a]")
+    if len(leaf_color) == 3:
+        leaf_color = leaf_color + [1]
+
+    pot_color = params.get("pot_color", [0.70, 0.62, 0.52, 1])
+    if not isinstance(pot_color, list) or len(pot_color) not in {3, 4}:
+        raise ValueError("params.pot_color must be [r, g, b] or [r, g, b, a]")
+    if len(pot_color) == 3:
+        pot_color = pot_color + [1]
+
+    stem_mat = create_material("plant stems", (0.22, 0.18, 0.10, 1), roughness=0.74)
+    leaf_mat = create_material("plant waxy leaves", tuple(leaf_color), roughness=0.62)
+    vein_mat = create_material("plant leaf veins", (leaf_color[0] * 0.62, leaf_color[1] * 0.72, leaf_color[2] * 0.62, 1), roughness=0.72)
+    pot_mat = create_material("plant ceramic pot", tuple(pot_color), roughness=0.7)
+    soil_mat = create_material("plant dark soil", (0.10, 0.075, 0.05, 1), roughness=0.95)
+    floor_mat = create_material("plant studio floor", (0.78, 0.76, 0.71, 1), roughness=0.65)
+
+    create_rounded_cube("plant studio floor", (0, 0, -0.035), (pot_radius * 6.4, pot_radius * 6.4, 0.07), floor_mat, 0.02, 2)
+    create_cylinder("plant ceramic pot", (0, 0, pot_height / 2), pot_radius, pot_height, pot_mat, vertices=48)
+    create_cylinder("plant pot rim", (0, 0, pot_height + 0.035), pot_radius * 1.08, 0.07, pot_mat, vertices=48)
+    create_cylinder("plant dark soil", (0, 0, pot_height + 0.075), pot_radius * 0.88, 0.035, soil_mat, vertices=48)
+
+    stem_height = max(0.25, height - pot_height * 0.45)
+    for index in range(stem_count):
+        angle = (math.tau / stem_count) * index
+        lean = 0.11 + 0.03 * (index % 3)
+        x = math.cos(angle) * lean
+        y = math.sin(angle) * lean
+        stem = create_cylinder(
+            f"plant stem {index + 1}",
+            (x * 0.5, y * 0.5, pot_height + stem_height * 0.45),
+            pot_radius * 0.035,
+            stem_height * (0.78 + 0.05 * (index % 2)),
+            stem_mat,
+            vertices=12,
+        )
+        stem.rotation_euler[0] = math.sin(angle) * math.radians(7)
+        stem.rotation_euler[1] = -math.cos(angle) * math.radians(7)
+
+    leaf_base_z = pot_height + stem_height * 0.48
+    leaf_span = pot_radius * 1.55
+    for index in range(leaf_count):
+        angle = (math.tau / leaf_count) * index
+        layer = index % 4
+        radius = leaf_span * (0.42 + 0.11 * layer)
+        z = leaf_base_z + stem_height * (0.08 * layer + 0.05 * math.sin(index * 1.7))
+        x = math.cos(angle) * radius
+        y = math.sin(angle) * radius
+        length = pot_radius * (0.42 + 0.055 * (index % 3))
+        width = length * 0.34
+        rotation = (math.radians(18 + layer * 7), 0, angle)
+        create_leaf(
+            f"plant broad leaf {index + 1}",
+            (x, y, z),
+            (length, width, 0.035),
+            rotation,
+            leaf_mat,
+        )
+        create_rounded_cube(
+            f"plant leaf vein {index + 1}",
+            (x, y, z + 0.018),
+            (length * 1.35, 0.012, 0.008),
+            vein_mat,
+            0.004,
+            1,
+        ).rotation_euler[2] = angle
+
+    add_area_light("plant large softbox", (-2.0, -2.6, height * 1.85), (math.radians(58), 0, math.radians(-28)), 480, 3.5)
+    add_area_light("plant green rim", (1.8, 1.6, height * 1.3), (math.radians(70), 0, math.radians(132)), 90, 1.8)
+
+    bpy.ops.object.camera_add(location=(2.3, -3.4, height * 0.95))
+    camera = bpy.context.object
+    camera.name = "plant product camera"
+    look_at(camera, (0, 0, height * 0.52))
+    camera.data.lens = 38
+    bpy.context.scene.camera = camera
+    bpy.context.scene.render.engine = "CYCLES"
+    bpy.context.scene.cycles.samples = 96
+    bpy.context.scene.render.resolution_x = 1280
+    bpy.context.scene.render.resolution_y = 720
+    bpy.context.scene.world.color = (0.78, 0.80, 0.82)
+    bpy.context.scene.view_settings.view_transform = "Filmic"
+    bpy.context.scene.view_settings.look = "Medium High Contrast"
+    bpy.context.scene.frame_set(1)
+
+    return make_result(
+        True,
+        message="Created indoor plant model.",
+        style=style,
+        height=height,
+        pot_radius=pot_radius,
+        leaf_count=leaf_count,
+        stem_count=stem_count,
     )
 
 
@@ -1411,6 +1533,8 @@ def execute_command(payload):
         return action_create_chair_model(params)
     if action == "create_sofa_model":
         return action_create_sofa_model(params)
+    if action == "create_plant_model":
+        return action_create_plant_model(params)
     if action == "inspect_rig":
         return action_inspect_rig(params)
     if action == "render_scene":

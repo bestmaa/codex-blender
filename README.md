@@ -12,6 +12,7 @@ This is not a cloud connector. Blender runs locally on your machine.
 - Create a reusable modern wooden table model.
 - Create a reusable modern chair model.
 - Create a reusable modern sofa model.
+- Create a reusable indoor plant model.
 - Add reference images as textured planes for side-by-side modeling.
 - Apply user-provided image textures to Blender objects.
 - Create approximate scenes from structured reference-image plans.
@@ -153,6 +154,12 @@ Create a modern sofa model:
 
 ```powershell
 python bridge\codex_blender_bridge.py examples\create_sofa_model.json
+```
+
+Create an indoor plant model:
+
+```powershell
+python bridge\codex_blender_bridge.py examples\create_plant_model.json
 ```
 
 Add a reference image plane:
@@ -324,6 +331,24 @@ Create sofa model:
 }
 ```
 
+Create plant model:
+
+```json
+{
+  "action": "create_plant_model",
+  "params": {
+    "height": 2.1,
+    "pot_radius": 0.42,
+    "pot_height": 0.58,
+    "leaf_count": 18,
+    "stem_count": 5,
+    "leaf_color": [0.20, 0.55, 0.34, 1],
+    "pot_color": [0.70, 0.62, 0.52, 1],
+    "style": "indoor_potted"
+  }
+}
+```
+
 Add reference image:
 
 ```json
@@ -486,6 +511,7 @@ Supported v0.20 actions:
 - `create_table_model`
 - `create_chair_model`
 - `create_sofa_model`
+- `create_plant_model`
 - `add_reference_image`
 - `apply_texture_material`
 - `apply_material_preset`
@@ -520,6 +546,7 @@ When connected as a Codex plugin/MCP server, it exposes:
 - `blender_create_table_model`
 - `blender_create_chair_model`
 - `blender_create_sofa_model`
+- `blender_create_plant_model`
 - `blender_add_reference_image`
 - `blender_apply_texture_material`
 - `blender_apply_material_preset`

@@ -140,6 +140,26 @@ Creates a reusable modern sofa model with cushions, arms, legs, camera, and ligh
 }
 ```
 
+### create_plant_model
+
+Creates a reusable indoor plant model with a pot, stems, broad leaves, camera, and lighting.
+
+```json
+{
+  "action": "create_plant_model",
+  "params": {
+    "height": 2.1,
+    "pot_radius": 0.42,
+    "pot_height": 0.58,
+    "leaf_count": 18,
+    "stem_count": 5,
+    "leaf_color": [0.20, 0.55, 0.34, 1],
+    "pot_color": [0.70, 0.62, 0.52, 1],
+    "style": "indoor_potted"
+  }
+}
+```
+
 ### add_reference_image
 
 Adds a local image as a reference plane in the current Blender scene. Use this before or after model creation when matching a generated/reference image.
