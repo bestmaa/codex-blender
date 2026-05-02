@@ -446,7 +446,7 @@ Commit:
 
 ### 18. v0.29 Object Transform Action
 
-Status: pending
+Status: completed
 
 Goal:
 Allow precise movement/rotation/scaling of existing objects.

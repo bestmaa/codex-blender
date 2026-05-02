@@ -1,7 +1,7 @@
 bl_info = {
     "name": "Codex Blender Bridge",
     "author": "Aditya",
-    "version": (0, 28, 0),
+    "version": (0, 29, 0),
     "blender": (3, 6, 0),
     "location": "View3D > Sidebar > Codex",
     "description": "Local HTTP bridge for sending Codex commands to Blender.",
@@ -1533,6 +1533,43 @@ def action_inspect_scene(params):
     return make_result(True, message="Inspected scene.", objects=objects, count=len(objects))
 
 
+def action_transform_object(params):
+    name = params.get("object")
+    if not isinstance(name, str) or not name.strip():
+        raise ValueError("params.object must be a non-empty string")
+    obj = bpy.data.objects.get(name)
+    if obj is None:
+        raise ValueError(f"Object not found: {name}")
+
+    if "location" in params:
+        obj.location = get_vector(params, "location", [obj.location.x, obj.location.y, obj.location.z])
+    if "rotation" in params:
+        obj.rotation_euler = get_vector(params, "rotation", [obj.rotation_euler.x, obj.rotation_euler.y, obj.rotation_euler.z])
+    if "scale" in params:
+        scale_value = params.get("scale")
+        if isinstance(scale_value, (int, float)):
+            obj.scale = (scale_value, scale_value, scale_value)
+        else:
+            obj.scale = get_vector(params, "scale", [obj.scale.x, obj.scale.y, obj.scale.z])
+    bpy.context.view_layer.update()
+    if "dimensions" in params:
+        dimensions = get_vector(params, "dimensions", [obj.dimensions.x, obj.dimensions.y, obj.dimensions.z])
+        if any(value <= 0 for value in dimensions):
+            raise ValueError("params.dimensions values must be positive")
+        obj.dimensions = dimensions
+        bpy.context.view_layer.update()
+
+    return make_result(
+        True,
+        message="Transformed object.",
+        object=obj.name,
+        location=tuple(round(value, 5) for value in obj.location),
+        rotation=tuple(round(value, 5) for value in obj.rotation_euler),
+        scale=tuple(round(value, 5) for value in obj.scale),
+        dimensions=tuple(round(value, 5) for value in obj.dimensions),
+    )
+
+
 def action_add_reference_image(params):
     path = resolve_input_path(params.get("path"))
     name = params.get("name", path.stem)
@@ -1984,6 +2021,8 @@ def execute_command(payload):
         return action_fit_object_to_bounds(params)
     if action == "inspect_scene":
         return action_inspect_scene(params)
+    if action == "transform_object":
+        return action_transform_object(params)
     if action == "add_reference_image":
         return action_add_reference_image(params)
     if action == "apply_texture_material":

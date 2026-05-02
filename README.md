@@ -19,6 +19,7 @@ This is not a cloud connector. Blender runs locally on your machine.
 - List local model, texture, and reference assets.
 - Fit and place imported assets inside target bounds.
 - Inspect current scene objects before editing.
+- Move, rotate, scale, and resize named scene objects.
 - Add reference images as textured planes for side-by-side modeling.
 - Apply user-provided image textures to Blender objects.
 - Create approximate scenes from structured reference-image plans.
@@ -202,6 +203,12 @@ Inspect the current scene:
 
 ```powershell
 python bridge\codex_blender_bridge.py examples\inspect_scene.json
+```
+
+Transform the table top:
+
+```powershell
+python bridge\codex_blender_bridge.py examples\transform_tabletop.json
 ```
 
 Add a reference image plane:
@@ -474,6 +481,19 @@ Inspect scene:
 }
 ```
 
+Transform object:
+
+```json
+{
+  "action": "transform_object",
+  "params": {
+    "object": "rounded rectangular tabletop",
+    "location": [0, 0, 1.75],
+    "dimensions": [3.2, 1.7, 0.2]
+  }
+}
+```
+
 Add reference image:
 
 ```json
@@ -643,6 +663,7 @@ Supported v0.20 actions:
 - `list_assets`
 - `fit_object_to_bounds`
 - `inspect_scene`
+- `transform_object`
 - `add_reference_image`
 - `apply_texture_material`
 - `apply_material_preset`
@@ -684,6 +705,7 @@ When connected as a Codex plugin/MCP server, it exposes:
 - `blender_list_assets`
 - `blender_fit_object_to_bounds`
 - `blender_inspect_scene`
+- `blender_transform_object`
 - `blender_add_reference_image`
 - `blender_apply_texture_material`
 - `blender_apply_material_preset`

@@ -279,6 +279,20 @@ TOOLS = [
         ),
     },
     {
+        "name": "blender_transform_object",
+        "description": "Move, rotate, scale, or resize an existing object while preserving unspecified transforms.",
+        "inputSchema": json_schema(
+            {
+                "object": {"type": "string", "description": "Object name to transform."},
+                "location": {"type": "array", "items": {"type": "number"}, "description": "Optional location [x, y, z]."},
+                "rotation": {"type": "array", "items": {"type": "number"}, "description": "Optional Euler rotation [x, y, z]."},
+                "scale": {"description": "Optional scale as a number or [x, y, z]."},
+                "dimensions": {"type": "array", "items": {"type": "number"}, "description": "Optional target dimensions [x, y, z]."},
+            },
+            required=["object"],
+        ),
+    },
+    {
         "name": "blender_save_blend",
         "description": "Save the current Blender scene to a .blend file.",
         "inputSchema": json_schema(
@@ -836,6 +850,12 @@ def call_tool(name: str, arguments: dict[str, Any]) -> tuple[dict[str, Any], boo
             "type": arguments.get("type"),
         }
         result = call_http("/command", {"action": "inspect_scene", "params": params})
+    elif name == "blender_transform_object":
+        params = {"object": arguments.get("object")}
+        for key in ("location", "rotation", "scale", "dimensions"):
+            if key in arguments:
+                params[key] = arguments[key]
+        result = call_http("/command", {"action": "transform_object", "params": params})
     elif name == "blender_save_blend":
         params = {"output": normalize_output_path(arguments.get("output", "scenes/scene.blend"))}
         result = call_http("/command", {"action": "save_blend", "params": params})
@@ -974,7 +994,7 @@ def handle_request(message: dict[str, Any]) -> dict[str, Any] | None:
             {
                 "protocolVersion": "2024-11-05",
                 "capabilities": {"tools": {}},
-                "serverInfo": {"name": "codex-blender", "version": "0.28.0"},
+                "serverInfo": {"name": "codex-blender", "version": "0.29.0"},
             },
         )
     if method == "tools/list":

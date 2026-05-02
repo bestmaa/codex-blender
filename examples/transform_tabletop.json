@@ -1,0 +1,8 @@
+{
+  "action": "transform_object",
+  "params": {
+    "object": "rounded rectangular tabletop",
+    "location": [0, 0, 1.75],
+    "dimensions": [3.2, 1.7, 0.2]
+  }
+}

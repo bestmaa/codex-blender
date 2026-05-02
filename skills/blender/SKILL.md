@@ -255,6 +255,21 @@ Returns current scene objects with name, type, transform, dimensions, and materi
 }
 ```
 
+### transform_object
+
+Moves, rotates, scales, or resizes an existing object. Unspecified transform fields are preserved.
+
+```json
+{
+  "action": "transform_object",
+  "params": {
+    "object": "rounded rectangular tabletop",
+    "location": [0, 0, 1.75],
+    "dimensions": [3.2, 1.7, 0.2]
+  }
+}
+```
+
 ### add_reference_image
 
 Adds a local image as a reference plane in the current Blender scene. Use this before or after model creation when matching a generated/reference image.
