@@ -7,8 +7,10 @@ This queue is the working contract for taking Codex Blender to v1.0 in small ver
 - Work on exactly one task at a time.
 - Pick the first task with `Status: pending`.
 - Change its status to `in_progress` before editing code.
+- Auto mode is enabled by default: after a task is implemented, verified, and committed, start the next pending task automatically.
 - Do not start the next task until the current task is implemented, verified, and committed.
 - If verification fails, keep the same task `in_progress` and fix it before moving on.
+- Stop auto mode only when verification fails, a blocker appears, Blender/bridge is unavailable, Git fails, or the user says stop/pause/review.
 - Keep changes scoped to the current task.
 - Preserve user changes and unrelated worktree changes.
 - Prefer structured bridge actions over trusted `run_python` scripts when adding reusable features.
