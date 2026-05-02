@@ -18,6 +18,7 @@ This is not a cloud connector. Blender runs locally on your machine.
 - Create reusable room layout presets.
 - List local model, texture, and reference assets.
 - Fit and place imported assets inside target bounds.
+- Inspect current scene objects before editing.
 - Add reference images as textured planes for side-by-side modeling.
 - Apply user-provided image textures to Blender objects.
 - Create approximate scenes from structured reference-image plans.
@@ -195,6 +196,12 @@ Fit the sample imported asset:
 
 ```powershell
 python bridge\codex_blender_bridge.py examples\fit_sample_asset.json
+```
+
+Inspect the current scene:
+
+```powershell
+python bridge\codex_blender_bridge.py examples\inspect_scene.json
 ```
 
 Add a reference image plane:
@@ -455,6 +462,18 @@ Fit object to bounds:
 }
 ```
 
+Inspect scene:
+
+```json
+{
+  "action": "inspect_scene",
+  "params": {
+    "include_hidden": false,
+    "type": "MESH"
+  }
+}
+```
+
 Add reference image:
 
 ```json
@@ -623,6 +642,7 @@ Supported v0.20 actions:
 - `create_room_layout`
 - `list_assets`
 - `fit_object_to_bounds`
+- `inspect_scene`
 - `add_reference_image`
 - `apply_texture_material`
 - `apply_material_preset`
@@ -663,6 +683,7 @@ When connected as a Codex plugin/MCP server, it exposes:
 - `blender_create_room_layout`
 - `blender_list_assets`
 - `blender_fit_object_to_bounds`
+- `blender_inspect_scene`
 - `blender_add_reference_image`
 - `blender_apply_texture_material`
 - `blender_apply_material_preset`

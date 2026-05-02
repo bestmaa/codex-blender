@@ -241,6 +241,20 @@ Scales and places an existing object inside target bounds. Use after `import_ass
 }
 ```
 
+### inspect_scene
+
+Returns current scene objects with name, type, transform, dimensions, and material names.
+
+```json
+{
+  "action": "inspect_scene",
+  "params": {
+    "include_hidden": false,
+    "type": "MESH"
+  }
+}
+```
+
 ### add_reference_image
 
 Adds a local image as a reference plane in the current Blender scene. Use this before or after model creation when matching a generated/reference image.

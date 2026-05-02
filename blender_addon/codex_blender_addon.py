@@ -1,7 +1,7 @@
 bl_info = {
     "name": "Codex Blender Bridge",
     "author": "Aditya",
-    "version": (0, 27, 0),
+    "version": (0, 28, 0),
     "blender": (3, 6, 0),
     "location": "View3D > Sidebar > Codex",
     "description": "Local HTTP bridge for sending Codex commands to Blender.",
@@ -1500,6 +1500,39 @@ def action_fit_object_to_bounds(params):
     )
 
 
+def action_inspect_scene(params):
+    include_hidden = params.get("include_hidden", False)
+    if not isinstance(include_hidden, bool):
+        raise ValueError("params.include_hidden must be a boolean")
+    object_type = params.get("type")
+    if object_type is not None and not isinstance(object_type, str):
+        raise ValueError("params.type must be a string")
+    selected_type = object_type.upper() if object_type else None
+
+    objects = []
+    for obj in bpy.context.scene.objects:
+        if not include_hidden and obj.hide_get():
+            continue
+        if selected_type and obj.type != selected_type:
+            continue
+        materials = []
+        if hasattr(obj.data, "materials"):
+            materials = [mat.name for mat in obj.data.materials if mat]
+        objects.append(
+            {
+                "name": obj.name,
+                "type": obj.type,
+                "location": [round(value, 5) for value in obj.location],
+                "rotation": [round(value, 5) for value in obj.rotation_euler],
+                "scale": [round(value, 5) for value in obj.scale],
+                "dimensions": [round(value, 5) for value in obj.dimensions],
+                "materials": materials,
+            }
+        )
+
+    return make_result(True, message="Inspected scene.", objects=objects, count=len(objects))
+
+
 def action_add_reference_image(params):
     path = resolve_input_path(params.get("path"))
     name = params.get("name", path.stem)
@@ -1949,6 +1982,8 @@ def execute_command(payload):
         return action_import_asset(params)
     if action == "fit_object_to_bounds":
         return action_fit_object_to_bounds(params)
+    if action == "inspect_scene":
+        return action_inspect_scene(params)
     if action == "add_reference_image":
         return action_add_reference_image(params)
     if action == "apply_texture_material":

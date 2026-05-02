@@ -426,7 +426,7 @@ Commit:
 
 ### 17. v0.28 Scene Object Inspection
 
-Status: pending
+Status: completed
 
 Goal:
 Let Codex inspect current scene objects before editing.

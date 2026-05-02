@@ -1,0 +1,6 @@
+{
+  "action": "inspect_scene",
+  "params": {
+    "include_hidden": false
+  }
+}

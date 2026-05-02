@@ -269,6 +269,16 @@ TOOLS = [
         ),
     },
     {
+        "name": "blender_inspect_scene",
+        "description": "Inspect current scene objects with names, types, transforms, dimensions, and materials.",
+        "inputSchema": json_schema(
+            {
+                "include_hidden": {"type": "boolean", "description": "Include hidden objects.", "default": False},
+                "type": {"type": "string", "description": "Optional Blender object type filter, for example MESH or LIGHT."},
+            }
+        ),
+    },
+    {
         "name": "blender_save_blend",
         "description": "Save the current Blender scene to a .blend file.",
         "inputSchema": json_schema(
@@ -820,6 +830,12 @@ def call_tool(name: str, arguments: dict[str, Any]) -> tuple[dict[str, Any], boo
             "align_to_floor": arguments.get("align_to_floor", True),
         }
         result = call_http("/command", {"action": "fit_object_to_bounds", "params": params})
+    elif name == "blender_inspect_scene":
+        params = {
+            "include_hidden": arguments.get("include_hidden", False),
+            "type": arguments.get("type"),
+        }
+        result = call_http("/command", {"action": "inspect_scene", "params": params})
     elif name == "blender_save_blend":
         params = {"output": normalize_output_path(arguments.get("output", "scenes/scene.blend"))}
         result = call_http("/command", {"action": "save_blend", "params": params})
@@ -958,7 +974,7 @@ def handle_request(message: dict[str, Any]) -> dict[str, Any] | None:
             {
                 "protocolVersion": "2024-11-05",
                 "capabilities": {"tools": {}},
-                "serverInfo": {"name": "codex-blender", "version": "0.27.0"},
+                "serverInfo": {"name": "codex-blender", "version": "0.28.0"},
             },
         )
     if method == "tools/list":
