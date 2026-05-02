@@ -153,6 +153,14 @@ Inspect rigs:
 python bridge\codex_blender_bridge.py examples\inspect_rig.json
 ```
 
+## Validate The Project
+
+Run local checks without launching Blender:
+
+```powershell
+python scripts\validate_project.py
+```
+
 ## Example Commands
 
 Create room:
