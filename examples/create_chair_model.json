@@ -1,0 +1,13 @@
+{
+  "action": "create_chair_model",
+  "params": {
+    "width": 1.35,
+    "depth": 1.25,
+    "height": 2.25,
+    "seat_height": 0.95,
+    "cushion_thickness": 0.18,
+    "wood_color": [0.72, 0.45, 0.25, 1],
+    "fabric_color": [0.34, 0.48, 0.56, 1],
+    "style": "modern_wood"
+  }
+}

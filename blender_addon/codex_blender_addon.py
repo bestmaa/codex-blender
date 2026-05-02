@@ -1,7 +1,7 @@
 bl_info = {
     "name": "Codex Blender Bridge",
     "author": "Aditya",
-    "version": (0, 19, 0),
+    "version": (0, 20, 0),
     "blender": (3, 6, 0),
     "location": "View3D > Sidebar > Codex",
     "description": "Local HTTP bridge for sending Codex commands to Blender.",
@@ -441,6 +441,86 @@ def action_create_table_model(params):
         width=width,
         height=height,
         include_grain=include_grain,
+    )
+
+
+def action_create_chair_model(params):
+    clear_scene()
+
+    width = get_number(params, "width", 1.35, minimum=0.4, maximum=5)
+    depth = get_number(params, "depth", 1.25, minimum=0.4, maximum=5)
+    height = get_number(params, "height", 2.25, minimum=0.8, maximum=6)
+    seat_height = get_number(params, "seat_height", 0.95, minimum=0.25, maximum=3)
+    cushion_thickness = get_number(params, "cushion_thickness", 0.18, minimum=0.05, maximum=0.6)
+    style = params.get("style", "modern_wood")
+    if not isinstance(style, str):
+        raise ValueError("params.style must be a string")
+
+    wood_color = params.get("wood_color", [0.72, 0.45, 0.25, 1])
+    if not isinstance(wood_color, list) or len(wood_color) not in {3, 4}:
+        raise ValueError("params.wood_color must be [r, g, b] or [r, g, b, a]")
+    if len(wood_color) == 3:
+        wood_color = wood_color + [1]
+
+    fabric_color = params.get("fabric_color", [0.34, 0.48, 0.56, 1])
+    if not isinstance(fabric_color, list) or len(fabric_color) not in {3, 4}:
+        raise ValueError("params.fabric_color must be [r, g, b] or [r, g, b, a]")
+    if len(fabric_color) == 3:
+        fabric_color = fabric_color + [1]
+
+    wood_mat = create_material("chair warm wood", tuple(wood_color), roughness=0.48)
+    dark_wood_mat = create_material("chair dark wood", (wood_color[0] * 0.55, wood_color[1] * 0.52, wood_color[2] * 0.48, 1), roughness=0.58)
+    fabric_mat = create_material("chair soft fabric", tuple(fabric_color), roughness=0.88)
+    floor_mat = create_material("chair studio floor", (0.78, 0.76, 0.71, 1), roughness=0.65)
+
+    create_rounded_cube("chair studio floor", (0, 0, -0.035), (width + 3.0, depth + 3.0, 0.07), floor_mat, 0.02, 2)
+    create_rounded_cube("chair seat cushion", (0, 0, seat_height), (width, depth, cushion_thickness), fabric_mat, 0.09, 7)
+    create_rounded_cube("chair front apron", (0, -depth * 0.48, seat_height - 0.18), (width * 0.92, 0.10, 0.22), dark_wood_mat, 0.03, 3)
+    create_rounded_cube("chair back apron", (0, depth * 0.48, seat_height - 0.18), (width * 0.92, 0.10, 0.22), dark_wood_mat, 0.03, 3)
+    create_rounded_cube("chair back cushion", (0, depth * 0.48, height * 0.72), (width, 0.18, height * 0.46), fabric_mat, 0.08, 7)
+    create_rounded_cube("chair top rail", (0, depth * 0.56, height), (width * 1.05, 0.16, 0.16), wood_mat, 0.06, 5)
+
+    leg_height = seat_height - cushion_thickness * 0.35
+    leg_x = width * 0.38
+    leg_y = depth * 0.36
+    radius = min(width, depth) * 0.055
+    for leg_name, x, y in [
+        ("chair front left leg", -leg_x, -leg_y),
+        ("chair front right leg", leg_x, -leg_y),
+        ("chair back left leg", -leg_x, leg_y),
+        ("chair back right leg", leg_x, leg_y),
+    ]:
+        create_table_leg(leg_name, x, y, leg_height, radius * 0.72, radius, wood_mat, angle=3.5)
+
+    for support_name, x in [("chair left back post", -leg_x, ), ("chair right back post", leg_x)]:
+        create_rounded_cube(support_name, (x, depth * 0.56, height * 0.64), (0.12, 0.12, height * 0.72), wood_mat, 0.035, 4)
+
+    add_area_light("chair large softbox", (-2.4, -2.8, 3.8), (math.radians(58), 0, math.radians(-28)), 520, 3.8)
+    add_area_light("chair cool rim", (2.2, 1.8, 2.6), (math.radians(70), 0, math.radians(132)), 100, 1.8)
+
+    bpy.ops.object.camera_add(location=(3.25, -4.85, 2.35))
+    camera = bpy.context.object
+    camera.name = "chair product camera"
+    look_at(camera, (0, 0.04, seat_height * 1.08))
+    camera.data.lens = 32
+    bpy.context.scene.camera = camera
+    bpy.context.scene.render.engine = "CYCLES"
+    bpy.context.scene.cycles.samples = 96
+    bpy.context.scene.render.resolution_x = 1280
+    bpy.context.scene.render.resolution_y = 720
+    bpy.context.scene.world.color = (0.78, 0.80, 0.82)
+    bpy.context.scene.view_settings.view_transform = "Filmic"
+    bpy.context.scene.view_settings.look = "Medium High Contrast"
+    bpy.context.scene.frame_set(1)
+
+    return make_result(
+        True,
+        message="Created modern chair model.",
+        style=style,
+        width=width,
+        depth=depth,
+        height=height,
+        seat_height=seat_height,
     )
 
 
@@ -1181,6 +1261,8 @@ def execute_command(payload):
         return action_create_outdoor_scene(params)
     if action == "create_table_model":
         return action_create_table_model(params)
+    if action == "create_chair_model":
+        return action_create_chair_model(params)
     if action == "inspect_rig":
         return action_inspect_rig(params)
     if action == "render_scene":

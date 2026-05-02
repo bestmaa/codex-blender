@@ -246,7 +246,7 @@ Commit:
 
 ### 9. v0.20 Chair Model Action
 
-Status: pending
+Status: completed
 
 Goal:
 Add a reusable chair model action to pair with the table.

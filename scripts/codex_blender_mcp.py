@@ -158,6 +158,22 @@ TOOLS = [
         ),
     },
     {
+        "name": "blender_create_chair_model",
+        "description": "Create a modern chair model with cushion, back, legs, camera, and lighting.",
+        "inputSchema": json_schema(
+            {
+                "width": {"type": "number", "description": "Chair width.", "default": 1.35},
+                "depth": {"type": "number", "description": "Chair depth.", "default": 1.25},
+                "height": {"type": "number", "description": "Chair total height.", "default": 2.25},
+                "seat_height": {"type": "number", "description": "Seat height.", "default": 0.95},
+                "cushion_thickness": {"type": "number", "description": "Seat cushion thickness.", "default": 0.18},
+                "wood_color": {"type": "array", "items": {"type": "number"}, "default": [0.72, 0.45, 0.25, 1]},
+                "fabric_color": {"type": "array", "items": {"type": "number"}, "default": [0.34, 0.48, 0.56, 1]},
+                "style": {"type": "string", "description": "Style label.", "default": "modern_wood"},
+            }
+        ),
+    },
+    {
         "name": "blender_save_blend",
         "description": "Save the current Blender scene to a .blend file.",
         "inputSchema": json_schema(
@@ -631,6 +647,18 @@ def call_tool(name: str, arguments: dict[str, Any]) -> tuple[dict[str, Any], boo
             "style": arguments.get("style", "modern_wood"),
         }
         result = call_http("/command", {"action": "create_table_model", "params": params})
+    elif name == "blender_create_chair_model":
+        params = {
+            "width": arguments.get("width", 1.35),
+            "depth": arguments.get("depth", 1.25),
+            "height": arguments.get("height", 2.25),
+            "seat_height": arguments.get("seat_height", 0.95),
+            "cushion_thickness": arguments.get("cushion_thickness", 0.18),
+            "wood_color": arguments.get("wood_color", [0.72, 0.45, 0.25, 1]),
+            "fabric_color": arguments.get("fabric_color", [0.34, 0.48, 0.56, 1]),
+            "style": arguments.get("style", "modern_wood"),
+        }
+        result = call_http("/command", {"action": "create_chair_model", "params": params})
     elif name == "blender_save_blend":
         params = {"output": normalize_output_path(arguments.get("output", "scenes/scene.blend"))}
         result = call_http("/command", {"action": "save_blend", "params": params})
@@ -769,7 +797,7 @@ def handle_request(message: dict[str, Any]) -> dict[str, Any] | None:
             {
                 "protocolVersion": "2024-11-05",
                 "capabilities": {"tools": {}},
-                "serverInfo": {"name": "codex-blender", "version": "0.19.0"},
+                "serverInfo": {"name": "codex-blender", "version": "0.20.0"},
             },
         )
     if method == "tools/list":

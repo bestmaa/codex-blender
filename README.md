@@ -10,6 +10,7 @@ This is not a cloud connector. Blender runs locally on your machine.
 - Create a starter room scene.
 - Create an outdoor road scene with trees and street lights.
 - Create a reusable modern wooden table model.
+- Create a reusable modern chair model.
 - Add reference images as textured planes for side-by-side modeling.
 - Apply user-provided image textures to Blender objects.
 - Create approximate scenes from structured reference-image plans.
@@ -141,6 +142,12 @@ Create a modern table model:
 python bridge\codex_blender_bridge.py examples\create_table_model.json
 ```
 
+Create a modern chair model:
+
+```powershell
+python bridge\codex_blender_bridge.py examples\create_chair_model.json
+```
+
 Add a reference image plane:
 
 ```powershell
@@ -268,6 +275,24 @@ Create table model:
     "corner_roundness": 0.14,
     "include_grain": true,
     "wood_color": [0.78, 0.47, 0.25, 1],
+    "style": "modern_wood"
+  }
+}
+```
+
+Create chair model:
+
+```json
+{
+  "action": "create_chair_model",
+  "params": {
+    "width": 1.35,
+    "depth": 1.25,
+    "height": 2.25,
+    "seat_height": 0.95,
+    "cushion_thickness": 0.18,
+    "wood_color": [0.72, 0.45, 0.25, 1],
+    "fabric_color": [0.34, 0.48, 0.56, 1],
     "style": "modern_wood"
   }
 }
@@ -427,12 +452,13 @@ Save scene:
 
 ## Supported Actions
 
-Supported v0.19 actions:
+Supported v0.20 actions:
 
 - `ping`
 - `create_room`
 - `create_outdoor_scene`
 - `create_table_model`
+- `create_chair_model`
 - `add_reference_image`
 - `apply_texture_material`
 - `apply_material_preset`
@@ -465,6 +491,7 @@ When connected as a Codex plugin/MCP server, it exposes:
 - `blender_create_room`
 - `blender_create_outdoor_scene`
 - `blender_create_table_model`
+- `blender_create_chair_model`
 - `blender_add_reference_image`
 - `blender_apply_texture_material`
 - `blender_apply_material_preset`
