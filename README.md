@@ -11,6 +11,7 @@ This is not a cloud connector. Blender runs locally on your machine.
 - Create an outdoor road scene with trees and street lights.
 - Create a reusable modern wooden table model.
 - Create a reusable modern chair model.
+- Create a reusable modern sofa model.
 - Add reference images as textured planes for side-by-side modeling.
 - Apply user-provided image textures to Blender objects.
 - Create approximate scenes from structured reference-image plans.
@@ -146,6 +147,12 @@ Create a modern chair model:
 
 ```powershell
 python bridge\codex_blender_bridge.py examples\create_chair_model.json
+```
+
+Create a modern sofa model:
+
+```powershell
+python bridge\codex_blender_bridge.py examples\create_sofa_model.json
 ```
 
 Add a reference image plane:
@@ -294,6 +301,25 @@ Create chair model:
     "wood_color": [0.72, 0.45, 0.25, 1],
     "fabric_color": [0.34, 0.48, 0.56, 1],
     "style": "modern_wood"
+  }
+}
+```
+
+Create sofa model:
+
+```json
+{
+  "action": "create_sofa_model",
+  "params": {
+    "width": 3.2,
+    "depth": 1.35,
+    "height": 1.55,
+    "seat_height": 0.62,
+    "cushion_count": 3,
+    "cushion_gap": 0.035,
+    "fabric_color": [0.42, 0.54, 0.62, 1],
+    "leg_color": [0.42, 0.25, 0.14, 1],
+    "style": "modern_couch"
   }
 }
 ```
@@ -459,6 +485,7 @@ Supported v0.20 actions:
 - `create_outdoor_scene`
 - `create_table_model`
 - `create_chair_model`
+- `create_sofa_model`
 - `add_reference_image`
 - `apply_texture_material`
 - `apply_material_preset`
@@ -492,6 +519,7 @@ When connected as a Codex plugin/MCP server, it exposes:
 - `blender_create_outdoor_scene`
 - `blender_create_table_model`
 - `blender_create_chair_model`
+- `blender_create_sofa_model`
 - `blender_add_reference_image`
 - `blender_apply_texture_material`
 - `blender_apply_material_preset`

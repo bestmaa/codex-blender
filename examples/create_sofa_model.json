@@ -1,0 +1,14 @@
+{
+  "action": "create_sofa_model",
+  "params": {
+    "width": 3.2,
+    "depth": 1.35,
+    "height": 1.55,
+    "seat_height": 0.62,
+    "cushion_count": 3,
+    "cushion_gap": 0.035,
+    "fabric_color": [0.42, 0.54, 0.62, 1],
+    "leg_color": [0.42, 0.25, 0.14, 1],
+    "style": "modern_couch"
+  }
+}

@@ -268,7 +268,7 @@ Commit:
 
 ### 10. v0.21 Sofa Model Action
 
-Status: pending
+Status: completed
 
 Goal:
 Add a reusable sofa/couch model for room scenes.

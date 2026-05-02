@@ -1,7 +1,7 @@
 bl_info = {
     "name": "Codex Blender Bridge",
     "author": "Aditya",
-    "version": (0, 20, 0),
+    "version": (0, 21, 0),
     "blender": (3, 6, 0),
     "location": "View3D > Sidebar > Codex",
     "description": "Local HTTP bridge for sending Codex commands to Blender.",
@@ -521,6 +521,152 @@ def action_create_chair_model(params):
         depth=depth,
         height=height,
         seat_height=seat_height,
+    )
+
+
+def action_create_sofa_model(params):
+    clear_scene()
+
+    width = get_number(params, "width", 3.2, minimum=1.0, maximum=8)
+    depth = get_number(params, "depth", 1.35, minimum=0.6, maximum=4)
+    height = get_number(params, "height", 1.55, minimum=0.7, maximum=4)
+    seat_height = get_number(params, "seat_height", 0.62, minimum=0.25, maximum=2)
+    cushion_count = get_int(params, "cushion_count", 3, minimum=1, maximum=6)
+    cushion_gap = get_number(params, "cushion_gap", 0.035, minimum=0, maximum=0.2)
+    style = params.get("style", "modern_couch")
+    if not isinstance(style, str):
+        raise ValueError("params.style must be a string")
+
+    fabric_color = params.get("fabric_color", [0.42, 0.54, 0.62, 1])
+    if not isinstance(fabric_color, list) or len(fabric_color) not in {3, 4}:
+        raise ValueError("params.fabric_color must be [r, g, b] or [r, g, b, a]")
+    if len(fabric_color) == 3:
+        fabric_color = fabric_color + [1]
+
+    leg_color = params.get("leg_color", [0.42, 0.25, 0.14, 1])
+    if not isinstance(leg_color, list) or len(leg_color) not in {3, 4}:
+        raise ValueError("params.leg_color must be [r, g, b] or [r, g, b, a]")
+    if len(leg_color) == 3:
+        leg_color = leg_color + [1]
+
+    fabric_mat = create_material("sofa soft fabric", tuple(fabric_color), roughness=0.9)
+    seam_mat = create_material(
+        "sofa darker fabric seams",
+        (fabric_color[0] * 0.62, fabric_color[1] * 0.62, fabric_color[2] * 0.62, 1),
+        roughness=0.94,
+    )
+    leg_mat = create_material("sofa tapered wood legs", tuple(leg_color), roughness=0.55)
+    floor_mat = create_material("sofa studio floor", (0.78, 0.76, 0.71, 1), roughness=0.65)
+    shadow_mat = create_material("sofa soft shadow pad", (0.36, 0.34, 0.31, 1), roughness=0.84)
+
+    create_rounded_cube("sofa studio floor", (0, 0, -0.035), (width + 3.2, depth + 3.2, 0.07), floor_mat, 0.02, 2)
+    create_rounded_cube("sofa contact shadow pad", (0, 0, 0.012), (width + 0.55, depth + 0.5, 0.02), shadow_mat, 0.12, 8)
+
+    base_height = 0.24
+    create_rounded_cube("sofa base platform", (0, 0, seat_height - base_height * 0.55), (width, depth * 0.9, base_height), fabric_mat, 0.10, 8)
+
+    usable_width = width - cushion_gap * (cushion_count - 1)
+    cushion_width = usable_width / cushion_count
+    seat_depth = depth * 0.72
+    seat_z = seat_height + 0.08
+    start_x = -width / 2 + cushion_width / 2
+    for index in range(cushion_count):
+        x = start_x + index * (cushion_width + cushion_gap)
+        create_rounded_cube(
+            f"sofa seat cushion {index + 1}",
+            (x, -depth * 0.12, seat_z),
+            (cushion_width, seat_depth, 0.24),
+            fabric_mat,
+            0.12,
+            9,
+        )
+        if index > 0:
+            seam_x = x - cushion_width / 2 - cushion_gap / 2
+            create_rounded_cube(
+                f"sofa seat cushion seam {index}",
+                (seam_x, -depth * 0.12, seat_z + 0.13),
+                (0.018, seat_depth * 0.88, 0.018),
+                seam_mat,
+                0.006,
+                2,
+            )
+
+    back_height = height - seat_height + 0.08
+    create_rounded_cube(
+        "sofa back cushion",
+        (0, depth * 0.38, seat_height + back_height * 0.48),
+        (width, 0.22, back_height),
+        fabric_mat,
+        0.12,
+        9,
+    )
+    create_rounded_cube(
+        "sofa left arm",
+        (-width * 0.53, -depth * 0.04, seat_height + 0.28),
+        (0.28, depth * 0.96, 0.72),
+        fabric_mat,
+        0.10,
+        8,
+    )
+    create_rounded_cube(
+        "sofa right arm",
+        (width * 0.53, -depth * 0.04, seat_height + 0.28),
+        (0.28, depth * 0.96, 0.72),
+        fabric_mat,
+        0.10,
+        8,
+    )
+
+    pillow_width = min(0.58, width / max(cushion_count, 2) * 0.62)
+    for index, x in enumerate((-width * 0.28, width * 0.28), start=1):
+        create_rounded_cube(
+            f"sofa loose pillow {index}",
+            (x, depth * 0.18, seat_height + 0.46),
+            (pillow_width, 0.14, 0.46),
+            fabric_mat,
+            0.10,
+            8,
+        )
+
+    leg_height = seat_height - base_height * 1.1
+    leg_x = width * 0.40
+    leg_y = depth * 0.33
+    radius = min(width, depth) * 0.035
+    for leg_name, x, y in [
+        ("sofa front left leg", -leg_x, -leg_y),
+        ("sofa front right leg", leg_x, -leg_y),
+        ("sofa back left leg", -leg_x, leg_y),
+        ("sofa back right leg", leg_x, leg_y),
+    ]:
+        create_table_leg(leg_name, x, y, leg_height, radius * 0.75, radius, leg_mat, angle=4)
+
+    add_area_light("sofa large softbox", (-width * 0.55, -depth * 2.0, height * 2.35), (math.radians(58), 0, math.radians(-28)), 620, 4.4)
+    add_area_light("sofa warm rim light", (width * 0.55, depth * 1.55, height * 1.65), (math.radians(70), 0, math.radians(132)), 130, 2.2)
+    add_area_light("sofa overhead fill", (0, 0, height * 2.55), (0, 0, 0), 140, 5.8)
+
+    bpy.ops.object.camera_add(location=(width * 0.95, -depth * 3.3, height * 1.65))
+    camera = bpy.context.object
+    camera.name = "sofa product camera"
+    look_at(camera, (0, -depth * 0.04, seat_height * 0.95))
+    camera.data.lens = 35
+    bpy.context.scene.camera = camera
+    bpy.context.scene.render.engine = "CYCLES"
+    bpy.context.scene.cycles.samples = 96
+    bpy.context.scene.render.resolution_x = 1280
+    bpy.context.scene.render.resolution_y = 720
+    bpy.context.scene.world.color = (0.78, 0.80, 0.82)
+    bpy.context.scene.view_settings.view_transform = "Filmic"
+    bpy.context.scene.view_settings.look = "Medium High Contrast"
+    bpy.context.scene.frame_set(1)
+
+    return make_result(
+        True,
+        message="Created modern sofa model.",
+        style=style,
+        width=width,
+        depth=depth,
+        height=height,
+        cushion_count=cushion_count,
     )
 
 
@@ -1263,6 +1409,8 @@ def execute_command(payload):
         return action_create_table_model(params)
     if action == "create_chair_model":
         return action_create_chair_model(params)
+    if action == "create_sofa_model":
+        return action_create_sofa_model(params)
     if action == "inspect_rig":
         return action_inspect_rig(params)
     if action == "render_scene":

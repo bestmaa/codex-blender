@@ -174,6 +174,23 @@ TOOLS = [
         ),
     },
     {
+        "name": "blender_create_sofa_model",
+        "description": "Create a modern sofa model with cushions, arms, legs, camera, and lighting.",
+        "inputSchema": json_schema(
+            {
+                "width": {"type": "number", "description": "Sofa width.", "default": 3.2},
+                "depth": {"type": "number", "description": "Sofa depth.", "default": 1.35},
+                "height": {"type": "number", "description": "Sofa total height.", "default": 1.55},
+                "seat_height": {"type": "number", "description": "Seat height.", "default": 0.62},
+                "cushion_count": {"type": "integer", "description": "Number of seat cushions.", "default": 3},
+                "cushion_gap": {"type": "number", "description": "Gap between seat cushions.", "default": 0.035},
+                "fabric_color": {"type": "array", "items": {"type": "number"}, "default": [0.42, 0.54, 0.62, 1]},
+                "leg_color": {"type": "array", "items": {"type": "number"}, "default": [0.42, 0.25, 0.14, 1]},
+                "style": {"type": "string", "description": "Style label.", "default": "modern_couch"},
+            }
+        ),
+    },
+    {
         "name": "blender_save_blend",
         "description": "Save the current Blender scene to a .blend file.",
         "inputSchema": json_schema(
@@ -659,6 +676,19 @@ def call_tool(name: str, arguments: dict[str, Any]) -> tuple[dict[str, Any], boo
             "style": arguments.get("style", "modern_wood"),
         }
         result = call_http("/command", {"action": "create_chair_model", "params": params})
+    elif name == "blender_create_sofa_model":
+        params = {
+            "width": arguments.get("width", 3.2),
+            "depth": arguments.get("depth", 1.35),
+            "height": arguments.get("height", 1.55),
+            "seat_height": arguments.get("seat_height", 0.62),
+            "cushion_count": arguments.get("cushion_count", 3),
+            "cushion_gap": arguments.get("cushion_gap", 0.035),
+            "fabric_color": arguments.get("fabric_color", [0.42, 0.54, 0.62, 1]),
+            "leg_color": arguments.get("leg_color", [0.42, 0.25, 0.14, 1]),
+            "style": arguments.get("style", "modern_couch"),
+        }
+        result = call_http("/command", {"action": "create_sofa_model", "params": params})
     elif name == "blender_save_blend":
         params = {"output": normalize_output_path(arguments.get("output", "scenes/scene.blend"))}
         result = call_http("/command", {"action": "save_blend", "params": params})
@@ -797,7 +827,7 @@ def handle_request(message: dict[str, Any]) -> dict[str, Any] | None:
             {
                 "protocolVersion": "2024-11-05",
                 "capabilities": {"tools": {}},
-                "serverInfo": {"name": "codex-blender", "version": "0.20.0"},
+                "serverInfo": {"name": "codex-blender", "version": "0.21.0"},
             },
         )
     if method == "tools/list":

@@ -119,6 +119,27 @@ Creates a reusable modern chair model with a cushion, back, legs, camera, and li
 }
 ```
 
+### create_sofa_model
+
+Creates a reusable modern sofa model with cushions, arms, legs, camera, and lighting.
+
+```json
+{
+  "action": "create_sofa_model",
+  "params": {
+    "width": 3.2,
+    "depth": 1.35,
+    "height": 1.55,
+    "seat_height": 0.62,
+    "cushion_count": 3,
+    "cushion_gap": 0.035,
+    "fabric_color": [0.42, 0.54, 0.62, 1],
+    "leg_color": [0.42, 0.25, 0.14, 1],
+    "style": "modern_couch"
+  }
+}
+```
+
 ### add_reference_image
 
 Adds a local image as a reference plane in the current Blender scene. Use this before or after model creation when matching a generated/reference image.
