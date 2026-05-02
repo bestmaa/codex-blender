@@ -141,6 +141,22 @@ Applies a local image as a texture material on an existing Blender object. Use t
 }
 ```
 
+### apply_material_preset
+
+Applies a built-in material preset to an existing Blender object. Available presets: `wood_oak`, `fabric_soft`, `brushed_metal`, `glass_clear`, `matte_plastic`.
+
+```json
+{
+  "action": "apply_material_preset",
+  "params": {
+    "object": "darker tabletop underside",
+    "preset": "brushed_metal",
+    "material_name": "brushed metal underside preset",
+    "mode": "replace"
+  }
+}
+```
+
 ### render_scene
 
 Renders the current scene from the active camera to a PNG file.

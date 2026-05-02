@@ -157,6 +157,12 @@ Apply a scaled image texture to an object:
 python bridge\codex_blender_bridge.py examples\apply_scaled_wood_texture.json
 ```
 
+Apply a built-in material preset:
+
+```powershell
+python bridge\codex_blender_bridge.py examples\apply_material_preset.json
+```
+
 Import a local asset:
 
 ```powershell
@@ -273,6 +279,20 @@ Apply texture material:
 }
 ```
 
+Apply material preset:
+
+```json
+{
+  "action": "apply_material_preset",
+  "params": {
+    "object": "darker tabletop underside",
+    "preset": "brushed_metal",
+    "material_name": "brushed metal underside preset",
+    "mode": "replace"
+  }
+}
+```
+
 Import asset:
 
 ```json
@@ -314,7 +334,7 @@ Save scene:
 
 ## Supported Actions
 
-Supported v0.13 actions:
+Supported v0.14 actions:
 
 - `ping`
 - `create_room`
@@ -322,6 +342,7 @@ Supported v0.13 actions:
 - `create_table_model`
 - `add_reference_image`
 - `apply_texture_material`
+- `apply_material_preset`
 - `create_scene_from_reference`
 - `import_asset`
 - `render_scene`
@@ -349,6 +370,7 @@ When connected as a Codex plugin/MCP server, it exposes:
 - `blender_create_table_model`
 - `blender_add_reference_image`
 - `blender_apply_texture_material`
+- `blender_apply_material_preset`
 - `blender_create_scene_from_reference`
 - `blender_import_asset`
 - `blender_render_scene`
@@ -414,6 +436,14 @@ assets/references/
 ```
 
 `apply_texture_material` currently applies one image as the object's base color texture. Use it for user-supplied wood, fabric, stone, label, decal, or pattern images. Use `texture_scale`, `texture_offset`, `texture_rotation`, and `projection` to tune placement. For full realism, add matching roughness and normal maps in a later material workflow.
+
+Built-in material presets are available through `apply_material_preset`:
+
+- `wood_oak`
+- `fabric_soft`
+- `brushed_metal`
+- `glass_clear`
+- `matte_plastic`
 
 If render or save output goes to the wrong place:
 

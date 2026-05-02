@@ -1,0 +1,9 @@
+{
+  "action": "apply_material_preset",
+  "params": {
+    "object": "darker tabletop underside",
+    "preset": "brushed_metal",
+    "material_name": "brushed metal underside preset",
+    "mode": "replace"
+  }
+}

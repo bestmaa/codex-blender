@@ -325,6 +325,34 @@ TOOLS = [
         ),
     },
     {
+        "name": "blender_apply_material_preset",
+        "description": "Apply a built-in material preset to an existing Blender object.",
+        "inputSchema": json_schema(
+            {
+                "object": {
+                    "type": "string",
+                    "description": "Exact Blender object name to receive the material.",
+                },
+                "preset": {
+                    "type": "string",
+                    "description": "Preset name: wood_oak, fabric_soft, brushed_metal, glass_clear, or matte_plastic.",
+                    "default": "wood_oak",
+                },
+                "material_name": {
+                    "type": "string",
+                    "description": "Optional material name.",
+                    "default": "preset material",
+                },
+                "mode": {
+                    "type": "string",
+                    "description": "Use replace to clear existing materials, or append to add a material slot.",
+                    "default": "replace",
+                },
+            },
+            required=["object", "preset"],
+        ),
+    },
+    {
         "name": "blender_create_scene_from_reference",
         "description": "Create an approximate Blender scene from a structured reference-image scene plan.",
         "inputSchema": json_schema(
@@ -474,6 +502,14 @@ def call_tool(name: str, arguments: dict[str, Any]) -> tuple[dict[str, Any], boo
             "mode": arguments.get("mode", "replace"),
         }
         result = call_http("/command", {"action": "apply_texture_material", "params": params})
+    elif name == "blender_apply_material_preset":
+        params = {
+            "object": arguments.get("object"),
+            "preset": arguments.get("preset", "wood_oak"),
+            "material_name": arguments.get("material_name", "preset material"),
+            "mode": arguments.get("mode", "replace"),
+        }
+        result = call_http("/command", {"action": "apply_material_preset", "params": params})
     elif name == "blender_create_scene_from_reference":
         result = call_http("/command", {"action": "create_scene_from_reference", "params": arguments})
     elif name == "blender_inspect_rig":
@@ -523,7 +559,7 @@ def handle_request(message: dict[str, Any]) -> dict[str, Any] | None:
             {
                 "protocolVersion": "2024-11-05",
                 "capabilities": {"tools": {}},
-                "serverInfo": {"name": "codex-blender", "version": "0.13.0"},
+                "serverInfo": {"name": "codex-blender", "version": "0.14.0"},
             },
         )
     if method == "tools/list":

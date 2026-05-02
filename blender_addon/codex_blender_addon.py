@@ -1,7 +1,7 @@
 bl_info = {
     "name": "Codex Blender Bridge",
     "author": "Aditya",
-    "version": (0, 13, 0),
+    "version": (0, 14, 0),
     "blender": (3, 6, 0),
     "location": "View3D > Sidebar > Codex",
     "description": "Local HTTP bridge for sending Codex commands to Blender.",
@@ -787,6 +787,88 @@ def action_apply_texture_material(params):
     )
 
 
+MATERIAL_PRESETS = {
+    "wood_oak": {
+        "color": (0.72, 0.45, 0.22, 1.0),
+        "roughness": 0.46,
+        "metallic": 0.0,
+    },
+    "fabric_soft": {
+        "color": (0.33, 0.46, 0.56, 1.0),
+        "roughness": 0.88,
+        "metallic": 0.0,
+    },
+    "brushed_metal": {
+        "color": (0.62, 0.60, 0.56, 1.0),
+        "roughness": 0.28,
+        "metallic": 0.85,
+    },
+    "glass_clear": {
+        "color": (0.72, 0.92, 1.0, 0.34),
+        "roughness": 0.05,
+        "metallic": 0.0,
+        "alpha": 0.34,
+    },
+    "matte_plastic": {
+        "color": (0.18, 0.18, 0.20, 1.0),
+        "roughness": 0.62,
+        "metallic": 0.0,
+    },
+}
+
+
+def create_material_preset(name, preset):
+    color = preset["color"]
+    mat = create_material(name, color, roughness=preset["roughness"], metallic=preset["metallic"])
+    alpha = preset.get("alpha")
+    if alpha is not None:
+        mat.blend_method = "BLEND"
+        mat.use_screen_refraction = True
+        bsdf = mat.node_tree.nodes.get("Principled BSDF")
+        if bsdf and "Alpha" in bsdf.inputs:
+            bsdf.inputs["Alpha"].default_value = alpha
+    return mat
+
+
+def action_apply_material_preset(params):
+    object_name = params.get("object")
+    if not isinstance(object_name, str) or not object_name.strip():
+        raise ValueError("params.object must be a non-empty string")
+
+    obj = bpy.data.objects.get(object_name)
+    if obj is None:
+        raise ValueError(f"Object not found: {object_name}")
+    if not hasattr(obj.data, "materials"):
+        raise ValueError(f"Object does not support materials: {object_name}")
+
+    preset_name = params.get("preset")
+    if preset_name not in MATERIAL_PRESETS:
+        names = ", ".join(sorted(MATERIAL_PRESETS))
+        raise ValueError(f"params.preset must be one of: {names}")
+
+    material_name = params.get("material_name") or f"{object_name} {preset_name}"
+    if not isinstance(material_name, str) or not material_name.strip():
+        raise ValueError("params.material_name must be a non-empty string")
+
+    mode = params.get("mode", "replace")
+    if mode not in {"replace", "append"}:
+        raise ValueError("params.mode must be 'replace' or 'append'")
+
+    material = create_material_preset(material_name, MATERIAL_PRESETS[preset_name])
+    if mode == "replace":
+        obj.data.materials.clear()
+    obj.data.materials.append(material)
+
+    return make_result(
+        True,
+        message="Applied material preset.",
+        object=obj.name,
+        material=material.name,
+        preset=preset_name,
+        mode=mode,
+    )
+
+
 def material_from_plan(cache, name, color):
     key = name or json.dumps(color)
     if key not in cache:
@@ -915,6 +997,8 @@ def execute_command(payload):
         return action_add_reference_image(params)
     if action == "apply_texture_material":
         return action_apply_texture_material(params)
+    if action == "apply_material_preset":
+        return action_apply_material_preset(params)
     if action == "create_scene_from_reference":
         return action_create_scene_from_reference(params)
     if action == "run_python":

@@ -95,7 +95,7 @@ Commit:
 
 ### 3. v0.14 Texture Folder And Material Presets
 
-Status: pending
+Status: completed
 
 Goal:
 Make texture usage easier by documenting folders and adding preset materials for common surfaces.
