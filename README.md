@@ -7,7 +7,7 @@ The first version is intentionally simple:
 - A Blender add-on starts a local HTTP server inside Blender.
 - A bridge script sends JSON commands from the terminal or Codex workflow.
 - Commands execute through Blender's Python API.
-- Examples cover room creation and rig inspection.
+- Examples cover room creation, scene rendering, and rig inspection.
 
 ## Project Status
 
@@ -22,10 +22,13 @@ codex-blender/
   blender_addon/codex_blender_addon.py
   bridge/codex_blender_bridge.py
   examples/create_room.json
+  examples/render_scene.json
   examples/inspect_rig.json
 ```
 
 ## Setup
+
+### Blender
 
 1. Open Blender.
 2. Go to `Edit > Preferences > Add-ons > Install`.
@@ -39,6 +42,18 @@ By default the bridge listens on:
 ```text
 http://127.0.0.1:8765
 ```
+
+### Codex
+
+This repository includes a local MCP server in `.mcp.json`. When this plugin is enabled in Codex, it exposes tools for:
+
+- `blender_health`
+- `blender_create_room`
+- `blender_render_scene`
+- `blender_inspect_rig`
+- `blender_command`
+
+The Blender add-on still needs to be running before those tools can control Blender.
 
 ## Send A Command
 
@@ -54,6 +69,14 @@ On Windows PowerShell:
 python bridge\codex_blender_bridge.py examples\create_room.json
 ```
 
+Render the current Blender scene:
+
+```powershell
+python bridge\codex_blender_bridge.py examples\render_scene.json
+```
+
+Relative render outputs are resolved from the folder where the bridge command is run. From the project folder, `renders/room.png` writes to `codex-blender/renders/room.png`.
+
 ## Command Shape
 
 ```json
@@ -65,10 +88,11 @@ python bridge\codex_blender_bridge.py examples\create_room.json
 }
 ```
 
-Supported v0.1 actions:
+Supported v0.2 actions:
 
 - `ping`
 - `create_room`
+- `render_scene`
 - `inspect_rig`
 - `run_python`
 
@@ -82,4 +106,3 @@ Supported v0.1 actions:
 - Rigged model animation helpers.
 - Render automation.
 - MCP server integration for richer Codex tool calls.
-

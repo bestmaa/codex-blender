@@ -16,10 +16,11 @@ Use this skill for Blender automation through the local Codex Blender bridge.
 ## Workflow
 
 1. Clarify the Blender task only when required details are missing.
-2. Prefer structured JSON commands for supported actions.
-3. Use generated Blender Python only when a structured action is not enough.
-4. Save reusable command examples under `examples/`.
-5. For rigged models, first run `inspect_rig`, then generate animation against the discovered bone names.
+2. Prefer the `codex-blender` MCP tools when this plugin is enabled in Codex.
+3. Prefer structured JSON commands for supported actions when MCP tools are not available.
+4. Use generated Blender Python only when a structured action is not enough.
+5. Save reusable command examples under `examples/`.
+6. For rigged models, first run `inspect_rig`, then generate animation against the discovered bone names.
 
 ## Safety
 
@@ -60,6 +61,22 @@ Returns armature and bone names for the current Blender scene.
 }
 ```
 
+### render_scene
+
+Renders the current scene from the active camera to a PNG file.
+
+```json
+{
+  "action": "render_scene",
+  "params": {
+    "output": "renders/room.png",
+    "resolution": [1280, 720],
+    "samples": 32,
+    "timeout_seconds": 300
+  }
+}
+```
+
 ### run_python
 
 Runs trusted Blender Python.
@@ -72,4 +89,3 @@ Runs trusted Blender Python.
   }
 }
 ```
-

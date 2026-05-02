@@ -1,3 +1,12 @@
 {
-  "mcpServers": {}
+  "mcpServers": {
+    "codex-blender": {
+      "command": "python",
+      "args": ["scripts/codex_blender_mcp.py"],
+      "env": {
+        "BLENDER_BRIDGE_URL": "http://127.0.0.1:8765",
+        "BLENDER_OUTPUT_BASE_DIR": "\\\\wsl.localhost\\Ubuntu\\home\\aditya\\projects\\codex-blender"
+      }
+    }
+  }
 }

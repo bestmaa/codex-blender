@@ -21,7 +21,22 @@ def load_payload(value: str) -> dict:
     return json.loads(value)
 
 
-def send_command(payload: dict, url: str) -> dict:
+def normalize_render_output(payload: dict, base_dir: Path) -> dict:
+    if payload.get("action") != "render_scene":
+        return payload
+
+    params = payload.setdefault("params", {})
+    output = params.get("output")
+    if not isinstance(output, str) or not output or output.startswith("//"):
+        return payload
+
+    output_path = Path(output)
+    if not output_path.is_absolute():
+        params["output"] = str((base_dir / output_path).resolve())
+    return payload
+
+
+def send_command(payload: dict, url: str, timeout: int) -> dict:
     data = json.dumps(payload).encode("utf-8")
     request = urllib.request.Request(
         url,
@@ -29,7 +44,7 @@ def send_command(payload: dict, url: str) -> dict:
         headers={"Content-Type": "application/json"},
         method="POST",
     )
-    with urllib.request.urlopen(request, timeout=30) as response:
+    with urllib.request.urlopen(request, timeout=timeout) as response:
         return json.loads(response.read().decode("utf-8"))
 
 
@@ -37,10 +52,12 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Send a command to Blender.")
     parser.add_argument("payload", help="Path to a JSON command file, or inline JSON.")
     parser.add_argument("--url", default=DEFAULT_URL, help=f"Bridge URL. Default: {DEFAULT_URL}")
+    parser.add_argument("--timeout", type=int, default=300, help="Request timeout in seconds. Default: 300")
     args = parser.parse_args()
 
     try:
-        result = send_command(load_payload(args.payload), args.url)
+        payload = normalize_render_output(load_payload(args.payload), Path.cwd())
+        result = send_command(payload, args.url, args.timeout)
     except json.JSONDecodeError as exc:
         print(f"Invalid JSON: {exc}", file=sys.stderr)
         return 2
@@ -54,4 +71,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

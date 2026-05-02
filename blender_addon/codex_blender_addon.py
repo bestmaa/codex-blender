@@ -1,7 +1,7 @@
 bl_info = {
     "name": "Codex Blender Bridge",
     "author": "Aditya",
-    "version": (0, 1, 0),
+    "version": (0, 2, 0),
     "blender": (3, 6, 0),
     "location": "View3D > Sidebar > Codex",
     "description": "Local HTTP bridge for sending Codex commands to Blender.",
@@ -11,9 +11,11 @@ bl_info = {
 import contextlib
 import io
 import json
+import os
 import queue
 import threading
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from pathlib import Path
 
 import bpy
 from mathutils import Vector
@@ -21,6 +23,7 @@ from mathutils import Vector
 
 HOST = "127.0.0.1"
 PORT = 8765
+DEFAULT_COMMAND_TIMEOUT = 300
 
 _server = None
 _server_thread = None
@@ -132,6 +135,62 @@ def action_inspect_rig(_params):
     return make_result(True, armatures=armatures)
 
 
+def resolve_output_path(value):
+    output = value or "renders/render.png"
+    if not isinstance(output, str):
+        raise ValueError("params.output must be a string")
+
+    if output.startswith("//"):
+        path = Path(bpy.path.abspath(output))
+    else:
+        path = Path(output)
+        if not path.is_absolute():
+            path = Path(__file__).resolve().parents[1] / path
+
+    path.parent.mkdir(parents=True, exist_ok=True)
+    return path
+
+
+def set_resolution(params):
+    resolution = params.get("resolution", [1280, 720])
+    if (
+        not isinstance(resolution, list)
+        or len(resolution) != 2
+        or not all(isinstance(value, int) and value > 0 for value in resolution)
+    ):
+        raise ValueError("params.resolution must be [width, height] with positive integers")
+
+    bpy.context.scene.render.resolution_x = resolution[0]
+    bpy.context.scene.render.resolution_y = resolution[1]
+    bpy.context.scene.render.resolution_percentage = 100
+    return resolution
+
+
+def action_render_scene(params):
+    if bpy.context.scene.camera is None:
+        return make_result(False, error="Scene has no active camera")
+
+    output_path = resolve_output_path(params.get("output"))
+    resolution = set_resolution(params)
+    samples = params.get("samples")
+    if samples is not None:
+        if not isinstance(samples, int) or samples <= 0:
+            return make_result(False, error="params.samples must be a positive integer")
+        if bpy.context.scene.render.engine == "CYCLES":
+            bpy.context.scene.cycles.samples = samples
+
+    bpy.context.scene.render.filepath = os.fspath(output_path)
+    bpy.context.scene.render.image_settings.file_format = "PNG"
+    bpy.ops.render.render(write_still=True)
+
+    return make_result(
+        True,
+        message="Rendered scene.",
+        output=os.fspath(output_path),
+        resolution=resolution,
+    )
+
+
 def action_run_python(params):
     code = params.get("code", "")
     if not isinstance(code, str) or not code.strip():
@@ -154,6 +213,8 @@ def execute_command(payload):
         return action_create_room(params)
     if action == "inspect_rig":
         return action_inspect_rig(params)
+    if action == "render_scene":
+        return action_render_scene(params)
     if action == "run_python":
         return action_run_python(params)
     return make_result(False, error=f"Unsupported action: {action}")
@@ -197,7 +258,10 @@ class CodexRequestHandler(BaseHTTPRequestHandler):
 
         job = CommandJob(payload)
         _command_queue.put(job)
-        if not job.event.wait(timeout=30):
+        timeout = payload.get("params", {}).get("timeout_seconds", DEFAULT_COMMAND_TIMEOUT)
+        if not isinstance(timeout, (int, float)) or timeout <= 0:
+            timeout = DEFAULT_COMMAND_TIMEOUT
+        if not job.event.wait(timeout=timeout):
             self.send_json(504, make_result(False, error="Timed out waiting for Blender."))
             return
 
@@ -300,4 +364,3 @@ def unregister():
 
 if __name__ == "__main__":
     register()
-
