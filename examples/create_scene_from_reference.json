@@ -1,0 +1,43 @@
+{
+  "action": "create_scene_from_reference",
+  "params": {
+    "title": "warm living room reference",
+    "floor_color": [0.42, 0.33, 0.24, 1],
+    "floor_size": [8, 6, 0.08],
+    "objects": [
+      {
+        "name": "back wall",
+        "shape": "cube",
+        "location": [0, 3, 1.5],
+        "scale": [8, 0.12, 3],
+        "color": [0.72, 0.68, 0.60, 1],
+        "material": "warm wall"
+      },
+      {
+        "name": "green sofa",
+        "shape": "cube",
+        "location": [-1.4, 1.2, 0.45],
+        "scale": [2.6, 0.85, 0.5],
+        "color": [0.08, 0.28, 0.16, 1],
+        "material": "green fabric"
+      },
+      {
+        "name": "round planter",
+        "shape": "cylinder",
+        "location": [2.2, 1.0, 0.3],
+        "radius": 0.42,
+        "depth": 0.6,
+        "color": [0.12, 0.11, 0.10, 1],
+        "material": "ceramic planter"
+      },
+      {
+        "name": "indoor tree canopy",
+        "shape": "sphere",
+        "location": [2.2, 1.0, 2.0],
+        "scale": [0.85, 0.65, 0.55],
+        "color": [0.04, 0.32, 0.10, 1],
+        "material": "green leaves"
+      }
+    ]
+  }
+}

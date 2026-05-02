@@ -9,6 +9,7 @@ This is not a cloud connector. Blender runs locally on your machine.
 - Start and stop a local Blender bridge at `http://127.0.0.1:8765`.
 - Create a starter room scene.
 - Create an outdoor road scene with trees and street lights.
+- Create approximate scenes from structured reference-image plans.
 - Import local `.glb`, `.gltf`, `.fbx`, and `.obj` assets.
 - Render the current scene to PNG.
 - Save the current scene to `.blend`.
@@ -230,11 +231,12 @@ Save scene:
 
 ## Supported Actions
 
-Supported v0.7 actions:
+Supported v0.8 actions:
 
 - `ping`
 - `create_room`
 - `create_outdoor_scene`
+- `create_scene_from_reference`
 - `import_asset`
 - `render_scene`
 - `save_blend`
@@ -258,6 +260,7 @@ When connected as a Codex plugin/MCP server, it exposes:
 - `blender_health`
 - `blender_create_room`
 - `blender_create_outdoor_scene`
+- `blender_create_scene_from_reference`
 - `blender_import_asset`
 - `blender_render_scene`
 - `blender_save_blend`

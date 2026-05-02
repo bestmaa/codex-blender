@@ -124,6 +124,28 @@ Imports a local 3D asset. Supports `.glb`, `.gltf`, `.fbx`, and `.obj`.
 }
 ```
 
+### create_scene_from_reference
+
+Creates an approximate 3D scene from a structured plan inferred from a reference image.
+
+```json
+{
+  "action": "create_scene_from_reference",
+  "params": {
+    "title": "reference scene",
+    "objects": [
+      {
+        "name": "green sofa",
+        "shape": "cube",
+        "location": [-1.4, 1.2, 0.45],
+        "scale": [2.6, 0.85, 0.5],
+        "color": [0.08, 0.28, 0.16, 1]
+      }
+    ]
+  }
+}
+```
+
 ### run_python
 
 Runs trusted Blender Python.

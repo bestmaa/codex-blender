@@ -1,7 +1,7 @@
 bl_info = {
     "name": "Codex Blender Bridge",
     "author": "Aditya",
-    "version": (0, 7, 0),
+    "version": (0, 8, 0),
     "blender": (3, 6, 0),
     "location": "View3D > Sidebar > Codex",
     "description": "Local HTTP bridge for sending Codex commands to Blender.",
@@ -452,6 +452,98 @@ def action_import_asset(params):
     )
 
 
+def material_from_plan(cache, name, color):
+    key = name or json.dumps(color)
+    if key not in cache:
+        if not isinstance(color, list) or len(color) not in {3, 4}:
+            color = [0.7, 0.7, 0.7, 1.0]
+        if len(color) == 3:
+            color = color + [1.0]
+        cache[key] = create_material(name or "reference material", tuple(color), roughness=0.72)
+    return cache[key]
+
+
+def create_reference_primitive(item, material):
+    shape = item.get("shape", "cube")
+    name = item.get("name", shape)
+    location = get_vector(item, "location", [0, 0, 0])
+    rotation = get_vector(item, "rotation", [0, 0, 0])
+    scale = get_vector(item, "scale", [1, 1, 1])
+
+    if shape == "cube":
+        obj = create_cube(name, location, scale, material)
+    elif shape == "cylinder":
+        radius = get_number(item, "radius", 0.5, minimum=0.01)
+        depth = get_number(item, "depth", 1.0, minimum=0.01)
+        obj = create_cylinder(name, location, radius, depth, material, vertices=32)
+    elif shape == "cone":
+        radius1 = get_number(item, "radius1", 0.5, minimum=0.0)
+        radius2 = get_number(item, "radius2", 0.0, minimum=0.0)
+        depth = get_number(item, "depth", 1.0, minimum=0.01)
+        obj = create_cone(name, location, radius1, radius2, depth, material, vertices=32)
+    elif shape == "sphere":
+        bpy.ops.mesh.primitive_uv_sphere_add(segments=32, ring_count=16, radius=1, location=location)
+        obj = bpy.context.object
+        obj.name = name
+        obj.scale = scale
+        obj.data.materials.append(material)
+    else:
+        raise ValueError(f"Unsupported reference shape: {shape}")
+
+    obj.rotation_euler = rotation
+    return obj
+
+
+def action_create_scene_from_reference(params):
+    clear_scene()
+
+    title = params.get("title", "reference scene")
+    if not isinstance(title, str):
+        raise ValueError("params.title must be a string")
+
+    materials = {}
+    floor_mat = material_from_plan(materials, "reference floor", params.get("floor_color", [0.45, 0.43, 0.38, 1]))
+    floor_size = get_vector(params, "floor_size", [8, 6, 0.08])
+    create_cube("reference floor", (0, 0, -0.04), floor_size, floor_mat)
+
+    objects = params.get("objects", [])
+    if not isinstance(objects, list):
+        raise ValueError("params.objects must be a list")
+
+    created = []
+    for index, item in enumerate(objects):
+        if not isinstance(item, dict):
+            raise ValueError("each object in params.objects must be an object")
+        material = material_from_plan(
+            materials,
+            item.get("material", f"reference material {index + 1}"),
+            item.get("color", [0.7, 0.7, 0.7, 1]),
+        )
+        created.append(create_reference_primitive(item, material).name)
+
+    bpy.ops.object.light_add(type="AREA", location=(0, -3.2, 4.0), rotation=(math.radians(62), 0, 0))
+    key = bpy.context.object
+    key.name = "reference soft key light"
+    key.data.energy = get_number(params, "key_light_energy", 420, minimum=0)
+    key.data.size = 4.5
+
+    bpy.ops.object.light_add(type="SUN", location=(0, 0, 6), rotation=(math.radians(45), 0, math.radians(35)))
+    sun = bpy.context.object
+    sun.name = "reference sun light"
+    sun.data.energy = get_number(params, "sun_energy", 1.4, minimum=0)
+
+    camera_location = get_vector(params, "camera_location", [5.0, -5.0, 3.0])
+    camera_rotation = get_vector(params, "camera_rotation", [math.radians(60), 0, math.radians(42)])
+    bpy.ops.object.camera_add(location=camera_location, rotation=camera_rotation)
+    bpy.context.scene.camera = bpy.context.object
+    bpy.context.scene.world.color = tuple(params.get("world_color", [0.05, 0.055, 0.065]))
+    bpy.context.scene.render.engine = "CYCLES"
+    bpy.context.scene.cycles.samples = 64
+    bpy.context.scene.frame_set(1)
+
+    return make_result(True, message="Created scene from reference plan.", title=title, objects=created)
+
+
 def action_run_python(params):
     code = params.get("code", "")
     if not isinstance(code, str) or not code.strip():
@@ -482,6 +574,8 @@ def execute_command(payload):
         return action_save_blend(params)
     if action == "import_asset":
         return action_import_asset(params)
+    if action == "create_scene_from_reference":
+        return action_create_scene_from_reference(params)
     if action == "run_python":
         return action_run_python(params)
     return make_result(False, error=f"Unsupported action: {action}")

@@ -155,6 +155,25 @@ TOOLS = [
         ),
     },
     {
+        "name": "blender_create_scene_from_reference",
+        "description": "Create an approximate Blender scene from a structured reference-image scene plan.",
+        "inputSchema": json_schema(
+            {
+                "title": {"type": "string", "default": "reference scene"},
+                "floor_color": {"type": "array", "items": {"type": "number"}, "default": [0.45, 0.43, 0.38, 1]},
+                "floor_size": {"type": "array", "items": {"type": "number"}, "default": [8, 6, 0.08]},
+                "objects": {
+                    "type": "array",
+                    "description": "Primitive scene objects inferred from a reference image.",
+                    "items": {"type": "object"},
+                    "default": [],
+                },
+                "camera_location": {"type": "array", "items": {"type": "number"}, "default": [5, -5, 3]},
+                "camera_rotation": {"type": "array", "items": {"type": "number"}, "default": [1.0472, 0, 0.733]},
+            }
+        ),
+    },
+    {
         "name": "blender_inspect_rig",
         "description": "Return armature and bone names from the current Blender scene.",
         "inputSchema": json_schema({}),
@@ -245,6 +264,8 @@ def call_tool(name: str, arguments: dict[str, Any]) -> tuple[dict[str, Any], boo
             "scale": arguments.get("scale", 1.0),
         }
         result = call_http("/command", {"action": "import_asset", "params": params})
+    elif name == "blender_create_scene_from_reference":
+        result = call_http("/command", {"action": "create_scene_from_reference", "params": arguments})
     elif name == "blender_inspect_rig":
         result = call_http("/command", {"action": "inspect_rig"})
     elif name == "blender_command":
@@ -286,7 +307,7 @@ def handle_request(message: dict[str, Any]) -> dict[str, Any] | None:
             {
                 "protocolVersion": "2024-11-05",
                 "capabilities": {"tools": {}},
-                "serverInfo": {"name": "codex-blender", "version": "0.7.0"},
+                "serverInfo": {"name": "codex-blender", "version": "0.8.0"},
             },
         )
     if method == "tools/list":
