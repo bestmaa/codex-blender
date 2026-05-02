@@ -111,6 +111,12 @@ Expected response:
 
 Run commands from the project folder.
 
+For a complete smoke test, see:
+
+```text
+docs/quickstart-demo.md
+```
+
 Create a starter room:
 
 ```powershell
