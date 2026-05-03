@@ -39,6 +39,27 @@ Fix:
 
 If reload is not available, reinstall the latest add-on ZIP or source file.
 
+## Reading Error Responses
+
+Bridge failures return JSON with:
+
+```json
+{
+  "ok": false,
+  "error": "Object not found: table",
+  "errorType": "ObjectNotFound",
+  "hint": "Run inspect_scene first, then use the exact object name returned by Blender."
+}
+```
+
+Common `errorType` values:
+
+- `ObjectNotFound`: inspect the scene and use the exact object name.
+- `PathNotFound`: check that the model, texture, reference, render, export, or scene path exists.
+- `UnsupportedAction`: reload bridge code or install the latest add-on.
+- `UnsupportedAssetType`: use `.glb`, `.gltf`, `.fbx`, or `.obj`.
+- `InvalidParams`: check vector lengths, number ranges, booleans, and required strings.
+
 ## Texture Or Asset Path Not Found
 
 Symptom:

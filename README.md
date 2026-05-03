@@ -104,7 +104,7 @@ https://github.com/bestmaa/codex-blender/releases
 Download the current versioned ZIP, for example:
 
 ```text
-codex_blender_addon_v0.99.1.zip
+codex_blender_addon_v0.99.2.zip
 ```
 
 Or build it locally:
@@ -796,7 +796,7 @@ Save scene:
 
 ## Supported Actions
 
-Supported v0.99.1 pre-release actions:
+Supported v0.99.2 pre-release actions:
 
 - `ping`
 - `create_room`
@@ -902,6 +902,8 @@ If an action says `Unsupported action`:
 - Blender is running an older loaded copy of the add-on.
 - In development mode, click `Reload Bridge Code`.
 - For normal users, restart Blender or reinstall the updated add-on.
+
+If a command returns `ObjectNotFound`, run `inspect_scene` and copy the exact object name from the response. If a command returns `PathNotFound`, check that the file exists and prefer project-relative paths such as `assets/models/sample_pyramid.obj`, `assets/textures/oak_wood_basecolor.png`, or `assets/references/modern_table_reference.png`.
 
 If asset import fails:
 

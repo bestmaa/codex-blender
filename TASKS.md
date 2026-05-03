@@ -944,7 +944,7 @@ Commit:
 
 ### 41. v0.99.2 Error Response Polish
 
-Status: pending
+Status: completed
 
 Goal:
 Make bridge errors easier for users to understand.

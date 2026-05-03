@@ -1,7 +1,7 @@
 bl_info = {
     "name": "Codex Blender Bridge",
     "author": "Aditya",
-    "version": (0, 99, 1),
+    "version": (0, 99, 2),
     "blender": (3, 6, 0),
     "location": "View3D > Sidebar > Codex",
     "description": "Local HTTP bridge for sending Codex commands to Blender.",
@@ -43,6 +43,27 @@ def make_result(ok, **values):
     data = {"ok": ok}
     data.update(values)
     return data
+
+
+def make_error_result(exc):
+    message = str(exc)
+    error_type = type(exc).__name__
+    hint = None
+
+    if isinstance(exc, FileNotFoundError):
+        error_type = "PathNotFound"
+        hint = "Check that the path exists. Use project-relative paths like assets/models/file.obj, assets/textures/file.png, or assets/references/file.png."
+    elif isinstance(exc, ValueError):
+        error_type = "InvalidParams"
+        hint = "Check the command JSON params and retry."
+        if message.startswith("Object not found:") or message.startswith("Reference object not found:"):
+            error_type = "ObjectNotFound"
+            hint = "Run inspect_scene first, then use the exact object name returned by Blender."
+        elif message.startswith("Unsupported asset type:"):
+            error_type = "UnsupportedAssetType"
+            hint = "Use a supported model type: .glb, .gltf, .fbx, or .obj."
+
+    return make_result(False, error=message, errorType=error_type, hint=hint)
 
 
 def get_addon_preferences():
@@ -1379,14 +1400,24 @@ def action_set_render_preset(params):
 
 def action_render_scene(params):
     if bpy.context.scene.camera is None:
-        return make_result(False, error="Scene has no active camera")
+        return make_result(
+            False,
+            error="Scene has no active camera",
+            errorType="CameraNotFound",
+            hint="Create a scene first or run setup_reference_camera before rendering.",
+        )
 
     output_path = resolve_output_path(params.get("output"))
     resolution = set_resolution(params)
     samples = params.get("samples")
     if samples is not None:
         if not isinstance(samples, int) or samples <= 0:
-            return make_result(False, error="params.samples must be a positive integer")
+            return make_result(
+                False,
+                error="params.samples must be a positive integer",
+                errorType="InvalidParams",
+                hint="Set params.samples to a positive integer such as 32 or 64.",
+            )
         if bpy.context.scene.render.engine == "CYCLES":
             bpy.context.scene.cycles.samples = samples
 
@@ -1493,7 +1524,12 @@ def action_import_asset(params):
     elif suffix == ".obj":
         import_obj(path)
     else:
-        return make_result(False, error=f"Unsupported asset type: {suffix}")
+        return make_result(
+            False,
+            error=f"Unsupported asset type: {suffix}",
+            errorType="UnsupportedAssetType",
+            hint="Use a supported model type: .glb, .gltf, .fbx, or .obj.",
+        )
 
     imported = [obj for obj in bpy.data.objects if obj not in before]
     set_import_transform(imported, location, rotation, scale)
@@ -2203,7 +2239,7 @@ def execute_command(payload):
         False,
         error=f"Unsupported action: {action}",
         errorType="UnsupportedAction",
-        hint="Reload the bridge code or install the latest add-on if this action was added recently.",
+        hint="Check the action name. Reload the bridge code or install the latest add-on if this action was added recently.",
     )
 
 
@@ -2217,7 +2253,7 @@ def process_queued_commands():
         try:
             job.result = execute_command(job.payload)
         except Exception as exc:
-            job.result = make_result(False, error=str(exc), errorType=type(exc).__name__)
+            job.result = make_error_result(exc)
         finally:
             job.event.set()
 
