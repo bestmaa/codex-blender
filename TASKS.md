@@ -1008,7 +1008,7 @@ Commit:
 
 ### 44. v0.99.5 Skill Workflow Audit
 
-Status: pending
+Status: completed
 
 Goal:
 Ensure the installed Blender skill tells Codex how to use all stable workflows.

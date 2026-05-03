@@ -23,6 +23,36 @@ Use this skill for Blender automation through the local Codex Blender bridge.
 6. For rigged models, first run `inspect_rig`, then generate animation against the discovered bone names.
 7. After add-on code changes, enable `Developer Mode` and use Blender's `Reload Bridge Code` button before testing new actions.
 
+## Common Workflows
+
+### Inspect And Edit Existing Scenes
+
+Run `inspect_scene` before changing an existing object. Use the exact object name from the response for `transform_object`, `duplicate_object`, `animate_object`, `apply_texture_material`, or `apply_material_preset`.
+
+### Reference Image Matching
+
+When the user gives or asks for a reference image workflow:
+
+1. Put the image under `assets/references/`.
+2. Add it with `add_reference_image`.
+3. Create or import the rough model.
+4. Use `setup_reference_camera` or `setup_compare_view`.
+5. Render, compare, adjust geometry/materials, and repeat.
+
+Use `create_scene_from_reference` only when there is a structured scene plan; it is an approximation workflow, not automatic perfect image-to-3D conversion.
+
+### Texture Workflow
+
+Put texture files under `assets/textures/`. Use `apply_texture_material` for user-provided images and multi-map materials. Use `texture_scale`, `texture_offset`, `texture_rotation`, and `projection` when the image placement needs tuning. Use `apply_material_preset` for fast built-in materials when no custom image texture is needed.
+
+### Import, Fit, And Export
+
+Put importable models under `assets/models/`. Use `import_asset`, then `fit_object_to_bounds` if the imported object is too large, too small, or not aligned to the floor. Use `export_glb` for reusable scene/model exchange and `export_obj` when a simple mesh export is enough.
+
+### Render And Save
+
+Use `set_render_preset` before `render_scene` when speed or quality matters. Use `save_blend` after creating or editing a useful scene.
+
 ## MCP Tool Use
 
 MCP tools use the `blender_` prefix, while raw bridge actions use the action names below. Prefer the specific MCP tool when one exists, for example `blender_create_table_model` instead of the generic `blender_command`.
