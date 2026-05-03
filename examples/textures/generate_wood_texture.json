@@ -1,0 +1,7 @@
+{
+  "kind": "wood",
+  "output": "assets/textures/generated/procedural_wood_basecolor.png",
+  "width": 512,
+  "height": 512,
+  "seed": 71
+}

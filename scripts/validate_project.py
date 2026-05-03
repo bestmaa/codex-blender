@@ -27,6 +27,7 @@ REQUIRED_FILES = [
     "scripts/image_to_3d_adapters.py",
     "scripts/run_image_to_3d_job.py",
     "scripts/run_image_to_3d_import_workflow.py",
+    "scripts/generate_procedural_texture.py",
     "scripts/package_addon.py",
     "scripts/smoke_test_bridge.py",
     "scripts/smoke_test_blendermcp.py",
@@ -82,6 +83,7 @@ REQUIRED_FILES = [
     "examples/image-to-3d/local_provider_job.json",
     "examples/image-to-3d/cloud_placeholder_job.json",
     "examples/image-to-3d/mock_import_workflow_job.json",
+    "examples/textures/generate_wood_texture.json",
     "docs/quickstart-demo.md",
     "docs/commands.md",
     "docs/mcp-tools.md",
@@ -105,6 +107,7 @@ PYTHON_FILES = [
     "scripts/image_to_3d_adapters.py",
     "scripts/run_image_to_3d_job.py",
     "scripts/run_image_to_3d_import_workflow.py",
+    "scripts/generate_procedural_texture.py",
     "scripts/package_addon.py",
     "scripts/smoke_test_bridge.py",
     "scripts/smoke_test_blendermcp.py",
@@ -120,6 +123,7 @@ JSON_FILES = [
     "examples/image-to-3d/local_provider_job.json",
     "examples/image-to-3d/cloud_placeholder_job.json",
     "examples/image-to-3d/mock_import_workflow_job.json",
+    "examples/textures/generate_wood_texture.json",
     "examples/create_room.json",
     "examples/create_outdoor_scene.json",
     "examples/render_outdoor_scene.json",
@@ -529,6 +533,38 @@ def check_image_to_3d_import_workflow() -> None:
             raise AssertionError(f"Image-to-3D import workflow missing planned action: {action}")
 
 
+def check_procedural_texture_generator() -> None:
+    output = project_path("assets/textures/generated/validation_noise.png")
+    if output.exists():
+        output.unlink()
+    completed = subprocess.run(
+        [
+            sys.executable,
+            str(project_path("scripts/generate_procedural_texture.py")),
+            "noise",
+            str(output),
+            "--width",
+            "16",
+            "--height",
+            "16",
+            "--seed",
+            "151",
+        ],
+        cwd=ROOT,
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        check=False,
+    )
+    if completed.returncode != 0:
+        raise AssertionError(f"Procedural texture generator failed: {completed.stderr}")
+    if not output.exists():
+        raise AssertionError("Procedural texture generator did not create output")
+    if output.read_bytes()[:8] != b"\x89PNG\r\n\x1a\n":
+        raise AssertionError("Procedural texture generator output is not a PNG")
+    output.unlink()
+
+
 def check_mcp_tool_coverage() -> None:
     mcp_source = project_path("scripts/codex_blender_mcp.py").read_text(encoding="utf-8")
     declared_tools = set(re.findall(r'"name": "(blender_[^"]+)"', mcp_source))
@@ -629,6 +665,7 @@ def main() -> int:
         ("image-to-3D provider stub", check_image_to_3d_provider_stub),
         ("cloud image-to-3D adapter", check_cloud_image_to_3d_adapter),
         ("image-to-3D import workflow", check_image_to_3d_import_workflow),
+        ("procedural texture generator", check_procedural_texture_generator),
         ("MCP tool coverage", check_mcp_tool_coverage),
         ("repository hygiene", check_repository_hygiene),
         ("package ZIP", check_package_zip),

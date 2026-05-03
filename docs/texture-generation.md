@@ -62,6 +62,22 @@ Offline/manual textures:
 - Use external tools such as Blender, Krita, GIMP, Material Maker, or Substance workflows outside this repository.
 - Save finished maps into `assets/textures/`.
 
+Local procedural textures:
+
+```powershell
+python scripts\generate_procedural_texture.py wood assets\textures\generated\procedural_wood_basecolor.png --width 512 --height 512 --seed 71
+```
+
+Supported local texture kinds:
+
+- `wood`
+- `fabric`
+- `stone`
+- `noise`
+- `stripes`
+
+The generator writes PNG basecolor textures and uses only Python's standard library. Use it for blockout materials, quick reference matching, or creating a starting image before manual editing.
+
 Cloud or AI-generated textures:
 
 - Use explicit user configuration before uploading any source image.
