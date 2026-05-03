@@ -138,6 +138,12 @@ For a complete smoke test, see:
 docs/quickstart-demo.md
 ```
 
+For image/reference matching, see:
+
+```text
+docs/reference-workflow.md
+```
+
 Create a starter room:
 
 ```powershell

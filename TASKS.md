@@ -563,7 +563,7 @@ Commit:
 
 ### 23. v0.34 Reference Workflow Documentation
 
-Status: pending
+Status: completed
 
 Goal:
 Document a repeatable workflow for image-to-model work.
