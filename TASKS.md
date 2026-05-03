@@ -675,7 +675,7 @@ Commit:
 
 ### 28. v0.39 Pre-Beta Cleanup
 
-Status: pending
+Status: completed
 
 Goal:
 Prepare for beta stabilization.

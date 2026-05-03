@@ -68,6 +68,8 @@ Use these folders by convention:
 
 Stable JSON commands live directly under `examples/` and are covered by `scripts/validate_project.py`. One-off local experiments can be kept in `examples/dev/`, which is ignored by Git except for its README.
 
+Stable reference images used by examples or docs live directly under `assets/references/`. One-off visual references can be kept in `assets/references/dev/`, which is ignored by Git except for its README.
+
 ## Install The Blender Add-On
 
 ### From Source

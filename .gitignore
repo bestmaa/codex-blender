@@ -11,3 +11,5 @@ scenes/
 exports/
 examples/dev/*
 !examples/dev/README.md
+assets/references/dev/*
+!assets/references/dev/README.md
