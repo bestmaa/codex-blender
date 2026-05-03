@@ -345,6 +345,18 @@ TOOLS = [
         ),
     },
     {
+        "name": "blender_list_procedural_catalog",
+        "description": "List procedural asset categories, presets, common params, and example files.",
+        "inputSchema": json_schema(
+            {
+                "category": {
+                    "type": "string",
+                    "description": "Optional category filter: primitive, furniture, architecture, or outdoor.",
+                },
+            }
+        ),
+    },
+    {
         "name": "blender_list_assets",
         "description": "List local assets from assets/models, assets/textures, and assets/references.",
         "inputSchema": json_schema(
@@ -1017,6 +1029,11 @@ def call_tool(name: str, arguments: dict[str, Any]) -> tuple[dict[str, Any], boo
             "style": arguments.get("style", "clean_modern"),
         }
         result = call_http("/command", {"action": "create_room_layout", "params": params})
+    elif name == "blender_list_procedural_catalog":
+        params = {}
+        if "category" in arguments:
+            params["category"] = arguments.get("category")
+        result = call_http("/command", {"action": "list_procedural_catalog", "params": params})
     elif name == "blender_list_assets":
         params = {
             "type": arguments.get("type"),
@@ -1207,7 +1224,7 @@ def handle_request(message: dict[str, Any]) -> dict[str, Any] | None:
             {
                 "protocolVersion": "2024-11-05",
                 "capabilities": {"tools": {}},
-                "serverInfo": {"name": "codex-blender", "version": "1.2.3"},
+                "serverInfo": {"name": "codex-blender", "version": "1.2.4"},
             },
         )
     if method == "tools/list":

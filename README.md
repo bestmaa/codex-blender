@@ -23,6 +23,7 @@ It cannot turn any arbitrary image into a perfect production 3D model by itself.
 - Create reusable procedural primitives such as beveled boxes, panels, glass panels, cylinders, cones, planes, spheres, and labels.
 - Create procedural furniture presets such as shelves, cabinets, desks, beds, doors, windows, and wall art.
 - Create procedural architecture presets such as walls with openings, floor tiles, ceiling panels, stairs, railings, and facades.
+- List procedural asset categories, presets, params, and examples.
 - Create a composed furniture set scene.
 - Create reusable room layout presets.
 - List local model, texture, and reference assets.
@@ -107,7 +108,7 @@ https://github.com/bestmaa/codex-blender/releases
 Download the current versioned ZIP, for example:
 
 ```text
-codex_blender_addon_v1.2.3.zip
+codex_blender_addon_v1.2.4.zip
 ```
 
 Or build it locally:
@@ -216,6 +217,7 @@ python bridge\codex_blender_bridge.py examples\render_outdoor_scene.json
 python bridge\codex_blender_bridge.py examples\create_primitive_library.json
 python bridge\codex_blender_bridge.py examples\create_furniture_presets.json
 python bridge\codex_blender_bridge.py examples\create_architecture_presets.json
+python bridge\codex_blender_bridge.py examples\list_procedural_catalog.json
 python bridge\codex_blender_bridge.py examples\create_furniture_set.json
 python bridge\codex_blender_bridge.py examples\add_reference_image.json
 python bridge\codex_blender_bridge.py examples\setup_compare_view.json
@@ -307,6 +309,12 @@ Create procedural architecture presets:
 
 ```powershell
 python bridge\codex_blender_bridge.py examples\create_architecture_presets.json
+```
+
+List procedural catalog:
+
+```powershell
+python bridge\codex_blender_bridge.py examples\list_procedural_catalog.json
 ```
 
 Create a modern chair model:
@@ -866,7 +874,7 @@ Save scene:
 
 ## Supported Actions
 
-Supported v1.2.3 actions:
+Supported v1.2.4 actions:
 
 - `ping`
 - `create_room`
@@ -875,6 +883,7 @@ Supported v1.2.3 actions:
 - `create_primitive`
 - `create_furniture_preset`
 - `create_architecture_preset`
+- `list_procedural_catalog`
 - `create_chair_model`
 - `create_sofa_model`
 - `create_plant_model`
@@ -923,6 +932,7 @@ When connected as a Codex plugin/MCP server, it exposes:
 - `blender_create_primitive`
 - `blender_create_furniture_preset`
 - `blender_create_architecture_preset`
+- `blender_list_procedural_catalog`
 - `blender_create_chair_model`
 - `blender_create_sofa_model`
 - `blender_create_plant_model`

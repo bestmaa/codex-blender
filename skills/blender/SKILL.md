@@ -49,6 +49,8 @@ Use `create_furniture_preset` when the user asks for common room objects such as
 
 Use `create_architecture_preset` when the user asks for room or building details such as walls with openings, floor tiles, ceiling panels, stairs, railings, or facade elements.
 
+Use `list_procedural_catalog` when you need to discover available procedural categories, presets, common params, and example files before choosing a creation action.
+
 ### Texture Workflow
 
 Put texture files under `assets/textures/`. Use `apply_texture_material` for user-provided images and multi-map materials. Use `texture_scale`, `texture_offset`, `texture_rotation`, and `projection` when the image placement needs tuning. Use `apply_material_preset` for fast built-in materials when no custom image texture is needed.
@@ -212,6 +214,17 @@ Creates one or more procedural architecture presets. Supported presets include `
     "wall_color": [0.76, 0.76, 0.72, 1],
     "trim_color": [0.92, 0.90, 0.84, 1]
   }
+}
+```
+
+### list_procedural_catalog
+
+Lists procedural categories, supported presets, common params, and example files. Use optional `category` to filter to `primitive`, `furniture`, `architecture`, or `outdoor`.
+
+```json
+{
+  "action": "list_procedural_catalog",
+  "params": {}
 }
 ```
 

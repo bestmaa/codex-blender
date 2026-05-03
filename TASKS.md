@@ -1338,7 +1338,7 @@ Commit:
 
 ### 60. v1.2.4 Procedural Library Catalog
 
-Status: pending
+Status: completed
 
 Goal:
 Make procedural assets discoverable from Codex and terminal.

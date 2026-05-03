@@ -1,7 +1,7 @@
 bl_info = {
     "name": "Codex Blender Bridge",
     "author": "Aditya",
-    "version": (1, 2, 3),
+    "version": (1, 2, 4),
     "blender": (3, 6, 0),
     "location": "View3D > Sidebar > Codex",
     "description": "Local HTTP bridge for sending Codex commands to Blender.",
@@ -1802,6 +1802,48 @@ def action_create_architecture_preset(params):
     return make_result(True, message="Created procedural architecture presets.", objects=created, count=len(created))
 
 
+def action_list_procedural_catalog(params):
+    category_filter = params.get("category")
+    if category_filter is not None and not isinstance(category_filter, str):
+        raise ValueError("params.category must be a string")
+
+    catalog = [
+        {
+            "category": "primitive",
+            "action": "create_primitive",
+            "presets": ["beveled_box", "box", "cube", "panel", "glass_panel", "cylinder", "cone", "sphere", "plane", "label"],
+            "common_params": ["name", "location", "rotation", "dimensions", "color", "material_name", "bevel", "radius", "depth", "size", "text"],
+            "example": "examples/create_primitive_library.json",
+        },
+        {
+            "category": "furniture",
+            "action": "create_furniture_preset",
+            "presets": ["shelf", "cabinet", "desk", "bed", "door", "window", "wall_art"],
+            "common_params": ["name", "location", "width", "depth", "height", "thickness", "wood_color", "accent_color", "fabric_color", "glass_color"],
+            "example": "examples/create_furniture_presets.json",
+        },
+        {
+            "category": "architecture",
+            "action": "create_architecture_preset",
+            "presets": ["wall_opening", "floor_tiles", "ceiling_panels", "stairs", "railing", "facade"],
+            "common_params": ["name", "location", "width", "depth", "height", "thickness", "wall_color", "trim_color", "floor_color", "glass_color", "accent_color"],
+            "example": "examples/create_architecture_presets.json",
+        },
+        {
+            "category": "outdoor",
+            "action": "create_outdoor_scene",
+            "presets": ["road", "sidewalk", "curb", "road_markings", "bench", "sign", "bush", "rock", "varied_tree", "street_light"],
+            "common_params": ["road_length", "road_width", "density", "tree_count", "street_light_count", "bench_count", "sign_count", "bush_count", "rock_count", "sidewalk_width", "style"],
+            "example": "examples/create_outdoor_scene.json",
+        },
+    ]
+    if category_filter:
+        selected = [item for item in catalog if item["category"] == category_filter.lower()]
+    else:
+        selected = catalog
+    return make_result(True, message="Listed procedural catalog.", categories=selected, count=len(selected))
+
+
 def set_resolution(params):
     resolution = params.get("resolution", [1280, 720])
     if (
@@ -2672,6 +2714,8 @@ def execute_command(payload):
         return action_create_furniture_preset(params)
     if action == "create_architecture_preset":
         return action_create_architecture_preset(params)
+    if action == "list_procedural_catalog":
+        return action_list_procedural_catalog(params)
     if action == "create_chair_model":
         return action_create_chair_model(params)
     if action == "create_sofa_model":

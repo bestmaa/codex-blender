@@ -29,6 +29,7 @@ Successful responses always include `"ok": true`. Failed responses include `"ok"
 | `create_furniture_set` | `table_length=3.2`, `table_width=1.55`, `chair_count=4`, `include_plant=true`, `include_lamp=true`, `style="compact_dining"` | `{ok, message, style, table_length, table_width, chair_count, include_plant, include_lamp}` |
 | `create_room_layout` | `preset="living_room"`, `style="clean_modern"`; presets: `studio`, `living_room`, `office`, `gallery` | `{ok, message, preset, style}` |
 | `create_scene_from_reference` | `title="reference scene"`, optional `floor_color`, `wall_color`, `camera_location`, `target`, `objects=[]` | `{ok, message, title, objects}` |
+| `list_procedural_catalog` | optional `category`: `primitive`, `furniture`, `architecture`, or `outdoor` | `{ok, message, categories, count}` |
 
 ## Reusable Models
 
