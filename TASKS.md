@@ -988,7 +988,7 @@ Commit:
 
 ### 43. v0.99.4 MCP Tool Audit
 
-Status: pending
+Status: completed
 
 Goal:
 Ensure MCP tools match stable bridge actions.

@@ -173,6 +173,12 @@ For the stable JSON command schema, see:
 docs/commands.md
 ```
 
+For MCP tool coverage and raw-command notes, see:
+
+```text
+docs/mcp-tools.md
+```
+
 For common local setup and runtime issues, see:
 
 ```text
@@ -802,7 +808,7 @@ Save scene:
 
 ## Supported Actions
 
-Supported v0.99.3 pre-release actions:
+Supported v0.99.4 pre-release actions:
 
 - `ping`
 - `create_room`

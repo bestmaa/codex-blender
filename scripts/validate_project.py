@@ -57,6 +57,7 @@ REQUIRED_FILES = [
     "assets/models/sample_pyramid.obj",
     "docs/quickstart-demo.md",
     "docs/commands.md",
+    "docs/mcp-tools.md",
     "docs/reference-workflow.md",
     "docs/troubleshooting.md",
     "docs/windows-paths.md",
@@ -249,6 +250,32 @@ def check_bridge_path_normalization() -> None:
             raise AssertionError(f"Input path was not normalized for {action}")
 
 
+def check_mcp_tool_coverage() -> None:
+    mcp_source = project_path("scripts/codex_blender_mcp.py").read_text(encoding="utf-8")
+    declared_tools = set(re.findall(r'"name": "(blender_[^"]+)"', mcp_source))
+    handled_tools = set()
+    for match in re.findall(r'(?:if|elif) name == "(blender_[^"]+)"', mcp_source):
+        handled_tools.add(match)
+
+    missing_handlers = sorted(declared_tools - handled_tools)
+    if missing_handlers:
+        raise AssertionError("MCP tools missing handlers: " + ", ".join(missing_handlers))
+
+    if "blender_command" not in declared_tools:
+        raise AssertionError("MCP raw command tool is missing")
+
+    action_to_tool = {"ping": "blender_health"}
+    raw_only_actions = {"run_python"}
+    for action in sorted(get_supported_actions()):
+        if action in raw_only_actions:
+            if action not in project_path("docs/mcp-tools.md").read_text(encoding="utf-8"):
+                raise AssertionError(f"Raw-only MCP action is not documented: {action}")
+            continue
+        tool_name = action_to_tool.get(action, f"blender_{action}")
+        if tool_name not in declared_tools:
+            raise AssertionError(f"MCP tool missing for action {action}: expected {tool_name}")
+
+
 def check_package_zip() -> None:
     from package_addon import package_addon, read_version
 
@@ -280,6 +307,7 @@ def main() -> int:
         ("skill actions", check_skill_actions),
         ("README paths", check_readme_paths),
         ("bridge path normalization", check_bridge_path_normalization),
+        ("MCP tool coverage", check_mcp_tool_coverage),
         ("package ZIP", check_package_zip),
     ]
 
