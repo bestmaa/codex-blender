@@ -1414,7 +1414,7 @@ Commit:
 
 ### 64. v1.3.3 Asset Preview And Metadata Docs
 
-Status: pending
+Status: completed
 
 Goal:
 Document how users should add their own models, textures, and previews.
