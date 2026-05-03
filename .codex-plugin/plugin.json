@@ -1,6 +1,6 @@
 {
   "name": "codex-blender",
-  "version": "0.98.0",
+  "version": "0.98.5",
   "description": "Local Codex plugin scaffold for controlling Blender through scripts and a localhost bridge.",
   "author": {
     "name": "Aditya",

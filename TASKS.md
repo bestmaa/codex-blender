@@ -877,7 +877,7 @@ Commit:
 
 ### 38. v0.98.5 Final Smoke Test Matrix
 
-Status: pending
+Status: completed
 
 Goal:
 Define and run the final smoke test matrix before the v0.99 sequence.

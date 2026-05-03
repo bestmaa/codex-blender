@@ -59,6 +59,7 @@ REQUIRED_FILES = [
     "docs/troubleshooting.md",
     "docs/release-packaging.md",
     "docs/demo-assets.md",
+    "docs/smoke-test-matrix.md",
 ]
 
 PYTHON_FILES = [
