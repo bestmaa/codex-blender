@@ -56,6 +56,7 @@ REQUIRED_FILES = [
     "examples/inspect_rig.json",
     "assets/models/sample_pyramid.obj",
     "docs/quickstart-demo.md",
+    "docs/commands.md",
     "docs/reference-workflow.md",
     "docs/troubleshooting.md",
     "docs/windows-paths.md",

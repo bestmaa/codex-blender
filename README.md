@@ -167,6 +167,12 @@ For image/reference matching, see:
 docs/reference-workflow.md
 ```
 
+For the stable JSON command schema, see:
+
+```text
+docs/commands.md
+```
+
 For common local setup and runtime issues, see:
 
 ```text
@@ -796,7 +802,7 @@ Save scene:
 
 ## Supported Actions
 
-Supported v0.99.2 pre-release actions:
+Supported v0.99.3 pre-release actions:
 
 - `ping`
 - `create_room`

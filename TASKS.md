@@ -968,7 +968,7 @@ Commit:
 
 ### 42. v0.99.3 Command Schema Documentation
 
-Status: pending
+Status: completed
 
 Goal:
 Document the stable bridge command schema before v1.
