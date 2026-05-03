@@ -1736,7 +1736,7 @@ Commit:
 
 ### 81. v1.7.3 Publish GitHub Release
 
-Status: pending
+Status: completed
 
 Goal:
 Publish GitHub release only when the user explicitly confirms.
