@@ -158,6 +158,12 @@ For release ZIP packaging, see:
 docs/release-packaging.md
 ```
 
+For beta release notes, see:
+
+```text
+docs/beta-release-notes.md
+```
+
 Create a starter room:
 
 ```powershell
@@ -733,7 +739,7 @@ Save scene:
 
 ## Supported Actions
 
-Supported v0.20 actions:
+Supported v0.90.0 beta actions:
 
 - `ping`
 - `create_room`

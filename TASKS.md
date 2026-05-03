@@ -695,7 +695,7 @@ Commit:
 
 ### 29. v0.90 Beta Release
 
-Status: pending
+Status: completed
 
 Goal:
 Mark the project as beta after core workflows are stable.
