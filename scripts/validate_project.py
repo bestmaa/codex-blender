@@ -60,6 +60,7 @@ REQUIRED_FILES = [
     "docs/quickstart-demo.md",
     "docs/commands.md",
     "docs/mcp-tools.md",
+    "docs/blendermcp-compatibility.md",
     "docs/reference-workflow.md",
     "docs/troubleshooting.md",
     "docs/windows-paths.md",

@@ -104,7 +104,7 @@ https://github.com/bestmaa/codex-blender/releases
 Download the current versioned ZIP, for example:
 
 ```text
-codex_blender_addon_v1.0.0.zip
+codex_blender_addon_v1.1.0.zip
 ```
 
 Or build it locally:
@@ -183,6 +183,12 @@ For MCP tool coverage and raw-command notes, see:
 
 ```text
 docs/mcp-tools.md
+```
+
+For BlenderMCP compatibility planning, see:
+
+```text
+docs/blendermcp-compatibility.md
 ```
 
 For common local setup and runtime issues, see:
@@ -832,7 +838,7 @@ Save scene:
 
 ## Supported Actions
 
-Supported v1.0.0 actions:
+Supported v1.1.0 actions:
 
 - `ping`
 - `create_room`

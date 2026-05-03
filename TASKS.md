@@ -1183,7 +1183,7 @@ Commit:
 
 ### 52. v1.1.0 BlenderMCP Compatibility Research
 
-Status: pending
+Status: completed
 
 Goal:
 Define what "BlenderMCP-compatible" means for this project before writing adapters.
