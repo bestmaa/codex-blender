@@ -105,6 +105,7 @@ REQUIRED_FILES = [
     "docs/troubleshooting.md",
     "docs/windows-paths.md",
     "docs/release-packaging.md",
+    "docs/github-release.md",
     "docs/release-notes-v1.md",
     "docs/known-limitations.md",
     "docs/demo-assets.md",
