@@ -109,7 +109,7 @@ https://github.com/bestmaa/codex-blender/releases
 Download the current versioned ZIP, for example:
 
 ```text
-codex_blender_addon_v1.3.1.zip
+codex_blender_addon_v1.3.2.zip
 ```
 
 Or build it locally:
@@ -220,6 +220,7 @@ python bridge\codex_blender_bridge.py examples\create_furniture_presets.json
 python bridge\codex_blender_bridge.py examples\create_architecture_presets.json
 python bridge\codex_blender_bridge.py examples\list_procedural_catalog.json
 python bridge\codex_blender_bridge.py examples\search_assets.json
+python bridge\codex_blender_bridge.py examples\import_asset_from_library.json
 python bridge\codex_blender_bridge.py examples\create_furniture_set.json
 python bridge\codex_blender_bridge.py examples\add_reference_image.json
 python bridge\codex_blender_bridge.py examples\setup_compare_view.json
@@ -366,6 +367,7 @@ List local assets:
 ```powershell
 python bridge\codex_blender_bridge.py examples\list_assets.json
 python bridge\codex_blender_bridge.py examples\search_assets.json
+python bridge\codex_blender_bridge.py examples\import_asset_from_library.json
 ```
 
 Fit the sample imported asset:
@@ -883,7 +885,7 @@ Save scene:
 
 ## Supported Actions
 
-Supported v1.3.1 actions:
+Supported v1.3.2 actions:
 
 - `ping`
 - `create_room`
@@ -916,6 +918,7 @@ Supported v1.3.1 actions:
 - `export_obj`
 - `create_scene_from_reference`
 - `import_asset`
+- `import_asset_from_library`
 - `render_scene`
 - `save_blend`
 - `inspect_rig`
@@ -966,6 +969,7 @@ When connected as a Codex plugin/MCP server, it exposes:
 - `blender_export_obj`
 - `blender_create_scene_from_reference`
 - `blender_import_asset`
+- `blender_import_asset_from_library`
 - `blender_render_scene`
 - `blender_save_blend`
 - `blender_inspect_rig`

@@ -59,7 +59,7 @@ Put texture files under `assets/textures/`. Use `apply_texture_material` for use
 
 Put importable models under `assets/models/`. Use `import_asset`, then `fit_object_to_bounds` if the imported object is too large, too small, or not aligned to the floor. Use `export_glb` for reusable scene/model exchange and `export_obj` when a simple mesh export is enough.
 
-Use `assets/library.json` as the stable local asset manifest. It records searchable names, types, tags, paths, preview paths, license/source notes, and scale hints for models, textures, and references. Use `search_assets` to find manifest entries by query, type, tag, or extension.
+Use `assets/library.json` as the stable local asset manifest. It records searchable names, types, tags, paths, preview paths, license/source notes, and scale hints for models, textures, and references. Use `search_assets` to find manifest entries by query, type, tag, or extension. Use `import_asset_from_library` when importing a model listed in the manifest.
 
 ### Render And Save
 
@@ -368,6 +368,24 @@ Searches the stable `assets/library.json` manifest by query, type, tag, and exte
     "type": "texture",
     "extension": "png",
     "limit": 10
+  }
+}
+```
+
+### import_asset_from_library
+
+Imports a model by library `id`, `name`, or `query`, applies manifest scale hints, and optionally fits it to bounds.
+
+```json
+{
+  "action": "import_asset_from_library",
+  "params": {
+    "id": "sample_pyramid_obj",
+    "location": [0, 0, 0],
+    "fit_to_bounds": true,
+    "target_size": [1.5, 1.5, 1.5],
+    "target_location": [0, 0, 0],
+    "align_to_floor": true
   }
 }
 ```

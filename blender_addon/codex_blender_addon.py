@@ -1,7 +1,7 @@
 bl_info = {
     "name": "Codex Blender Bridge",
     "author": "Aditya",
-    "version": (1, 3, 1),
+    "version": (1, 3, 2),
     "blender": (3, 6, 0),
     "location": "View3D > Sidebar > Codex",
     "description": "Local HTTP bridge for sending Codex commands to Blender.",
@@ -2128,6 +2128,69 @@ def action_import_asset(params):
     )
 
 
+def find_library_asset(params):
+    asset_id = params.get("id")
+    name = params.get("name")
+    query = params.get("query")
+    identifier = asset_id or name or query
+    if not isinstance(identifier, str) or not identifier.strip():
+        raise ValueError("params.id, params.name, or params.query must be a non-empty string")
+    wanted = identifier.strip().lower()
+    for asset in read_asset_library():
+        haystack = {
+            asset.get("id", "").lower(),
+            asset.get("name", "").lower(),
+        }
+        if wanted in haystack:
+            return asset
+    matches = action_search_assets({"query": identifier, "limit": 1}).get("assets", [])
+    if matches:
+        return matches[0]
+    raise ValueError(f"Asset not found in library: {identifier}")
+
+
+def action_import_asset_from_library(params):
+    asset = find_library_asset(params)
+    if asset.get("type") != "model":
+        raise ValueError(f"Asset is not importable as a model: {asset.get('id')}")
+
+    scale_hints = asset.get("scale_hints", {})
+    import_params = {
+        "path": asset["path"],
+        "location": params.get("location", [0, 0, 0]),
+        "rotation": params.get("rotation", [0, 0, 0]),
+        "scale": params.get("scale", scale_hints.get("default_scale", 1.0)),
+    }
+    import_result = action_import_asset(import_params)
+    if not import_result.get("ok"):
+        return import_result
+
+    fit_result = None
+    fit_to_bounds = params.get("fit_to_bounds", True)
+    if not isinstance(fit_to_bounds, bool):
+        raise ValueError("params.fit_to_bounds must be a boolean")
+    imported_objects = import_result.get("objects", [])
+    if fit_to_bounds and imported_objects:
+        target_size = params.get("target_size", scale_hints.get("target_size", [1, 1, 1]))
+        target_location = params.get("target_location", params.get("location", [0, 0, 0]))
+        fit_result = action_fit_object_to_bounds(
+            {
+                "object": imported_objects[0],
+                "target_size": target_size,
+                "target_location": target_location,
+                "align_to_floor": params.get("align_to_floor", True),
+            }
+        )
+
+    return make_result(
+        True,
+        message="Imported asset from library.",
+        asset=asset,
+        imported=import_result,
+        fit=fit_result,
+    )
+
+
 def action_fit_object_to_bounds(params):
     name = params.get("object")
     if not isinstance(name, str) or not name.strip():
@@ -2803,6 +2866,8 @@ def execute_command(payload):
         return action_export_obj(params)
     if action == "import_asset":
         return action_import_asset(params)
+    if action == "import_asset_from_library":
+        return action_import_asset_from_library(params)
     if action == "fit_object_to_bounds":
         return action_fit_object_to_bounds(params)
     if action == "inspect_scene":

@@ -1395,7 +1395,7 @@ Commit:
 
 ### 63. v1.3.2 Asset Import From Search
 
-Status: pending
+Status: completed
 
 Goal:
 Make search-to-import workflow easy.

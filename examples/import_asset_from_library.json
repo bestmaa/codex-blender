@@ -1,0 +1,11 @@
+{
+  "action": "import_asset_from_library",
+  "params": {
+    "id": "sample_pyramid_obj",
+    "location": [0, 0, 0],
+    "fit_to_bounds": true,
+    "target_size": [1.5, 1.5, 1.5],
+    "target_location": [0, 0, 0],
+    "align_to_floor": true
+  }
+}

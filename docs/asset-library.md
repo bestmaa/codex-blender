@@ -16,4 +16,4 @@ Each asset entry must include:
 
 Generated renders, exports, scenes, and development-only reference files should not be listed in the stable manifest.
 
-Use `search_assets` or the `blender_search_assets` MCP tool to query this manifest by name, type, tag, extension, or general text.
+Use `search_assets` or the `blender_search_assets` MCP tool to query this manifest by name, type, tag, extension, or general text. Use `import_asset_from_library` or `blender_import_asset_from_library` to import a model entry by id/name/query and apply its scale hints.

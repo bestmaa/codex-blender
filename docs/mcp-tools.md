@@ -32,6 +32,7 @@ The MCP server in `scripts/codex_blender_mcp.py` exposes stable tools for normal
 | `export_glb` | `blender_export_glb` |
 | `export_obj` | `blender_export_obj` |
 | `import_asset` | `blender_import_asset` |
+| `import_asset_from_library` | `blender_import_asset_from_library` |
 | `add_reference_image` | `blender_add_reference_image` |
 | `apply_texture_material` | `blender_apply_texture_material` |
 | `apply_material_preset` | `blender_apply_material_preset` |

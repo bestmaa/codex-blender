@@ -544,6 +544,24 @@ TOOLS = [
         ),
     },
     {
+        "name": "blender_import_asset_from_library",
+        "description": "Import a model by asset library id/name/query, applying manifest scale hints and optional fit-to-bounds.",
+        "inputSchema": json_schema(
+            {
+                "id": {"type": "string", "description": "Asset library id."},
+                "name": {"type": "string", "description": "Asset library display name."},
+                "query": {"type": "string", "description": "Fallback search query when id/name is not provided."},
+                "location": {"type": "array", "items": {"type": "number"}, "default": [0, 0, 0]},
+                "rotation": {"type": "array", "items": {"type": "number"}, "default": [0, 0, 0]},
+                "scale": {"description": "Optional override scale. Defaults to asset scale hint."},
+                "fit_to_bounds": {"type": "boolean", "description": "Fit imported object to bounds after import.", "default": True},
+                "target_size": {"description": "Target bounds as a number or [x, y, z]. Defaults to asset scale hint."},
+                "target_location": {"type": "array", "items": {"type": "number"}, "default": [0, 0, 0]},
+                "align_to_floor": {"type": "boolean", "description": "Align fitted object bottom to target location z.", "default": True},
+            }
+        ),
+    },
+    {
         "name": "blender_add_reference_image",
         "description": "Add a local image as a reference plane in the current Blender scene.",
         "inputSchema": json_schema(
@@ -1134,6 +1152,22 @@ def call_tool(name: str, arguments: dict[str, Any]) -> tuple[dict[str, Any], boo
             "scale": arguments.get("scale", 1.0),
         }
         result = call_http("/command", {"action": "import_asset", "params": params})
+    elif name == "blender_import_asset_from_library":
+        params = {
+            "id": arguments.get("id"),
+            "name": arguments.get("name"),
+            "query": arguments.get("query"),
+            "location": arguments.get("location", [0, 0, 0]),
+            "rotation": arguments.get("rotation", [0, 0, 0]),
+            "fit_to_bounds": arguments.get("fit_to_bounds", True),
+            "target_location": arguments.get("target_location", arguments.get("location", [0, 0, 0])),
+            "align_to_floor": arguments.get("align_to_floor", True),
+        }
+        if "scale" in arguments:
+            params["scale"] = arguments.get("scale")
+        if "target_size" in arguments:
+            params["target_size"] = arguments.get("target_size")
+        result = call_http("/command", {"action": "import_asset_from_library", "params": params})
     elif name == "blender_add_reference_image":
         params = {
             "path": normalize_input_path(arguments.get("path")),
@@ -1246,7 +1280,7 @@ def handle_request(message: dict[str, Any]) -> dict[str, Any] | None:
             {
                 "protocolVersion": "2024-11-05",
                 "capabilities": {"tools": {}},
-                "serverInfo": {"name": "codex-blender", "version": "1.3.1"},
+                "serverInfo": {"name": "codex-blender", "version": "1.3.2"},
             },
         )
     if method == "tools/list":
