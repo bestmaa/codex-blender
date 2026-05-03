@@ -109,7 +109,7 @@ https://github.com/bestmaa/codex-blender/releases
 Download the current versioned ZIP, for example:
 
 ```text
-codex_blender_addon_v1.3.3.zip
+codex_blender_addon_v1.4.0.zip
 ```
 
 Or build it locally:
@@ -245,6 +245,12 @@ For the local asset manifest format, see:
 
 ```text
 docs/asset-library.md
+```
+
+For the provider-neutral image-to-3D integration plan, see:
+
+```text
+docs/image-to-3d.md
 ```
 
 For beta release notes, see:
@@ -885,7 +891,7 @@ Save scene:
 
 ## Supported Actions
 
-Supported v1.3.3 actions:
+Supported v1.4.0 actions:
 
 - `ping`
 - `create_room`

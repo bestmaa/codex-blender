@@ -73,6 +73,7 @@ REQUIRED_FILES = [
     "assets/models/sample_pyramid.obj",
     "assets/library.json",
     "docs/asset-library.md",
+    "docs/image-to-3d.md",
     "docs/quickstart-demo.md",
     "docs/commands.md",
     "docs/mcp-tools.md",

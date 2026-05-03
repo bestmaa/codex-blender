@@ -1432,7 +1432,7 @@ Commit:
 
 ### 65. v1.4.0 Image-To-3D Integration Plan
 
-Status: pending
+Status: completed
 
 Goal:
 Design a provider-neutral image-to-3D integration before adding any vendor-specific code.
