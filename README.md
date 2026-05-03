@@ -104,7 +104,7 @@ https://github.com/bestmaa/codex-blender/releases
 Download the current versioned ZIP, for example:
 
 ```text
-codex_blender_addon_v0.99.10.zip
+codex_blender_addon_v0.99.11.zip
 ```
 
 Or build it locally:
@@ -243,6 +243,12 @@ For the final smoke test matrix, see:
 
 ```text
 docs/smoke-test-matrix.md
+```
+
+For the final new-user walkthrough, see:
+
+```text
+docs/final-user-walkthrough.md
 ```
 
 For Windows path and PowerShell quoting examples, see:
@@ -826,7 +832,7 @@ Save scene:
 
 ## Supported Actions
 
-Supported v0.99.10 pre-release actions:
+Supported v0.99.11 pre-release actions:
 
 - `ping`
 - `create_room`

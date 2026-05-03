@@ -1135,7 +1135,7 @@ Commit:
 
 ### 50. v0.99.11 Final User Walkthrough
 
-Status: pending
+Status: completed
 
 Goal:
 Run the project exactly like a new user would before v1.

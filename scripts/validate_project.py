@@ -68,6 +68,7 @@ REQUIRED_FILES = [
     "docs/known-limitations.md",
     "docs/demo-assets.md",
     "docs/smoke-test-matrix.md",
+    "docs/final-user-walkthrough.md",
 ]
 
 PYTHON_FILES = [
