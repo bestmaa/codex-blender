@@ -38,6 +38,12 @@ Verify the release ZIP locally:
 python scripts\verify_release_asset.py --build
 ```
 
+Generate release draft metadata without publishing:
+
+```powershell
+python scripts\generate_release_draft.py --build
+```
+
 ## Features
 
 - Start and stop a local Blender bridge at `http://127.0.0.1:8765`.
@@ -137,7 +143,7 @@ https://github.com/bestmaa/codex-blender/releases
 Download the current versioned ZIP, for example:
 
 ```text
-codex_blender_addon_v1.7.1.zip
+codex_blender_addon_v1.7.2.zip
 ```
 
 Or build it locally:
@@ -925,7 +931,7 @@ Save scene:
 
 ## Supported Actions
 
-Supported v1.7.1 actions:
+Supported v1.7.2 actions:
 
 - `ping`
 - `create_room`

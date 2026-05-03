@@ -1717,7 +1717,7 @@ Commit:
 
 ### 80. v1.7.2 GitHub Release Draft Helper
 
-Status: pending
+Status: completed
 
 Goal:
 Prepare release metadata without publishing automatically.

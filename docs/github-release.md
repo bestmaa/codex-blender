@@ -58,6 +58,14 @@ python scripts\verify_release_asset.py --build
 
 The verifier prints JSON with `filename`, `size_bytes`, `sha256`, and `contents`.
 
+Generate draft release metadata without publishing:
+
+```powershell
+python scripts\generate_release_draft.py --build
+```
+
+This writes `dist/release-draft.json` and `dist/release-draft.md`. The JSON includes `publish: false` to make the manual confirmation boundary explicit.
+
 ## Branch And Push
 
 Only push after user approval:

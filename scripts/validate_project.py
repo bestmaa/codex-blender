@@ -33,6 +33,7 @@ REQUIRED_FILES = [
     "scripts/compare_images.py",
     "scripts/create_iteration_report.py",
     "scripts/verify_release_asset.py",
+    "scripts/generate_release_draft.py",
     "scripts/package_addon.py",
     "scripts/smoke_test_bridge.py",
     "scripts/smoke_test_blendermcp.py",
@@ -128,6 +129,7 @@ PYTHON_FILES = [
     "scripts/compare_images.py",
     "scripts/create_iteration_report.py",
     "scripts/verify_release_asset.py",
+    "scripts/generate_release_draft.py",
     "scripts/package_addon.py",
     "scripts/smoke_test_bridge.py",
     "scripts/smoke_test_blendermcp.py",
@@ -878,6 +880,25 @@ def check_release_asset_verifier() -> None:
         raise AssertionError("Release asset verifier did not report expected ZIP metadata")
 
 
+def check_release_draft_helper() -> None:
+    completed = subprocess.run(
+        [sys.executable, str(project_path("scripts/generate_release_draft.py")), "--build"],
+        cwd=ROOT,
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        check=False,
+    )
+    if completed.returncode != 0:
+        raise AssertionError(f"Release draft helper failed: {completed.stderr}")
+    payload = json.loads(completed.stdout)
+    if not payload.get("ok") or payload.get("publish") is not False:
+        raise AssertionError("Release draft helper must generate metadata without publishing")
+    body_path = Path(payload["body_path"])
+    if not body_path.exists() or "SHA256" not in body_path.read_text(encoding="utf-8"):
+        raise AssertionError("Release draft helper did not write body with checksum")
+
+
 def run_check(name: str, func) -> None:
     func()
     print(f"OK: {name}")
@@ -910,6 +931,7 @@ def main() -> int:
         ("repository hygiene", check_repository_hygiene),
         ("package ZIP", check_package_zip),
         ("release asset verifier", check_release_asset_verifier),
+        ("release draft helper", check_release_draft_helper),
     ]
 
     try:
