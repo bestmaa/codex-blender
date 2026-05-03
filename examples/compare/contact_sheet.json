@@ -1,0 +1,10 @@
+{
+  "reference": "assets/references/modern_table_reference.png",
+  "render": "assets/logo.png",
+  "output": "renders/compare/table_side_by_side_v001.png",
+  "reference_label": "Reference",
+  "render_label": "Render",
+  "metadata_output": "renders/compare/reports/table_v001.json",
+  "height": 540,
+  "gap": 16
+}

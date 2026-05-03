@@ -82,3 +82,13 @@ Each iteration should record:
 - Human notes on what still differs.
 
 Later tasks can automate side-by-side images and numeric metrics, but the folder and naming convention should stay stable.
+
+## Contact Sheet
+
+Create a side-by-side PNG from two existing PNG files:
+
+```powershell
+python scripts\create_contact_sheet.py assets\references\modern_table_reference.png renders\image_to_3d_mock_import.png renders\compare\table_side_by_side_v001.png --reference-label Reference --render-label Render --metadata-output renders\compare\reports\table_v001.json
+```
+
+The script writes the combined PNG plus optional JSON metadata containing source paths, labels, output size, and gap.

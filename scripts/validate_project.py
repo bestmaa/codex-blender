@@ -29,6 +29,7 @@ REQUIRED_FILES = [
     "scripts/run_image_to_3d_import_workflow.py",
     "scripts/generate_procedural_texture.py",
     "scripts/register_user_texture.py",
+    "scripts/create_contact_sheet.py",
     "scripts/package_addon.py",
     "scripts/smoke_test_bridge.py",
     "scripts/smoke_test_blendermcp.py",
@@ -91,6 +92,7 @@ REQUIRED_FILES = [
     "examples/image-to-3d/mock_import_workflow_job.json",
     "examples/textures/generate_wood_texture.json",
     "examples/textures/register_user_texture.json",
+    "examples/compare/contact_sheet.json",
     "docs/quickstart-demo.md",
     "docs/commands.md",
     "docs/mcp-tools.md",
@@ -116,6 +118,7 @@ PYTHON_FILES = [
     "scripts/run_image_to_3d_import_workflow.py",
     "scripts/generate_procedural_texture.py",
     "scripts/register_user_texture.py",
+    "scripts/create_contact_sheet.py",
     "scripts/package_addon.py",
     "scripts/smoke_test_bridge.py",
     "scripts/smoke_test_blendermcp.py",
@@ -134,6 +137,7 @@ JSON_FILES = [
     "examples/image-to-3d/mock_import_workflow_job.json",
     "examples/textures/generate_wood_texture.json",
     "examples/textures/register_user_texture.json",
+    "examples/compare/contact_sheet.json",
     "examples/create_room.json",
     "examples/create_outdoor_scene.json",
     "examples/render_outdoor_scene.json",
@@ -657,6 +661,44 @@ def check_user_texture_registration() -> None:
         raise AssertionError("User texture registration dry-run did not build a texture asset")
 
 
+def check_contact_sheet_generator() -> None:
+    output = project_path("renders/compare/validation_contact_sheet.png")
+    metadata = project_path("renders/compare/reports/validation_contact_sheet.json")
+    for path in (output, metadata):
+        if path.exists():
+            path.unlink()
+    completed = subprocess.run(
+        [
+            sys.executable,
+            str(project_path("scripts/create_contact_sheet.py")),
+            str(project_path("assets/icon.png")),
+            str(project_path("assets/logo.png")),
+            str(output),
+            "--reference-label",
+            "Reference",
+            "--render-label",
+            "Render",
+            "--metadata-output",
+            str(metadata),
+            "--height",
+            "64",
+        ],
+        cwd=ROOT,
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        check=False,
+    )
+    if completed.returncode != 0:
+        raise AssertionError(f"Contact sheet generator failed: {completed.stderr}")
+    if not output.exists() or output.read_bytes()[:8] != b"\x89PNG\r\n\x1a\n":
+        raise AssertionError("Contact sheet generator did not create a PNG")
+    if not metadata.exists():
+        raise AssertionError("Contact sheet generator did not create metadata")
+    output.unlink()
+    metadata.unlink()
+
+
 def check_mcp_tool_coverage() -> None:
     mcp_source = project_path("scripts/codex_blender_mcp.py").read_text(encoding="utf-8")
     declared_tools = set(re.findall(r'"name": "(blender_[^"]+)"', mcp_source))
@@ -761,6 +803,7 @@ def main() -> int:
         ("image-to-3D import workflow", check_image_to_3d_import_workflow),
         ("procedural texture generator", check_procedural_texture_generator),
         ("user texture registration", check_user_texture_registration),
+        ("contact sheet generator", check_contact_sheet_generator),
         ("MCP tool coverage", check_mcp_tool_coverage),
         ("repository hygiene", check_repository_hygiene),
         ("package ZIP", check_package_zip),

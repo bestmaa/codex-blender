@@ -1622,7 +1622,7 @@ Commit:
 
 ### 75. v1.6.1 Side-By-Side Contact Sheet
 
-Status: pending
+Status: completed
 
 Goal:
 Generate a side-by-side comparison image from reference and render files.

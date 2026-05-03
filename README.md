@@ -12,6 +12,12 @@ It cannot turn any arbitrary image into a perfect production 3D model by itself.
 
 For a repeatable reference-vs-render process, see `docs/render-comparison.md`.
 
+Create a side-by-side comparison contact sheet:
+
+```powershell
+python scripts\create_contact_sheet.py assets\references\modern_table_reference.png assets\logo.png renders\compare\table_side_by_side_v001.png --metadata-output renders\compare\reports\table_v001.json
+```
+
 ## Features
 
 - Start and stop a local Blender bridge at `http://127.0.0.1:8765`.
@@ -111,7 +117,7 @@ https://github.com/bestmaa/codex-blender/releases
 Download the current versioned ZIP, for example:
 
 ```text
-codex_blender_addon_v1.6.0.zip
+codex_blender_addon_v1.6.1.zip
 ```
 
 Or build it locally:
@@ -899,7 +905,7 @@ Save scene:
 
 ## Supported Actions
 
-Supported v1.6.0 actions:
+Supported v1.6.1 actions:
 
 - `ping`
 - `create_room`
