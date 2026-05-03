@@ -1028,7 +1028,7 @@ Commit:
 
 ### 45. v0.99.6 Example Smoke Test Script
 
-Status: pending
+Status: completed
 
 Goal:
 Add one script to run stable examples in a predictable order when Blender is running.

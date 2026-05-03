@@ -23,6 +23,7 @@ REQUIRED_FILES = [
     "bridge/codex_blender_bridge.py",
     "scripts/codex_blender_mcp.py",
     "scripts/package_addon.py",
+    "scripts/smoke_test_bridge.py",
     "skills/blender/SKILL.md",
     "examples/create_room.json",
     "examples/create_outdoor_scene.json",
@@ -71,6 +72,7 @@ PYTHON_FILES = [
     "bridge/codex_blender_bridge.py",
     "scripts/codex_blender_mcp.py",
     "scripts/package_addon.py",
+    "scripts/smoke_test_bridge.py",
     "scripts/validate_project.py",
 ]
 
