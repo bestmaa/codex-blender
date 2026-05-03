@@ -799,7 +799,7 @@ Commit:
 
 ### 34. v0.95 Release Candidate
 
-Status: pending
+Status: completed
 
 Goal:
 Prepare v1 release candidate.

@@ -1,6 +1,6 @@
-# v0.90.0 Beta Release Notes
+# v0.95.0 Release Candidate Notes
 
-Codex Blender v0.90.0 is the first beta stabilization point for the local Blender bridge.
+Codex Blender v0.95.0 is the release candidate stabilization point for the local Blender bridge before v1.0.
 
 ## Included Workflows
 
@@ -17,7 +17,7 @@ Codex Blender v0.90.0 is the first beta stabilization point for the local Blende
 Build or download:
 
 ```text
-dist/codex_blender_addon_v0.90.0.zip
+dist/codex_blender_addon_v0.95.0.zip
 ```
 
 Install in Blender:
@@ -37,7 +37,7 @@ Then enable `Codex Blender Bridge` and click `Start Bridge`.
 
 ## Validation
 
-Before publishing a beta ZIP:
+Before publishing a release candidate ZIP:
 
 ```powershell
 python scripts\validate_project.py
