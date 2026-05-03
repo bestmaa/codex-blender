@@ -1,0 +1,9 @@
+{
+  "action": "render_scene",
+  "params": {
+    "output": "renders/outdoor_expanded.png",
+    "resolution": [1280, 720],
+    "samples": 48,
+    "timeout_seconds": 300
+  }
+}

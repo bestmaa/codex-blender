@@ -92,7 +92,7 @@ TOOLS = [
     },
     {
         "name": "blender_create_outdoor_scene",
-        "description": "Create an outdoor road scene with trees, street lights, camera, and lighting.",
+        "description": "Create an outdoor road scene with sidewalks, markings, varied trees, benches, signs, bushes, rocks, street lights, camera, and lighting.",
         "inputSchema": json_schema(
             {
                 "road_length": {
@@ -114,6 +114,41 @@ TOOLS = [
                     "type": "integer",
                     "description": "Number of street lights to place along both sides.",
                     "default": 6,
+                },
+                "density": {
+                    "type": "number",
+                    "description": "Default density multiplier for optional outdoor details.",
+                    "default": 1.0,
+                },
+                "sidewalk_width": {
+                    "type": "number",
+                    "description": "Sidewalk width on each side of the road.",
+                    "default": 1.1,
+                },
+                "bench_count": {
+                    "type": "integer",
+                    "description": "Number of benches.",
+                    "default": 4,
+                },
+                "sign_count": {
+                    "type": "integer",
+                    "description": "Number of road signs.",
+                    "default": 4,
+                },
+                "bush_count": {
+                    "type": "integer",
+                    "description": "Number of bushes.",
+                    "default": 10,
+                },
+                "rock_count": {
+                    "type": "integer",
+                    "description": "Number of landscape rocks.",
+                    "default": 8,
+                },
+                "include_sidewalks": {
+                    "type": "boolean",
+                    "description": "Add sidewalks beside the curbs.",
+                    "default": True,
                 },
                 "style": {
                     "type": "string",
@@ -887,6 +922,13 @@ def call_tool(name: str, arguments: dict[str, Any]) -> tuple[dict[str, Any], boo
             "road_width": arguments.get("road_width", 5),
             "tree_count": arguments.get("tree_count", 12),
             "street_light_count": arguments.get("street_light_count", 6),
+            "density": arguments.get("density", 1.0),
+            "sidewalk_width": arguments.get("sidewalk_width", 1.1),
+            "bench_count": arguments.get("bench_count", 4),
+            "sign_count": arguments.get("sign_count", 4),
+            "bush_count": arguments.get("bush_count", 10),
+            "rock_count": arguments.get("rock_count", 8),
+            "include_sidewalks": arguments.get("include_sidewalks", True),
             "style": arguments.get("style", "clean_suburban"),
         }
         result = call_http("/command", {"action": "create_outdoor_scene", "params": params})
@@ -1165,7 +1207,7 @@ def handle_request(message: dict[str, Any]) -> dict[str, Any] | None:
             {
                 "protocolVersion": "2024-11-05",
                 "capabilities": {"tools": {}},
-                "serverInfo": {"name": "codex-blender", "version": "1.2.2"},
+                "serverInfo": {"name": "codex-blender", "version": "1.2.3"},
             },
         )
     if method == "tools/list":

@@ -30,6 +30,7 @@ REQUIRED_FILES = [
     "skills/blender/SKILL.md",
     "examples/create_room.json",
     "examples/create_outdoor_scene.json",
+    "examples/render_outdoor_scene.json",
     "examples/create_table_model.json",
     "examples/create_primitive_library.json",
     "examples/create_furniture_presets.json",
@@ -99,6 +100,7 @@ JSON_FILES = [
     ".agents/plugins/marketplace.json",
     "examples/create_room.json",
     "examples/create_outdoor_scene.json",
+    "examples/render_outdoor_scene.json",
     "examples/create_table_model.json",
     "examples/create_primitive_library.json",
     "examples/create_furniture_presets.json",
@@ -188,6 +190,7 @@ def check_examples() -> None:
     expected_actions = {
         "examples/create_room.json": "create_room",
         "examples/create_outdoor_scene.json": "create_outdoor_scene",
+        "examples/render_outdoor_scene.json": "render_scene",
         "examples/create_table_model.json": "create_table_model",
         "examples/create_primitive_library.json": "create_primitive",
         "examples/create_furniture_presets.json": "create_furniture_preset",

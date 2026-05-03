@@ -110,7 +110,7 @@ Returns armature and bone names for the current Blender scene.
 
 ### create_outdoor_scene
 
-Creates an outdoor road scene with road, trees, street lights, camera, and lighting.
+Creates an outdoor road scene with road, sidewalks, markings, varied trees, benches, signs, bushes, rocks, street lights, camera, and lighting.
 
 ```json
 {
@@ -120,6 +120,13 @@ Creates an outdoor road scene with road, trees, street lights, camera, and light
     "road_width": 5,
     "tree_count": 12,
     "street_light_count": 6,
+    "density": 1.0,
+    "sidewalk_width": 1.1,
+    "bench_count": 4,
+    "sign_count": 4,
+    "bush_count": 10,
+    "rock_count": 8,
+    "include_sidewalks": true,
     "style": "clean_suburban"
   }
 }

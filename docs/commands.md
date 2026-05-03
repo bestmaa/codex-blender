@@ -25,7 +25,7 @@ Successful responses always include `"ok": true`. Failed responses include `"ok"
 | Action | Params And Defaults | Success Shape |
 | --- | --- | --- |
 | `create_room` | `style="modern_neon"` | `{ok, message, style}` |
-| `create_outdoor_scene` | `road_length=32`, `road_width=5`, `tree_count=12`, `street_light_count=6`, `style="clean_suburban"` | `{ok, message, style, road_length, road_width, tree_count, street_light_count}` |
+| `create_outdoor_scene` | `road_length=32`, `road_width=5`, `tree_count=12`, `street_light_count=6`, `density=1.0`, `sidewalk_width=1.1`, `bench_count`, `sign_count`, `bush_count`, `rock_count`, `include_sidewalks=true`, `style="clean_suburban"` | `{ok, message, style, road_length, road_width, tree_count, street_light_count, density, bench_count, sign_count, bush_count, rock_count}` |
 | `create_furniture_set` | `table_length=3.2`, `table_width=1.55`, `chair_count=4`, `include_plant=true`, `include_lamp=true`, `style="compact_dining"` | `{ok, message, style, table_length, table_width, chair_count, include_plant, include_lamp}` |
 | `create_room_layout` | `preset="living_room"`, `style="clean_modern"`; presets: `studio`, `living_room`, `office`, `gallery` | `{ok, message, preset, style}` |
 | `create_scene_from_reference` | `title="reference scene"`, optional `floor_color`, `wall_color`, `camera_location`, `target`, `objects=[]` | `{ok, message, title, objects}` |

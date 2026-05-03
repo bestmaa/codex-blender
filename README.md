@@ -14,7 +14,7 @@ It cannot turn any arbitrary image into a perfect production 3D model by itself.
 
 - Start and stop a local Blender bridge at `http://127.0.0.1:8765`.
 - Create a starter room scene.
-- Create an outdoor road scene with trees and street lights.
+- Create an outdoor road scene with sidewalks, curbs, markings, varied trees, benches, signs, bushes, rocks, and street lights.
 - Create a reusable modern wooden table model.
 - Create a reusable modern chair model.
 - Create a reusable modern sofa model.
@@ -107,7 +107,7 @@ https://github.com/bestmaa/codex-blender/releases
 Download the current versioned ZIP, for example:
 
 ```text
-codex_blender_addon_v1.2.2.zip
+codex_blender_addon_v1.2.3.zip
 ```
 
 Or build it locally:
@@ -211,6 +211,8 @@ docs/windows-paths.md
 
 ```powershell
 python bridge\codex_blender_bridge.py examples\create_table_model.json
+python bridge\codex_blender_bridge.py examples\create_outdoor_scene.json
+python bridge\codex_blender_bridge.py examples\render_outdoor_scene.json
 python bridge\codex_blender_bridge.py examples\create_primitive_library.json
 python bridge\codex_blender_bridge.py examples\create_furniture_presets.json
 python bridge\codex_blender_bridge.py examples\create_architecture_presets.json
@@ -280,6 +282,7 @@ Create an outdoor road scene:
 
 ```powershell
 python bridge\codex_blender_bridge.py examples\create_outdoor_scene.json
+python bridge\codex_blender_bridge.py examples\render_outdoor_scene.json
 ```
 
 Create a modern table model:
@@ -863,7 +866,7 @@ Save scene:
 
 ## Supported Actions
 
-Supported v1.2.2 actions:
+Supported v1.2.3 actions:
 
 - `ping`
 - `create_room`

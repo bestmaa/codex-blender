@@ -5,6 +5,13 @@
     "road_width": 5,
     "tree_count": 12,
     "street_light_count": 6,
+    "density": 1.0,
+    "sidewalk_width": 1.1,
+    "bench_count": 4,
+    "sign_count": 4,
+    "bush_count": 10,
+    "rock_count": 8,
+    "include_sidewalks": true,
     "style": "clean_suburban"
   }
 }

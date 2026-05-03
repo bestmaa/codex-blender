@@ -1,7 +1,7 @@
 bl_info = {
     "name": "Codex Blender Bridge",
     "author": "Aditya",
-    "version": (1, 2, 2),
+    "version": (1, 2, 3),
     "blender": (3, 6, 0),
     "location": "View3D > Sidebar > Codex",
     "description": "Local HTTP bridge for sending Codex commands to Blender.",
@@ -1151,11 +1151,19 @@ def action_list_assets(params):
     return make_result(True, message="Listed assets.", assets=assets, count=len(assets))
 
 
-def add_tree(index, x, y, trunk_mat, leaf_mat, height_offset=0.0):
+def add_tree(index, x, y, trunk_mat, leaf_mat, height_offset=0.0, variant="pine"):
     trunk_height = 1.0 + height_offset
     create_cylinder(f"tree {index} trunk", (x, y, trunk_height / 2), 0.13, trunk_height, trunk_mat, vertices=14)
-    create_cone(f"tree {index} lower canopy", (x, y, trunk_height + 0.55), 0.78, 0.18, 1.15, leaf_mat, vertices=20)
-    create_cone(f"tree {index} upper canopy", (x, y, trunk_height + 1.15), 0.55, 0.08, 0.95, leaf_mat, vertices=20)
+    if variant == "round":
+        bpy.ops.mesh.primitive_uv_sphere_add(segments=24, ring_count=12, radius=0.72, location=(x, y, trunk_height + 0.72))
+        bpy.context.object.name = f"tree {index} rounded canopy"
+        bpy.context.object.scale.z = 0.82
+        bpy.context.object.data.materials.append(leaf_mat)
+    elif variant == "slender":
+        create_cone(f"tree {index} slender canopy", (x, y, trunk_height + 0.85), 0.48, 0.08, 1.45, leaf_mat, vertices=18)
+    else:
+        create_cone(f"tree {index} lower canopy", (x, y, trunk_height + 0.55), 0.78, 0.18, 1.15, leaf_mat, vertices=20)
+        create_cone(f"tree {index} upper canopy", (x, y, trunk_height + 1.15), 0.55, 0.08, 0.95, leaf_mat, vertices=20)
 
 
 def add_street_light(index, x, y, pole_mat, lamp_mat):
@@ -1173,6 +1181,36 @@ def add_street_light(index, x, y, pole_mat, lamp_mat):
     return light
 
 
+def add_bench(index, x, y, wood_mat, metal_mat):
+    create_rounded_cube(f"bench {index} seat", (x, y, 0.36), (1.3, 0.34, 0.12), wood_mat, 0.035, 3)
+    create_rounded_cube(f"bench {index} back", (x, y + (0.17 if y < 0 else -0.17), 0.72), (1.3, 0.10, 0.48), wood_mat, 0.03, 3)
+    for side_x in (-0.46, 0.46):
+        create_cube(f"bench {index} leg {side_x:+.1f} a", (x + side_x, y - 0.11, 0.18), (0.07, 0.06, 0.34), metal_mat)
+        create_cube(f"bench {index} leg {side_x:+.1f} b", (x + side_x, y + 0.11, 0.18), (0.07, 0.06, 0.34), metal_mat)
+
+
+def add_road_sign(index, x, y, pole_mat, sign_mat):
+    create_cylinder(f"road sign {index} pole", (x, y, 0.82), 0.035, 1.64, pole_mat, vertices=12)
+    create_rounded_cube(f"road sign {index} panel", (x, y, 1.58), (0.58, 0.05, 0.42), sign_mat, 0.025, 3)
+
+
+def add_bush(index, x, y, leaf_mat):
+    for offset, radius in [((-0.18, 0.02), 0.28), ((0.12, -0.06), 0.33), ((0.08, 0.16), 0.24)]:
+        bpy.ops.mesh.primitive_uv_sphere_add(segments=18, ring_count=8, radius=radius, location=(x + offset[0], y + offset[1], radius * 0.75))
+        obj = bpy.context.object
+        obj.name = f"bush {index} cluster"
+        obj.scale.z = 0.62
+        obj.data.materials.append(leaf_mat)
+
+
+def add_rock(index, x, y, rock_mat):
+    bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=2, radius=0.26, location=(x, y, 0.16))
+    obj = bpy.context.object
+    obj.name = f"landscape rock {index}"
+    obj.scale = (1.0 + (index % 3) * 0.22, 0.72 + (index % 2) * 0.16, 0.46)
+    obj.data.materials.append(rock_mat)
+
+
 def action_create_outdoor_scene(params):
     clear_scene()
 
@@ -1180,6 +1218,15 @@ def action_create_outdoor_scene(params):
     road_width = get_number(params, "road_width", 5, minimum=2, maximum=30)
     tree_count = get_int(params, "tree_count", 12, minimum=0, maximum=80)
     street_light_count = get_int(params, "street_light_count", 6, minimum=0, maximum=40)
+    density = get_number(params, "density", 1.0, minimum=0.0, maximum=3.0)
+    sidewalk_width = get_number(params, "sidewalk_width", 1.1, minimum=0.0, maximum=5.0)
+    bench_count = get_int(params, "bench_count", int(4 * density), minimum=0, maximum=30)
+    sign_count = get_int(params, "sign_count", int(4 * density), minimum=0, maximum=30)
+    bush_count = get_int(params, "bush_count", int(10 * density), minimum=0, maximum=80)
+    rock_count = get_int(params, "rock_count", int(8 * density), minimum=0, maximum=80)
+    include_sidewalks = params.get("include_sidewalks", True)
+    if not isinstance(include_sidewalks, bool):
+        raise ValueError("params.include_sidewalks must be a boolean")
     style = params.get("style", "clean_suburban")
     if not isinstance(style, str):
         raise ValueError("params.style must be a string")
@@ -1188,8 +1235,13 @@ def action_create_outdoor_scene(params):
     asphalt_mat = create_material("dark asphalt", (0.025, 0.027, 0.028, 1.0), roughness=0.78)
     marking_mat = create_material("warm white road marking", (0.95, 0.86, 0.56, 1.0), roughness=0.45)
     curb_mat = create_material("concrete curb", (0.44, 0.42, 0.38, 1.0), roughness=0.8)
+    sidewalk_mat = create_material("light concrete sidewalk", (0.62, 0.61, 0.56, 1.0), roughness=0.84)
     trunk_mat = create_material("tree bark", (0.23, 0.12, 0.055, 1.0), roughness=0.82)
     leaf_mat = create_material("deep green leaves", (0.04, 0.28, 0.08, 1.0), roughness=0.88)
+    shrub_mat = create_material("mixed shrub leaves", (0.10, 0.36, 0.12, 1.0), roughness=0.9)
+    bench_wood_mat = create_material("outdoor bench wood", (0.45, 0.26, 0.12, 1.0), roughness=0.62)
+    sign_mat = create_material("painted sign face", (0.86, 0.20, 0.14, 1.0), roughness=0.38)
+    rock_mat = create_material("matte landscape rock", (0.34, 0.33, 0.30, 1.0), roughness=0.86)
     pole_mat = create_material("painted black metal", (0.015, 0.015, 0.018, 1.0), roughness=0.42, metallic=0.5)
     lamp_mat = create_material(
         "warm lamp glass",
@@ -1203,12 +1255,17 @@ def action_create_outdoor_scene(params):
     create_cube("main road", (0, 0, 0.01), (road_length, road_width, 0.08), asphalt_mat)
     create_cube("left curb", (0, road_width / 2 + 0.18, 0.09), (road_length, 0.18, 0.16), curb_mat)
     create_cube("right curb", (0, -road_width / 2 - 0.18, 0.09), (road_length, 0.18, 0.16), curb_mat)
+    if include_sidewalks and sidewalk_width > 0:
+        create_cube("left sidewalk", (0, road_width / 2 + 0.18 + sidewalk_width / 2, 0.035), (road_length, sidewalk_width, 0.07), sidewalk_mat)
+        create_cube("right sidewalk", (0, -road_width / 2 - 0.18 - sidewalk_width / 2, 0.035), (road_length, sidewalk_width, 0.07), sidewalk_mat)
 
     dash_count = max(3, int(road_length // 4))
     dash_spacing = road_length / dash_count
     for index in range(dash_count):
         x = -road_length / 2 + dash_spacing * (index + 0.5)
         create_cube(f"center road dash {index + 1}", (x, 0, 0.075), (dash_spacing * 0.45, 0.08, 0.012), marking_mat)
+        create_cube(f"left edge marking {index + 1}", (x, road_width / 2 - 0.22, 0.078), (dash_spacing * 0.28, 0.055, 0.012), marking_mat)
+        create_cube(f"right edge marking {index + 1}", (x, -road_width / 2 + 0.22, 0.078), (dash_spacing * 0.28, 0.055, 0.012), marking_mat)
 
     if tree_count:
         usable_length = road_length * 0.9
@@ -1218,7 +1275,7 @@ def action_create_outdoor_scene(params):
             row_index = index // 2
             x = -usable_length / 2 + (usable_length / max(1, row_count - 1)) * row_index
             y = side * (road_width / 2 + 1.8 + (0.35 if row_index % 2 else 0.0))
-            add_tree(index + 1, x, y, trunk_mat, leaf_mat, height_offset=(index % 3) * 0.08)
+            add_tree(index + 1, x, y, trunk_mat, leaf_mat, height_offset=(index % 3) * 0.08, variant=("pine", "round", "slender")[index % 3])
 
     if street_light_count:
         usable_length = road_length * 0.82
@@ -1229,6 +1286,31 @@ def action_create_outdoor_scene(params):
             x = -usable_length / 2 + (usable_length / max(1, row_count - 1)) * row_index
             y = side * (road_width / 2 + 0.78)
             add_street_light(index + 1, x, y, pole_mat, lamp_mat)
+
+    furnishing_length = road_length * 0.78
+    for index in range(bench_count):
+        side = 1 if index % 2 == 0 else -1
+        x = -furnishing_length / 2 + furnishing_length * ((index // 2) + 0.5) / max(1, math.ceil(bench_count / 2))
+        y = side * (road_width / 2 + 0.18 + sidewalk_width * 0.62)
+        add_bench(index + 1, x, y, bench_wood_mat, pole_mat)
+
+    for index in range(sign_count):
+        side = 1 if index % 2 == 0 else -1
+        x = -furnishing_length / 2 + furnishing_length * ((index // 2) + 0.35) / max(1, math.ceil(sign_count / 2))
+        y = side * (road_width / 2 + 0.18 + sidewalk_width + 0.35)
+        add_road_sign(index + 1, x, y, pole_mat, sign_mat)
+
+    for index in range(bush_count):
+        side = 1 if index % 2 == 0 else -1
+        x = -road_length * 0.46 + road_length * ((index // 2) + 0.5) / max(1, math.ceil(bush_count / 2))
+        y = side * (road_width / 2 + sidewalk_width + 1.15 + (0.25 if index % 4 == 0 else 0.0))
+        add_bush(index + 1, x, y, shrub_mat)
+
+    for index in range(rock_count):
+        side = 1 if index % 2 == 0 else -1
+        x = -road_length * 0.44 + road_length * ((index // 2) + 0.35) / max(1, math.ceil(rock_count / 2))
+        y = side * (road_width / 2 + sidewalk_width + 1.85 + (0.18 if index % 3 == 0 else 0.0))
+        add_rock(index + 1, x, y, rock_mat)
 
     bpy.ops.object.light_add(type="SUN", location=(0, -4, 8), rotation=(math.radians(48), 0, math.radians(28)))
     sun = bpy.context.object
@@ -1253,6 +1335,11 @@ def action_create_outdoor_scene(params):
         road_width=road_width,
         tree_count=tree_count,
         street_light_count=street_light_count,
+        density=density,
+        bench_count=bench_count,
+        sign_count=sign_count,
+        bush_count=bush_count,
+        rock_count=rock_count,
     )
 
 
