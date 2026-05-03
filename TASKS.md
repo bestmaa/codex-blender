@@ -1262,7 +1262,7 @@ Commit:
 
 ### 56. v1.2.0 Procedural Primitive Library
 
-Status: pending
+Status: completed
 
 Goal:
 Add better reusable procedural primitive helpers for future models.

@@ -189,6 +189,21 @@ TOOLS = [
         ),
     },
     {
+        "name": "blender_create_primitive",
+        "description": "Create a procedural primitive sample scene from boxes, panels, glass panels, cylinders, cones, planes, spheres, or labels.",
+        "inputSchema": json_schema(
+            {
+                "type": {"type": "string", "description": "Primitive type for a single item.", "default": "beveled_box"},
+                "name": {"type": "string", "description": "Object name for a single item.", "default": "procedural primitive"},
+                "location": {"type": "array", "items": {"type": "number"}, "default": [0, 0, 0]},
+                "rotation": {"type": "array", "items": {"type": "number"}, "default": [0, 0, 0]},
+                "dimensions": {"type": "array", "items": {"type": "number"}, "default": [1, 1, 1]},
+                "color": {"type": "array", "items": {"type": "number"}, "default": [0.8, 0.8, 0.8, 1]},
+                "items": {"type": "array", "description": "Optional list of primitive item objects.", "items": {"type": "object"}},
+            }
+        ),
+    },
+    {
         "name": "blender_create_sofa_model",
         "description": "Create a modern sofa model with cushions, arms, legs, camera, and lighting.",
         "inputSchema": json_schema(
@@ -865,6 +880,9 @@ def call_tool(name: str, arguments: dict[str, Any]) -> tuple[dict[str, Any], boo
             "style": arguments.get("style", "modern_wood"),
         }
         result = call_http("/command", {"action": "create_chair_model", "params": params})
+    elif name == "blender_create_primitive":
+        params = dict(arguments)
+        result = call_http("/command", {"action": "create_primitive", "params": params})
     elif name == "blender_create_sofa_model":
         params = {
             "width": arguments.get("width", 3.2),
@@ -1107,7 +1125,7 @@ def handle_request(message: dict[str, Any]) -> dict[str, Any] | None:
             {
                 "protocolVersion": "2024-11-05",
                 "capabilities": {"tools": {}},
-                "serverInfo": {"name": "codex-blender", "version": "1.1.3"},
+                "serverInfo": {"name": "codex-blender", "version": "1.2.0"},
             },
         )
     if method == "tools/list":

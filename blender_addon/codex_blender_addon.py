@@ -1,7 +1,7 @@
 bl_info = {
     "name": "Codex Blender Bridge",
     "author": "Aditya",
-    "version": (1, 1, 3),
+    "version": (1, 2, 0),
     "blender": (3, 6, 0),
     "location": "View3D > Sidebar > Codex",
     "description": "Local HTTP bridge for sending Codex commands to Blender.",
@@ -1319,6 +1319,142 @@ def get_vector2(params, name, default):
     return tuple(value)
 
 
+def get_color(params, name, default):
+    value = params.get(name, default)
+    if not isinstance(value, list) or len(value) not in {3, 4}:
+        raise ValueError(f"params.{name} must be [r, g, b] or [r, g, b, a]")
+    if not all(isinstance(item, (int, float)) for item in value):
+        raise ValueError(f"params.{name} must contain only numbers")
+    return tuple(value + [1] if len(value) == 3 else value)
+
+
+def apply_common_object_settings(obj, name, rotation):
+    obj.name = name
+    obj.rotation_euler = rotation
+    bpy.context.view_layer.update()
+    return obj
+
+
+def add_bevel(obj, amount, segments=3):
+    if amount <= 0:
+        return
+    bevel = obj.modifiers.new("soft bevel", "BEVEL")
+    bevel.width = amount
+    bevel.segments = segments
+    normal = obj.modifiers.new("weighted normals", "WEIGHTED_NORMAL")
+    normal.keep_sharp = True
+
+
+def create_primitive_item(item, index):
+    primitive_type = item.get("type", "beveled_box")
+    if not isinstance(primitive_type, str):
+        raise ValueError("params.type must be a string")
+    primitive_type = primitive_type.lower()
+    name = item.get("name", f"{primitive_type} {index}")
+    if not isinstance(name, str) or not name.strip():
+        raise ValueError("params.name must be a non-empty string")
+    location = get_vector(item, "location", [0, 0, 0])
+    rotation = get_vector(item, "rotation", [0, 0, 0])
+    color = get_color(item, "color", [0.8, 0.8, 0.8, 1])
+    roughness = get_number(item, "roughness", 0.55, minimum=0, maximum=1)
+    metallic = get_number(item, "metallic", 0.0, minimum=0, maximum=1)
+    material_name = item.get("material_name", f"{name} material")
+    if not isinstance(material_name, str) or not material_name.strip():
+        raise ValueError("params.material_name must be a non-empty string")
+    material = create_material(material_name, color, roughness=roughness, metallic=metallic)
+    if color[3] < 1:
+        material.blend_method = "BLEND"
+        material.show_transparent_back = True
+        bsdf = material.node_tree.nodes.get("Principled BSDF")
+        if bsdf and "Alpha" in bsdf.inputs:
+            bsdf.inputs["Alpha"].default_value = color[3]
+
+    if primitive_type in {"box", "cube", "beveled_box", "panel", "glass_panel"}:
+        default_dimensions = [1, 1, 1]
+        if primitive_type == "panel":
+            default_dimensions = [2, 0.08, 1.2]
+        elif primitive_type == "glass_panel":
+            default_dimensions = [2, 0.05, 1.5]
+        obj = create_cube(name, location, get_vector(item, "dimensions", default_dimensions), material)
+        bevel_amount = get_number(item, "bevel", 0.04 if primitive_type == "beveled_box" else 0.0, minimum=0, maximum=1)
+        add_bevel(obj, bevel_amount, segments=get_int(item, "bevel_segments", 3, minimum=1, maximum=16))
+    elif primitive_type == "cylinder":
+        obj = create_cylinder(
+            name,
+            location,
+            get_number(item, "radius", 0.5, minimum=0.01),
+            get_number(item, "depth", 1.0, minimum=0.01),
+            material,
+            vertices=get_int(item, "vertices", 32, minimum=3, maximum=128),
+        )
+    elif primitive_type == "cone":
+        obj = create_cone(
+            name,
+            location,
+            get_number(item, "radius1", 0.5, minimum=0.0),
+            get_number(item, "radius2", 0.0, minimum=0.0),
+            get_number(item, "depth", 1.0, minimum=0.01),
+            material,
+            vertices=get_int(item, "vertices", 32, minimum=3, maximum=128),
+        )
+    elif primitive_type == "sphere":
+        bpy.ops.mesh.primitive_uv_sphere_add(
+            segments=get_int(item, "segments", 32, minimum=8, maximum=128),
+            ring_count=get_int(item, "rings", 16, minimum=4, maximum=64),
+            radius=get_number(item, "radius", 0.5, minimum=0.01),
+            location=location,
+        )
+        obj = bpy.context.object
+        obj.data.materials.append(material)
+    elif primitive_type == "plane":
+        bpy.ops.mesh.primitive_plane_add(size=get_number(item, "size", 1.0, minimum=0.01), location=location)
+        obj = bpy.context.object
+        obj.data.materials.append(material)
+    elif primitive_type == "label":
+        bpy.ops.object.text_add(location=location, rotation=rotation)
+        obj = bpy.context.object
+        obj.name = name
+        obj.data.body = item.get("text", name)
+        obj.data.align_x = item.get("align", "CENTER").upper()
+        obj.data.align_y = "CENTER"
+        obj.data.size = get_number(item, "size", 0.32, minimum=0.01, maximum=10)
+        obj.data.materials.append(material)
+        return obj
+    else:
+        raise ValueError(f"Unsupported primitive type: {primitive_type}")
+
+    return apply_common_object_settings(obj, name, rotation)
+
+
+def action_create_primitive(params):
+    clear_scene()
+    items = params.get("items")
+    if items is None:
+        items = [params]
+    if not isinstance(items, list) or not items:
+        raise ValueError("params.items must be a non-empty list")
+    created = []
+    for index, item in enumerate(items, start=1):
+        if not isinstance(item, dict):
+            raise ValueError("each item in params.items must be an object")
+        created.append(create_primitive_item(item, index).name)
+
+    light_power = get_number(params, "light_power", 380, minimum=0, maximum=5000)
+    add_area_light("primitive softbox", (0, -3.8, 4.2), (math.radians(62), 0, 0), light_power, 4.5)
+    target = get_vector(params, "target", [0, 0, 0.8])
+    camera_location = get_vector(params, "camera_location", [4.2, -5.0, 2.6])
+    bpy.ops.object.camera_add(location=camera_location)
+    camera = bpy.context.object
+    camera.name = "primitive camera"
+    look_at(camera, target)
+    bpy.context.scene.camera = camera
+    bpy.context.scene.render.engine = "CYCLES"
+    bpy.context.scene.cycles.samples = 48
+    bpy.context.scene.world.color = (0.78, 0.82, 0.86)
+
+    return make_result(True, message="Created procedural primitives.", objects=created, count=len(created))
+
+
 def set_resolution(params):
     resolution = params.get("resolution", [1280, 720])
     if (
@@ -2183,6 +2319,8 @@ def execute_command(payload):
         return action_create_outdoor_scene(params)
     if action == "create_table_model":
         return action_create_table_model(params)
+    if action == "create_primitive":
+        return action_create_primitive(params)
     if action == "create_chair_model":
         return action_create_chair_model(params)
     if action == "create_sofa_model":

@@ -41,6 +41,10 @@ When the user gives or asks for a reference image workflow:
 
 Use `create_scene_from_reference` only when there is a structured scene plan; it is an approximation workflow, not automatic perfect image-to-3D conversion.
 
+### Procedural Primitive Workflow
+
+Use `create_primitive` when a scene needs reusable low-level shapes such as beveled boxes, panels, glass panels, cylinders, cones, planes, spheres, or labels. Use it before higher-level furniture/architecture helpers when the requested object is custom but can be built from simple parts.
+
 ### Texture Workflow
 
 Put texture files under `assets/textures/`. Use `apply_texture_material` for user-provided images and multi-map materials. Use `texture_scale`, `texture_offset`, `texture_rotation`, and `projection` when the image placement needs tuning. Use `apply_material_preset` for fast built-in materials when no custom image texture is needed.
@@ -133,6 +137,25 @@ Creates a reusable modern wooden table model with a rounded tabletop, tapered le
     "include_grain": true,
     "wood_color": [0.78, 0.47, 0.25, 1],
     "style": "modern_wood"
+  }
+}
+```
+
+### create_primitive
+
+Creates one or more reusable procedural primitives. Supported types include `beveled_box`, `box`, `cylinder`, `cone`, `sphere`, `plane`, `panel`, `glass_panel`, and `label`.
+
+```json
+{
+  "action": "create_primitive",
+  "params": {
+    "type": "beveled_box",
+    "name": "sample beveled plinth",
+    "location": [0, 0, 0.35],
+    "dimensions": [2.4, 1.2, 0.7],
+    "bevel": 0.08,
+    "color": [0.42, 0.50, 0.56, 1],
+    "material_name": "soft grey material"
   }
 }
 ```

@@ -1,0 +1,46 @@
+{
+  "action": "create_primitive",
+  "params": {
+    "items": [
+      {
+        "type": "beveled_box",
+        "name": "rounded display plinth",
+        "location": [-2.2, 0, 0.35],
+        "dimensions": [1.8, 1.2, 0.7],
+        "bevel": 0.08,
+        "color": [0.5, 0.56, 0.6, 1],
+        "material_name": "matte grey plinth"
+      },
+      {
+        "type": "glass_panel",
+        "name": "blue glass divider",
+        "location": [0, 0.8, 1.15],
+        "dimensions": [0.08, 2.2, 1.9],
+        "color": [0.55, 0.82, 1.0, 0.38],
+        "roughness": 0.08
+      },
+      {
+        "type": "cylinder",
+        "name": "round pedestal",
+        "location": [2.1, 0, 0.45],
+        "radius": 0.45,
+        "depth": 0.9,
+        "vertices": 40,
+        "color": [0.72, 0.62, 0.48, 1]
+      },
+      {
+        "type": "label",
+        "name": "primitive label",
+        "text": "Primitive Library",
+        "location": [0, -1.35, 1.4],
+        "rotation": [1.5708, 0, 0],
+        "size": 0.28,
+        "align": "center",
+        "color": [0.08, 0.08, 0.08, 1]
+      }
+    ],
+    "camera_location": [4.5, -5.2, 2.6],
+    "target": [0, 0, 0.8],
+    "light_power": 420
+  }
+}
