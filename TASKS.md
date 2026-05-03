@@ -1053,7 +1053,7 @@ Commit:
 
 ### 46. v0.99.7 Release Notes Draft
 
-Status: pending
+Status: completed
 
 Goal:
 Prepare release notes before v1.

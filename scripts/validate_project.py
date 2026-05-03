@@ -63,6 +63,7 @@ REQUIRED_FILES = [
     "docs/troubleshooting.md",
     "docs/windows-paths.md",
     "docs/release-packaging.md",
+    "docs/release-notes-v1.md",
     "docs/demo-assets.md",
     "docs/smoke-test-matrix.md",
 ]
