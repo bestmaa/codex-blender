@@ -58,6 +58,7 @@ REQUIRED_FILES = [
     "docs/reference-workflow.md",
     "docs/troubleshooting.md",
     "docs/release-packaging.md",
+    "docs/demo-assets.md",
 ]
 
 PYTHON_FILES = [

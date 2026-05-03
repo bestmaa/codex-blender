@@ -759,7 +759,7 @@ Commit:
 
 ### 32. v0.93 Release Demo Assets
 
-Status: pending
+Status: completed
 
 Goal:
 Keep a small set of demo assets for release testing.

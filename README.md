@@ -191,6 +191,12 @@ For release ZIP packaging, see:
 docs/release-packaging.md
 ```
 
+For included demo assets, see:
+
+```text
+docs/demo-assets.md
+```
+
 For beta release notes, see:
 
 ```text
