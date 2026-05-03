@@ -1,0 +1,6 @@
+{
+  "tool": "get_scene_info",
+  "params": {
+    "include_hidden": false
+  }
+}

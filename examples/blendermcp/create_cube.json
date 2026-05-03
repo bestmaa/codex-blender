@@ -1,0 +1,11 @@
+{
+  "name": "create_object",
+  "arguments": {
+    "type": "cube",
+    "name": "compatibility cube",
+    "location": [0, 0, 0.75],
+    "dimensions": [1.5, 1.5, 1.5],
+    "color": [0.25, 0.55, 0.9, 1],
+    "material": "compatibility blue material"
+  }
+}

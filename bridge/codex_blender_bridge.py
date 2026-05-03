@@ -8,7 +8,19 @@ import json
 import sys
 import urllib.error
 import urllib.request
+import importlib.util
 from pathlib import Path
+
+try:
+    from blendermcp_adapter import translate_blendermcp_payload
+except ModuleNotFoundError:
+    adapter_path = Path(__file__).with_name("blendermcp_adapter.py")
+    spec = importlib.util.spec_from_file_location("blendermcp_adapter", adapter_path)
+    if spec is None or spec.loader is None:
+        raise
+    adapter = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(adapter)
+    translate_blendermcp_payload = adapter.translate_blendermcp_payload
 
 
 DEFAULT_URL = "http://127.0.0.1:8765/command"
@@ -66,7 +78,10 @@ def main() -> int:
     args = parser.parse_args()
 
     try:
-        payload = normalize_command_paths(load_payload(args.payload), Path.cwd())
+        payload = normalize_command_paths(translate_blendermcp_payload(load_payload(args.payload)), Path.cwd())
+        if payload.get("ok") is False:
+            print(json.dumps(payload, indent=2, sort_keys=True))
+            return 1
         result = send_command(payload, args.url, args.timeout)
     except json.JSONDecodeError as exc:
         print(f"Invalid JSON: {exc}", file=sys.stderr)

@@ -22,6 +22,7 @@ REQUIRED_FILES = [
     "LICENSE",
     "blender_addon/codex_blender_addon.py",
     "bridge/codex_blender_bridge.py",
+    "bridge/blendermcp_adapter.py",
     "scripts/codex_blender_mcp.py",
     "scripts/package_addon.py",
     "scripts/smoke_test_bridge.py",
@@ -56,6 +57,11 @@ REQUIRED_FILES = [
     "examples/render_scene.json",
     "examples/save_blend.json",
     "examples/inspect_rig.json",
+    "examples/blendermcp/get_scene_info.json",
+    "examples/blendermcp/create_cube.json",
+    "examples/blendermcp/render_scene.json",
+    "examples/blendermcp/save_scene.json",
+    "examples/blendermcp/unsupported_delete_object.json",
     "assets/models/sample_pyramid.obj",
     "docs/quickstart-demo.md",
     "docs/commands.md",
@@ -75,6 +81,7 @@ REQUIRED_FILES = [
 PYTHON_FILES = [
     "blender_addon/codex_blender_addon.py",
     "bridge/codex_blender_bridge.py",
+    "bridge/blendermcp_adapter.py",
     "scripts/codex_blender_mcp.py",
     "scripts/package_addon.py",
     "scripts/smoke_test_bridge.py",
@@ -270,6 +277,36 @@ def check_bridge_path_normalization() -> None:
             raise AssertionError(f"Input path was not normalized for {action}")
 
 
+def check_blendermcp_adapter_examples() -> None:
+    adapter_path = project_path("bridge/blendermcp_adapter.py")
+    spec = importlib.util.spec_from_file_location("blendermcp_adapter", adapter_path)
+    if spec is None or spec.loader is None:
+        raise AssertionError("Could not load BlenderMCP adapter")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+
+    expected = {
+        "examples/blendermcp/get_scene_info.json": "inspect_scene",
+        "examples/blendermcp/create_cube.json": "create_scene_from_reference",
+        "examples/blendermcp/render_scene.json": "render_scene",
+        "examples/blendermcp/save_scene.json": "save_blend",
+    }
+    supported_actions = get_supported_actions()
+    for relative_path, action in expected.items():
+        payload = json.loads(project_path(relative_path).read_text(encoding="utf-8"))
+        translated = module.translate_blendermcp_payload(payload)
+        if translated.get("action") != action:
+            raise AssertionError(f"{relative_path} expected translated action {action}")
+        if action not in supported_actions:
+            raise AssertionError(f"{relative_path} translates to unsupported action {action}")
+
+    unsupported = module.translate_blendermcp_payload(
+        json.loads(project_path("examples/blendermcp/unsupported_delete_object.json").read_text(encoding="utf-8"))
+    )
+    if unsupported.get("ok") is not False or unsupported.get("errorType") != "UnsupportedCompatibilityPayload":
+        raise AssertionError("Unsupported BlenderMCP payload did not return a clear compatibility error")
+
+
 def check_mcp_tool_coverage() -> None:
     mcp_source = project_path("scripts/codex_blender_mcp.py").read_text(encoding="utf-8")
     declared_tools = set(re.findall(r'"name": "(blender_[^"]+)"', mcp_source))
@@ -362,6 +399,7 @@ def main() -> int:
         ("skill actions", check_skill_actions),
         ("README paths", check_readme_paths),
         ("bridge path normalization", check_bridge_path_normalization),
+        ("BlenderMCP adapter examples", check_blendermcp_adapter_examples),
         ("MCP tool coverage", check_mcp_tool_coverage),
         ("repository hygiene", check_repository_hygiene),
         ("package ZIP", check_package_zip),

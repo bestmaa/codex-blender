@@ -1,0 +1,6 @@
+{
+  "tool": "save_scene",
+  "params": {
+    "output": "scenes/blendermcp_compatibility.blend"
+  }
+}

@@ -1203,7 +1203,7 @@ Commit:
 
 ### 53. v1.1.1 BlenderMCP Payload Adapter
 
-Status: pending
+Status: completed
 
 Goal:
 Accept BlenderMCP-style payloads and translate safe ones into bridge actions.

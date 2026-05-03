@@ -1,0 +1,9 @@
+{
+  "command": "render_scene",
+  "args": {
+    "output": "renders/blendermcp_compatibility.png",
+    "resolution": [1280, 720],
+    "samples": 32,
+    "timeout_seconds": 300
+  }
+}

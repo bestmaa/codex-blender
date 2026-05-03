@@ -1,0 +1,6 @@
+{
+  "tool": "delete_object",
+  "params": {
+    "object_name": "compatibility cube"
+  }
+}
