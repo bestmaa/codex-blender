@@ -109,6 +109,28 @@ Use `apply_texture_material` for one image or a PBR-style set:
 
 For quick blockouts, use `apply_material_preset` first, then replace it with texture maps after the model shape and camera are acceptable.
 
+Reusable material recipes live in:
+
+```text
+assets/material_recipes.json
+```
+
+Use `apply_material_recipe` when the material should carry both shader settings and optional map paths:
+
+```json
+{
+  "action": "apply_material_recipe",
+  "params": {
+    "object": "tabletop",
+    "recipe": "wood_warm",
+    "material_name": "warm wood tabletop",
+    "texture_scale": [2.0, 1.0],
+    "projection": "generated",
+    "mode": "replace"
+  }
+}
+```
+
 ## Quality Loop
 
 1. Apply a draft texture with rough scale and projection.

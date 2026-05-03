@@ -109,7 +109,7 @@ https://github.com/bestmaa/codex-blender/releases
 Download the current versioned ZIP, for example:
 
 ```text
-codex_blender_addon_v1.5.1.zip
+codex_blender_addon_v1.5.2.zip
 ```
 
 Or build it locally:
@@ -440,6 +440,12 @@ Apply a built-in material preset:
 
 ```powershell
 python bridge\codex_blender_bridge.py examples\apply_material_preset.json
+```
+
+Apply a reusable material recipe:
+
+```powershell
+python bridge\codex_blender_bridge.py examples\apply_material_recipe.json
 ```
 
 Set up a reference camera:
@@ -891,7 +897,7 @@ Save scene:
 
 ## Supported Actions
 
-Supported v1.5.1 actions:
+Supported v1.5.2 actions:
 
 - `ping`
 - `create_room`
@@ -918,6 +924,7 @@ Supported v1.5.1 actions:
 - `add_reference_image`
 - `apply_texture_material`
 - `apply_material_preset`
+- `apply_material_recipe`
 - `setup_reference_camera`
 - `setup_compare_view`
 - `export_glb`
@@ -969,6 +976,7 @@ When connected as a Codex plugin/MCP server, it exposes:
 - `blender_add_reference_image`
 - `blender_apply_texture_material`
 - `blender_apply_material_preset`
+- `blender_apply_material_recipe`
 - `blender_setup_reference_camera`
 - `blender_setup_compare_view`
 - `blender_export_glb`
@@ -1063,6 +1071,8 @@ Built-in material presets are available through `apply_material_preset`:
 - `brushed_metal`
 - `glass_clear`
 - `matte_plastic`
+
+Reusable material recipes live in `assets/material_recipes.json` and can be applied through `apply_material_recipe`. Recipes combine shader values, optional texture map paths, default texture scale, and projection settings.
 
 If render or save output goes to the wrong place:
 

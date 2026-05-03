@@ -731,6 +731,47 @@ TOOLS = [
         ),
     },
     {
+        "name": "blender_apply_material_recipe",
+        "description": "Apply a reusable material recipe with shader settings and optional texture maps.",
+        "inputSchema": json_schema(
+            {
+                "object": {
+                    "type": "string",
+                    "description": "Exact Blender object name to receive the material.",
+                },
+                "recipe": {
+                    "type": "string",
+                    "description": "Recipe name: wood_warm, fabric_blue, metal_brushed, glass_clear, or plastic_matte.",
+                    "default": "wood_warm",
+                },
+                "material_name": {
+                    "type": "string",
+                    "description": "Optional material name.",
+                    "default": "recipe material",
+                },
+                "texture_scale": {
+                    "type": "array",
+                    "items": {"type": "number"},
+                    "minItems": 2,
+                    "maxItems": 2,
+                    "description": "Optional texture scale override.",
+                    "default": [1.0, 1.0],
+                },
+                "projection": {
+                    "type": "string",
+                    "description": "Texture coordinate projection override: uv, generated, or object.",
+                    "default": "generated",
+                },
+                "mode": {
+                    "type": "string",
+                    "description": "Use replace to clear existing materials, or append to add a material slot.",
+                    "default": "replace",
+                },
+            },
+            required=["object", "recipe"],
+        ),
+    },
+    {
         "name": "blender_setup_reference_camera",
         "description": "Set the active camera to frame a reference/model comparison target.",
         "inputSchema": json_schema(
@@ -1209,6 +1250,16 @@ def call_tool(name: str, arguments: dict[str, Any]) -> tuple[dict[str, Any], boo
             "mode": arguments.get("mode", "replace"),
         }
         result = call_http("/command", {"action": "apply_material_preset", "params": params})
+    elif name == "blender_apply_material_recipe":
+        params = {
+            "object": arguments.get("object"),
+            "recipe": arguments.get("recipe", "wood_warm"),
+            "material_name": arguments.get("material_name", "recipe material"),
+            "texture_scale": arguments.get("texture_scale", [1.0, 1.0]),
+            "projection": arguments.get("projection", "generated"),
+            "mode": arguments.get("mode", "replace"),
+        }
+        result = call_http("/command", {"action": "apply_material_recipe", "params": params})
     elif name == "blender_setup_reference_camera":
         params = {
             "reference_object": arguments.get("reference_object", "table reference image"),
@@ -1280,7 +1331,7 @@ def handle_request(message: dict[str, Any]) -> dict[str, Any] | None:
             {
                 "protocolVersion": "2024-11-05",
                 "capabilities": {"tools": {}},
-                "serverInfo": {"name": "codex-blender", "version": "1.5.1"},
+                "serverInfo": {"name": "codex-blender", "version": "1.5.2"},
             },
         )
     if method == "tools/list":

@@ -1,7 +1,7 @@
 bl_info = {
     "name": "Codex Blender Bridge",
     "author": "Aditya",
-    "version": (1, 5, 1),
+    "version": (1, 5, 2),
     "blender": (3, 6, 0),
     "location": "View3D > Sidebar > Codex",
     "description": "Local HTTP bridge for sending Codex commands to Blender.",
@@ -2550,6 +2550,33 @@ MATERIAL_PRESETS = {
 }
 
 
+def read_material_recipes():
+    path = get_project_root() / "assets" / "material_recipes.json"
+    if not path.exists():
+        raise FileNotFoundError(f"Material recipe file not found: {path}")
+    data = json.loads(path.read_text(encoding="utf-8"))
+    recipes = data.get("recipes", {})
+    if not isinstance(recipes, dict) or not recipes:
+        raise ValueError("assets/material_recipes.json must contain a non-empty recipes object")
+    return recipes
+
+
+def assign_material(obj, material, mode):
+    if mode == "replace":
+        obj.data.materials.clear()
+    obj.data.materials.append(material)
+
+
+def apply_alpha_to_material(material, opacity):
+    if opacity >= 1.0:
+        return
+    material.blend_method = "BLEND"
+    material.show_transparent_back = True
+    bsdf = material.node_tree.nodes.get("Principled BSDF")
+    if bsdf and "Alpha" in bsdf.inputs:
+        bsdf.inputs["Alpha"].default_value = opacity
+
+
 def create_material_preset(name, preset):
     color = preset["color"]
     mat = create_material(name, color, roughness=preset["roughness"], metallic=preset["metallic"])
@@ -2588,9 +2615,7 @@ def action_apply_material_preset(params):
         raise ValueError("params.mode must be 'replace' or 'append'")
 
     material = create_material_preset(material_name, MATERIAL_PRESETS[preset_name])
-    if mode == "replace":
-        obj.data.materials.clear()
-    obj.data.materials.append(material)
+    assign_material(obj, material, mode)
 
     return make_result(
         True,
@@ -2598,6 +2623,72 @@ def action_apply_material_preset(params):
         object=obj.name,
         material=material.name,
         preset=preset_name,
+        mode=mode,
+    )
+
+
+def action_apply_material_recipe(params):
+    object_name = params.get("object")
+    if not isinstance(object_name, str) or not object_name.strip():
+        raise ValueError("params.object must be a non-empty string")
+
+    obj = bpy.data.objects.get(object_name)
+    if obj is None:
+        raise ValueError(f"Object not found: {object_name}")
+    if not hasattr(obj.data, "materials"):
+        raise ValueError(f"Object does not support materials: {object_name}")
+
+    recipe_name = params.get("recipe")
+    recipes = read_material_recipes()
+    if recipe_name not in recipes:
+        names = ", ".join(sorted(recipes))
+        raise ValueError(f"params.recipe must be one of: {names}")
+    recipe = recipes[recipe_name]
+
+    mode = params.get("mode", "replace")
+    if mode not in {"replace", "append"}:
+        raise ValueError("params.mode must be 'replace' or 'append'")
+    material_name = params.get("material_name") or f"{object_name} {recipe_name}"
+    if not isinstance(material_name, str) or not material_name.strip():
+        raise ValueError("params.material_name must be a non-empty string")
+
+    maps = recipe.get("maps", {})
+    if maps:
+        texture_params = {
+            "object": object_name,
+            "material_name": material_name,
+            "roughness": params.get("roughness", recipe.get("roughness", 0.55)),
+            "metallic": params.get("metallic", recipe.get("metallic", 0.0)),
+            "opacity": params.get("opacity", recipe.get("opacity", 1.0)),
+            "texture_scale": params.get("texture_scale", recipe.get("texture_scale", [1.0, 1.0])),
+            "texture_offset": params.get("texture_offset", recipe.get("texture_offset", [0.0, 0.0])),
+            "texture_rotation": params.get("texture_rotation", recipe.get("texture_rotation", 0.0)),
+            "projection": params.get("projection", recipe.get("projection", "uv")),
+            "mode": mode,
+        }
+        for key in ("path", "base_color_path", "roughness_path", "normal_path", "metallic_path", "alpha_path"):
+            if key in maps:
+                texture_params[key] = maps[key]
+        texture_result = action_apply_texture_material(texture_params)
+        texture_result["message"] = "Applied material recipe."
+        texture_result["recipe"] = recipe_name
+        return texture_result
+
+    color = tuple(params.get("base_color", recipe.get("base_color", [0.8, 0.8, 0.8, 1.0])))
+    roughness = params.get("roughness", recipe.get("roughness", 0.55))
+    metallic = params.get("metallic", recipe.get("metallic", 0.0))
+    opacity = params.get("opacity", recipe.get("opacity", color[3] if len(color) > 3 else 1.0))
+    material = create_material(material_name, color, roughness=roughness, metallic=metallic)
+    apply_alpha_to_material(material, opacity)
+    assign_material(obj, material, mode)
+
+    return make_result(
+        True,
+        message="Applied material recipe.",
+        object=obj.name,
+        material=material.name,
+        recipe=recipe_name,
+        category=recipe.get("category"),
         mode=mode,
     )
 
@@ -2884,6 +2975,8 @@ def execute_command(payload):
         return action_apply_texture_material(params)
     if action == "apply_material_preset":
         return action_apply_material_preset(params)
+    if action == "apply_material_recipe":
+        return action_apply_material_recipe(params)
     if action == "setup_reference_camera":
         return action_setup_reference_camera(params)
     if action == "setup_compare_view":

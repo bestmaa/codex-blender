@@ -1565,7 +1565,7 @@ Commit:
 
 ### 72. v1.5.2 Material Recipe System
 
-Status: pending
+Status: completed
 
 Goal:
 Create reusable material recipes that combine texture maps and shader settings.

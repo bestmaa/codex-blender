@@ -59,6 +59,7 @@ REQUIRED_FILES = [
     "examples/apply_scaled_wood_texture.json",
     "examples/apply_multimap_wood_texture.json",
     "examples/apply_material_preset.json",
+    "examples/apply_material_recipe.json",
     "examples/setup_reference_camera.json",
     "examples/setup_compare_view.json",
     "examples/export_table_glb.json",
@@ -76,6 +77,7 @@ REQUIRED_FILES = [
     "examples/blendermcp/unsupported_delete_object.json",
     "assets/models/sample_pyramid.obj",
     "assets/library.json",
+    "assets/material_recipes.json",
     "docs/asset-library.md",
     "docs/image-to-3d.md",
     "docs/texture-generation.md",
@@ -119,6 +121,7 @@ JSON_FILES = [
     ".mcp.json",
     ".agents/plugins/marketplace.json",
     "assets/library.json",
+    "assets/material_recipes.json",
     "schemas/image-to-3d-job.schema.json",
     "examples/image-to-3d/local_provider_job.json",
     "examples/image-to-3d/cloud_placeholder_job.json",
@@ -151,6 +154,7 @@ JSON_FILES = [
     "examples/apply_scaled_wood_texture.json",
     "examples/apply_multimap_wood_texture.json",
     "examples/apply_material_preset.json",
+    "examples/apply_material_recipe.json",
     "examples/setup_reference_camera.json",
     "examples/setup_compare_view.json",
     "examples/export_table_glb.json",
@@ -244,6 +248,7 @@ def check_examples() -> None:
         "examples/apply_scaled_wood_texture.json": "apply_texture_material",
         "examples/apply_multimap_wood_texture.json": "apply_texture_material",
         "examples/apply_material_preset.json": "apply_material_preset",
+        "examples/apply_material_recipe.json": "apply_material_recipe",
         "examples/setup_reference_camera.json": "setup_reference_camera",
         "examples/setup_compare_view.json": "setup_compare_view",
         "examples/export_table_glb.json": "export_glb",
@@ -396,6 +401,39 @@ def check_asset_library_manifest() -> None:
         target_size = scale_hints.get("target_size")
         if not isinstance(target_size, list) or len(target_size) != 3:
             raise AssertionError(f"Asset {asset_id} scale_hints.target_size must be [x, y, z]")
+
+
+def check_material_recipes() -> None:
+    manifest = json.loads(project_path("assets/material_recipes.json").read_text(encoding="utf-8"))
+    if manifest.get("schema_version") != "1.0":
+        raise AssertionError("Material recipe schema_version must be 1.0")
+    recipes = manifest.get("recipes")
+    if not isinstance(recipes, dict) or not recipes:
+        raise AssertionError("Material recipe manifest must contain recipes")
+    required = {"wood_warm", "fabric_blue", "metal_brushed", "glass_clear", "plastic_matte"}
+    missing = sorted(required - set(recipes))
+    if missing:
+        raise AssertionError("Missing material recipes: " + ", ".join(missing))
+    for name, recipe in recipes.items():
+        if not isinstance(recipe, dict):
+            raise AssertionError(f"Material recipe {name} must be an object")
+        color = recipe.get("base_color")
+        if not isinstance(color, list) or len(color) != 4:
+            raise AssertionError(f"Material recipe {name} base_color must be RGBA")
+        for numeric in ("roughness", "metallic", "opacity"):
+            if not isinstance(recipe.get(numeric), (int, float)):
+                raise AssertionError(f"Material recipe {name} {numeric} must be numeric")
+        maps = recipe.get("maps", {})
+        if maps:
+            if not isinstance(maps, dict):
+                raise AssertionError(f"Material recipe {name} maps must be an object")
+            for key, value in maps.items():
+                if key not in {"path", "base_color_path", "roughness_path", "normal_path", "metallic_path", "alpha_path"}:
+                    raise AssertionError(f"Material recipe {name} has unsupported map key {key}")
+                if not isinstance(value, str) or not value:
+                    raise AssertionError(f"Material recipe {name} map path must be a non-empty string")
+                if not project_path(value).exists():
+                    raise AssertionError(f"Material recipe {name} map path does not exist: {value}")
 
 
 def check_image_to_3d_job_examples() -> None:
@@ -661,6 +699,7 @@ def main() -> int:
         ("bridge path normalization", check_bridge_path_normalization),
         ("BlenderMCP adapter examples", check_blendermcp_adapter_examples),
         ("asset library manifest", check_asset_library_manifest),
+        ("material recipes", check_material_recipes),
         ("image-to-3D job examples", check_image_to_3d_job_examples),
         ("image-to-3D provider stub", check_image_to_3d_provider_stub),
         ("cloud image-to-3D adapter", check_cloud_image_to_3d_adapter),

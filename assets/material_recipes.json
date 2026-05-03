@@ -1,0 +1,50 @@
+{
+  "schema_version": "1.0",
+  "recipes": {
+    "wood_warm": {
+      "label": "Warm Wood",
+      "category": "wood",
+      "base_color": [0.72, 0.45, 0.22, 1.0],
+      "roughness": 0.46,
+      "metallic": 0.0,
+      "opacity": 1.0,
+      "maps": {
+        "base_color_path": "assets/textures/oak_wood_basecolor.png"
+      },
+      "texture_scale": [2.4, 1.0],
+      "projection": "generated"
+    },
+    "fabric_blue": {
+      "label": "Soft Blue Fabric",
+      "category": "fabric",
+      "base_color": [0.33, 0.46, 0.56, 1.0],
+      "roughness": 0.9,
+      "metallic": 0.0,
+      "opacity": 1.0
+    },
+    "metal_brushed": {
+      "label": "Brushed Metal",
+      "category": "metal",
+      "base_color": [0.62, 0.6, 0.56, 1.0],
+      "roughness": 0.28,
+      "metallic": 0.85,
+      "opacity": 1.0
+    },
+    "glass_clear": {
+      "label": "Clear Glass",
+      "category": "glass",
+      "base_color": [0.72, 0.92, 1.0, 0.34],
+      "roughness": 0.05,
+      "metallic": 0.0,
+      "opacity": 0.34
+    },
+    "plastic_matte": {
+      "label": "Matte Plastic",
+      "category": "plastic",
+      "base_color": [0.78, 0.78, 0.72, 1.0],
+      "roughness": 0.62,
+      "metallic": 0.0,
+      "opacity": 1.0
+    }
+  }
+}

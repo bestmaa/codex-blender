@@ -1,0 +1,11 @@
+{
+  "action": "apply_material_recipe",
+  "params": {
+    "object": "sample_pyramid.001",
+    "recipe": "wood_warm",
+    "material_name": "warm wood recipe validation",
+    "texture_scale": [1.5, 1.0],
+    "projection": "generated",
+    "mode": "replace"
+  }
+}

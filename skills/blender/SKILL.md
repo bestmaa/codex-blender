@@ -27,7 +27,7 @@ Use this skill for Blender automation through the local Codex Blender bridge.
 
 ### Inspect And Edit Existing Scenes
 
-Run `inspect_scene` before changing an existing object. Use the exact object name from the response for `transform_object`, `duplicate_object`, `animate_object`, `apply_texture_material`, or `apply_material_preset`.
+Run `inspect_scene` before changing an existing object. Use the exact object name from the response for `transform_object`, `duplicate_object`, `animate_object`, `apply_texture_material`, `apply_material_preset`, or `apply_material_recipe`.
 
 ### Reference Image Matching
 
@@ -53,7 +53,7 @@ Use `list_procedural_catalog` when you need to discover available procedural cat
 
 ### Texture Workflow
 
-Put texture files under `assets/textures/`. Use `apply_texture_material` for user-provided images and multi-map materials. Use `texture_scale`, `texture_offset`, `texture_rotation`, and `projection` when the image placement needs tuning. Use `apply_material_preset` for fast built-in materials when no custom image texture is needed.
+Put texture files under `assets/textures/`. Use `apply_texture_material` for user-provided images and multi-map materials. Use `texture_scale`, `texture_offset`, `texture_rotation`, and `projection` when the image placement needs tuning. Use `apply_material_preset` for fast built-in materials when no custom image texture is needed. Use `apply_material_recipe` for reusable shader settings plus optional map paths from `assets/material_recipes.json`.
 
 ### Import, Fit, And Export
 
@@ -538,6 +538,24 @@ Applies a built-in material preset to an existing Blender object. Available pres
     "object": "darker tabletop underside",
     "preset": "brushed_metal",
     "material_name": "brushed metal underside preset",
+    "mode": "replace"
+  }
+}
+```
+
+### apply_material_recipe
+
+Applies a reusable material recipe from `assets/material_recipes.json`. Available recipes: `wood_warm`, `fabric_blue`, `metal_brushed`, `glass_clear`, `plastic_matte`.
+
+```json
+{
+  "action": "apply_material_recipe",
+  "params": {
+    "object": "sample_pyramid.001",
+    "recipe": "wood_warm",
+    "material_name": "warm wood recipe",
+    "texture_scale": [1.5, 1.0],
+    "projection": "generated",
     "mode": "replace"
   }
 }

@@ -36,6 +36,7 @@ The MCP server in `scripts/codex_blender_mcp.py` exposes stable tools for normal
 | `add_reference_image` | `blender_add_reference_image` |
 | `apply_texture_material` | `blender_apply_texture_material` |
 | `apply_material_preset` | `blender_apply_material_preset` |
+| `apply_material_recipe` | `blender_apply_material_recipe` |
 | `setup_reference_camera` | `blender_setup_reference_camera` |
 | `setup_compare_view` | `blender_setup_compare_view` |
 | `create_scene_from_reference` | `blender_create_scene_from_reference` |
