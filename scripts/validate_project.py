@@ -32,6 +32,7 @@ REQUIRED_FILES = [
     "scripts/create_contact_sheet.py",
     "scripts/compare_images.py",
     "scripts/create_iteration_report.py",
+    "scripts/verify_release_asset.py",
     "scripts/package_addon.py",
     "scripts/smoke_test_bridge.py",
     "scripts/smoke_test_blendermcp.py",
@@ -126,6 +127,7 @@ PYTHON_FILES = [
     "scripts/create_contact_sheet.py",
     "scripts/compare_images.py",
     "scripts/create_iteration_report.py",
+    "scripts/verify_release_asset.py",
     "scripts/package_addon.py",
     "scripts/smoke_test_bridge.py",
     "scripts/smoke_test_blendermcp.py",
@@ -860,6 +862,22 @@ def check_package_zip() -> None:
         raise AssertionError(f"Unexpected package contents: {names}")
 
 
+def check_release_asset_verifier() -> None:
+    completed = subprocess.run(
+        [sys.executable, str(project_path("scripts/verify_release_asset.py")), "--build"],
+        cwd=ROOT,
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        check=False,
+    )
+    if completed.returncode != 0:
+        raise AssertionError(f"Release asset verifier failed: {completed.stderr}")
+    payload = json.loads(completed.stdout)
+    if not payload.get("ok") or "sha256" not in payload or payload.get("contents") != ["codex_blender_addon.py"]:
+        raise AssertionError("Release asset verifier did not report expected ZIP metadata")
+
+
 def run_check(name: str, func) -> None:
     func()
     print(f"OK: {name}")
@@ -891,6 +909,7 @@ def main() -> int:
         ("MCP tool coverage", check_mcp_tool_coverage),
         ("repository hygiene", check_repository_hygiene),
         ("package ZIP", check_package_zip),
+        ("release asset verifier", check_release_asset_verifier),
     ]
 
     try:

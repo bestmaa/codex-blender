@@ -32,6 +32,12 @@ python scripts\create_iteration_report.py assets\references\modern_table_referen
 
 For release publishing steps and the confirmation checklist, see `docs/github-release.md`.
 
+Verify the release ZIP locally:
+
+```powershell
+python scripts\verify_release_asset.py --build
+```
+
 ## Features
 
 - Start and stop a local Blender bridge at `http://127.0.0.1:8765`.
@@ -131,7 +137,7 @@ https://github.com/bestmaa/codex-blender/releases
 Download the current versioned ZIP, for example:
 
 ```text
-codex_blender_addon_v1.7.0.zip
+codex_blender_addon_v1.7.1.zip
 ```
 
 Or build it locally:
@@ -919,7 +925,7 @@ Save scene:
 
 ## Supported Actions
 
-Supported v1.7.0 actions:
+Supported v1.7.1 actions:
 
 - `ping`
 - `create_room`

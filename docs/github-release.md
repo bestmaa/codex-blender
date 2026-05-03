@@ -50,6 +50,14 @@ The ZIP should contain only:
 codex_blender_addon.py
 ```
 
+Verify filename, contents, embedded version, size, and SHA256:
+
+```powershell
+python scripts\verify_release_asset.py --build
+```
+
+The verifier prints JSON with `filename`, `size_bytes`, `sha256`, and `contents`.
+
 ## Branch And Push
 
 Only push after user approval:
