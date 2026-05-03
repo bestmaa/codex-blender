@@ -57,6 +57,7 @@ REQUIRED_FILES = [
     "docs/quickstart-demo.md",
     "docs/reference-workflow.md",
     "docs/troubleshooting.md",
+    "docs/release-packaging.md",
 ]
 
 PYTHON_FILES = [
@@ -214,6 +215,9 @@ def check_package_zip() -> None:
     output_path = package_addon(version)
     if not output_path.exists():
         raise AssertionError("Package ZIP was not created")
+    expected_name = f"codex_blender_addon_v{version}.zip"
+    if output_path.name != expected_name:
+        raise AssertionError(f"Unexpected package filename: {output_path.name}")
     with zipfile.ZipFile(output_path) as archive:
         names = archive.namelist()
     if names != ["codex_blender_addon.py"]:

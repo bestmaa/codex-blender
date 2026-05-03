@@ -150,6 +150,12 @@ For common local setup and runtime issues, see:
 docs/troubleshooting.md
 ```
 
+For release ZIP packaging, see:
+
+```text
+docs/release-packaging.md
+```
+
 Create a starter room:
 
 ```powershell

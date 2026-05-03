@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import zipfile
 from pathlib import Path
 
@@ -22,6 +23,8 @@ def read_version() -> str:
 
 def package_addon(version: str | None = None) -> Path:
     version = version or read_version()
+    if not re.fullmatch(r"\d+\.\d+\.\d+", version):
+        raise ValueError(f"Version must use MAJOR.MINOR.PATCH format: {version}")
     DIST_DIR.mkdir(parents=True, exist_ok=True)
     output_path = DIST_DIR / f"codex_blender_addon_v{version}.zip"
 

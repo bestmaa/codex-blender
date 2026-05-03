@@ -634,7 +634,7 @@ Commit:
 
 ### 26. v0.37 Packaging Polish
 
-Status: pending
+Status: completed
 
 Goal:
 Ensure add-on packaging is reliable for users.
