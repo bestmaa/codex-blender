@@ -13,3 +13,4 @@ examples/dev/*
 !examples/dev/README.md
 assets/references/dev/*
 !assets/references/dev/README.md
+assets/models/generated/

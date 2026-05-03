@@ -165,6 +165,20 @@ After generation:
 5. Set camera and render a preview.
 6. Add a manifest entry only when the user wants to keep the generated asset.
 
+Use the import workflow runner when Blender bridge is already running:
+
+```powershell
+python scripts\run_image_to_3d_import_workflow.py examples\image-to-3d\mock_import_workflow_job.json
+```
+
+The mock workflow copies `assets/models/sample_pyramid.obj` to the generated output path, imports it into Blender, fits it to the requested bounds, sets a camera, and renders the preview named by `import_options.preview_output`.
+
+Inspect the workflow plan without touching Blender:
+
+```powershell
+python scripts\run_image_to_3d_import_workflow.py examples\image-to-3d\mock_import_workflow_job.json --dry-run
+```
+
 ## Limitations
 
 Image-to-3D output can have bad topology, missing backsides, warped proportions, baked artifacts, poor UVs, or unusable materials. It usually needs manual cleanup, retopology, remeshing, material work, and scale adjustment before production use.

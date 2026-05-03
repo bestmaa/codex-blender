@@ -1,0 +1,27 @@
+{
+  "provider": "local_mock",
+  "input_image": "assets/references/modern_table_reference.png",
+  "prompt": "Use the local sample model as a mock generated model for import workflow testing.",
+  "output": "assets/models/generated/mock_generated_pyramid.obj",
+  "quality": "draft",
+  "mock_output_from": "assets/models/sample_pyramid.obj",
+  "wait_seconds": 10,
+  "metadata_output": "assets/models/generated/mock_generated_pyramid.metadata.json",
+  "import_options": {
+    "import_after_generate": true,
+    "location": [0, 0, 0],
+    "rotation": [0, 0, 0],
+    "scale": 1.0,
+    "fit_to_bounds": true,
+    "target_size": [1.6, 1.6, 1.4],
+    "target_location": [0, 0, 0],
+    "align_to_floor": true,
+    "render_preview": true,
+    "preview_output": "renders/image_to_3d_mock_import.png",
+    "camera_location": [3.2, -4.2, 2.4],
+    "camera_target": [0, 0, 0.7],
+    "camera_lens": 45,
+    "resolution": [960, 540],
+    "samples": 16
+  }
+}

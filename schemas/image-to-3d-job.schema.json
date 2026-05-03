@@ -61,6 +61,15 @@
       "minLength": 1,
       "description": "Optional provider endpoint for cloud adapter implementations."
     },
+    "mock_output_from": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Optional project-relative model copied by the import workflow for local mock tests."
+    },
+    "wait_seconds": {
+      "type": "number",
+      "minimum": 0
+    },
     "metadata_output": {
       "type": "string",
       "description": "Optional metadata JSON output path."
@@ -88,7 +97,12 @@
         "target_location": {"type": "array", "items": {"type": "number"}, "minItems": 3, "maxItems": 3},
         "align_to_floor": {"type": "boolean"},
         "render_preview": {"type": "boolean"},
-        "preview_output": {"type": "string"}
+        "preview_output": {"type": "string"},
+        "camera_location": {"type": "array", "items": {"type": "number"}, "minItems": 3, "maxItems": 3},
+        "camera_target": {"type": "array", "items": {"type": "number"}, "minItems": 3, "maxItems": 3},
+        "camera_lens": {"type": "number", "minimum": 1},
+        "resolution": {"type": "array", "items": {"type": "integer"}, "minItems": 2, "maxItems": 2},
+        "samples": {"type": "integer", "minimum": 1}
       }
     }
   }

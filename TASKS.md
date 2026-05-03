@@ -1509,7 +1509,7 @@ Commit:
 
 ### 69. v1.4.4 Image-To-3D Import Workflow
 
-Status: pending
+Status: completed
 
 Goal:
 Import generated `.glb`/`.obj` output back into Blender automatically.
