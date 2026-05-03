@@ -9,3 +9,5 @@ build/
 renders/
 scenes/
 exports/
+examples/dev/*
+!examples/dev/README.md
