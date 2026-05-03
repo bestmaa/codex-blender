@@ -30,6 +30,7 @@ REQUIRED_FILES = [
     "scripts/generate_procedural_texture.py",
     "scripts/register_user_texture.py",
     "scripts/create_contact_sheet.py",
+    "scripts/compare_images.py",
     "scripts/package_addon.py",
     "scripts/smoke_test_bridge.py",
     "scripts/smoke_test_blendermcp.py",
@@ -93,6 +94,7 @@ REQUIRED_FILES = [
     "examples/textures/generate_wood_texture.json",
     "examples/textures/register_user_texture.json",
     "examples/compare/contact_sheet.json",
+    "examples/compare/metrics.json",
     "docs/quickstart-demo.md",
     "docs/commands.md",
     "docs/mcp-tools.md",
@@ -119,6 +121,7 @@ PYTHON_FILES = [
     "scripts/generate_procedural_texture.py",
     "scripts/register_user_texture.py",
     "scripts/create_contact_sheet.py",
+    "scripts/compare_images.py",
     "scripts/package_addon.py",
     "scripts/smoke_test_bridge.py",
     "scripts/smoke_test_blendermcp.py",
@@ -138,6 +141,7 @@ JSON_FILES = [
     "examples/textures/generate_wood_texture.json",
     "examples/textures/register_user_texture.json",
     "examples/compare/contact_sheet.json",
+    "examples/compare/metrics.json",
     "examples/create_room.json",
     "examples/create_outdoor_scene.json",
     "examples/render_outdoor_scene.json",
@@ -699,6 +703,39 @@ def check_contact_sheet_generator() -> None:
     metadata.unlink()
 
 
+def check_image_difference_metrics() -> None:
+    output = project_path("renders/compare/reports/validation_metrics.json")
+    if output.exists():
+        output.unlink()
+    completed = subprocess.run(
+        [
+            sys.executable,
+            str(project_path("scripts/compare_images.py")),
+            str(project_path("assets/icon.png")),
+            str(project_path("assets/logo.png")),
+            "--output",
+            str(output),
+            "--bins",
+            "8",
+        ],
+        cwd=ROOT,
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        check=False,
+    )
+    if completed.returncode != 0:
+        raise AssertionError(f"Image difference metrics failed: {completed.stderr}")
+    payload = json.loads(completed.stdout)
+    if not payload.get("ok") or "histogram_l1_distance" not in payload:
+        raise AssertionError("Image difference metrics did not include histogram_l1_distance")
+    if "semantic" in payload.get("note", "").lower() and "not" not in payload.get("note", "").lower():
+        raise AssertionError("Image difference metrics must not imply semantic accuracy")
+    if not output.exists():
+        raise AssertionError("Image difference metrics did not write output JSON")
+    output.unlink()
+
+
 def check_mcp_tool_coverage() -> None:
     mcp_source = project_path("scripts/codex_blender_mcp.py").read_text(encoding="utf-8")
     declared_tools = set(re.findall(r'"name": "(blender_[^"]+)"', mcp_source))
@@ -804,6 +841,7 @@ def main() -> int:
         ("procedural texture generator", check_procedural_texture_generator),
         ("user texture registration", check_user_texture_registration),
         ("contact sheet generator", check_contact_sheet_generator),
+        ("image difference metrics", check_image_difference_metrics),
         ("MCP tool coverage", check_mcp_tool_coverage),
         ("repository hygiene", check_repository_hygiene),
         ("package ZIP", check_package_zip),

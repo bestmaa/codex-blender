@@ -1,0 +1,7 @@
+{
+  "reference": "assets/references/modern_table_reference.png",
+  "render": "assets/logo.png",
+  "output": "renders/compare/reports/table_metrics_v001.json",
+  "bins": 16,
+  "crop": null
+}

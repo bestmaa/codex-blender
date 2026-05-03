@@ -1641,7 +1641,7 @@ Commit:
 
 ### 76. v1.6.2 Basic Image Difference Metrics
 
-Status: pending
+Status: completed
 
 Goal:
 Provide simple numeric feedback for reference matching.

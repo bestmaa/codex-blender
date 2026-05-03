@@ -92,3 +92,11 @@ python scripts\create_contact_sheet.py assets\references\modern_table_reference.
 ```
 
 The script writes the combined PNG plus optional JSON metadata containing source paths, labels, output size, and gap.
+
+Compute rough non-semantic image metrics:
+
+```powershell
+python scripts\compare_images.py assets\references\modern_table_reference.png renders\image_to_3d_mock_import.png --output renders\compare\reports\table_metrics_v001.json
+```
+
+The metrics include dimensions, average RGB delta, and simple RGB histogram distance. Use them as a rough change signal only; they do not understand object identity, style, or whether a model is actually correct.
