@@ -27,6 +27,7 @@ It cannot turn any arbitrary image into a perfect production 3D model by itself.
 - Create a composed furniture set scene.
 - Create reusable room layout presets.
 - List local model, texture, and reference assets.
+- Maintain a searchable local asset manifest with paths, tags, license/source notes, previews, and scale hints.
 - Fit and place imported assets inside target bounds.
 - Inspect current scene objects before editing.
 - Move, rotate, scale, and resize named scene objects.
@@ -108,7 +109,7 @@ https://github.com/bestmaa/codex-blender/releases
 Download the current versioned ZIP, for example:
 
 ```text
-codex_blender_addon_v1.2.4.zip
+codex_blender_addon_v1.3.0.zip
 ```
 
 Or build it locally:
@@ -236,6 +237,12 @@ For included demo assets, see:
 
 ```text
 docs/demo-assets.md
+```
+
+For the local asset manifest format, see:
+
+```text
+docs/asset-library.md
 ```
 
 For beta release notes, see:
@@ -874,7 +881,7 @@ Save scene:
 
 ## Supported Actions
 
-Supported v1.2.4 actions:
+Supported v1.3.0 actions:
 
 - `ping`
 - `create_room`

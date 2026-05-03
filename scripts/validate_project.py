@@ -69,6 +69,8 @@ REQUIRED_FILES = [
     "examples/blendermcp/save_scene.json",
     "examples/blendermcp/unsupported_delete_object.json",
     "assets/models/sample_pyramid.obj",
+    "assets/library.json",
+    "docs/asset-library.md",
     "docs/quickstart-demo.md",
     "docs/commands.md",
     "docs/mcp-tools.md",
@@ -99,6 +101,7 @@ JSON_FILES = [
     ".codex-plugin/plugin.json",
     ".mcp.json",
     ".agents/plugins/marketplace.json",
+    "assets/library.json",
     "examples/create_room.json",
     "examples/create_outdoor_scene.json",
     "examples/render_outdoor_scene.json",
@@ -324,6 +327,51 @@ def check_blendermcp_adapter_examples() -> None:
         raise AssertionError("Unsupported BlenderMCP payload did not return a clear compatibility error")
 
 
+def check_asset_library_manifest() -> None:
+    manifest = json.loads(project_path("assets/library.json").read_text(encoding="utf-8"))
+    if manifest.get("schema_version") != "1.0":
+        raise AssertionError("Asset library schema_version must be 1.0")
+    assets = manifest.get("assets")
+    if not isinstance(assets, list) or not assets:
+        raise AssertionError("Asset library must contain a non-empty assets list")
+
+    seen_ids = set()
+    allowed_types = {"model", "texture", "reference"}
+    required_fields = {"id", "name", "type", "tags", "path", "scale_hints", "license", "source", "preview_path"}
+    for index, asset in enumerate(assets, start=1):
+        if not isinstance(asset, dict):
+            raise AssertionError(f"Asset entry {index} must be an object")
+        missing = sorted(required_fields - set(asset))
+        if missing:
+            raise AssertionError(f"Asset entry {index} missing fields: " + ", ".join(missing))
+        asset_id = asset["id"]
+        if not isinstance(asset_id, str) or not asset_id:
+            raise AssertionError(f"Asset entry {index} has invalid id")
+        if asset_id in seen_ids:
+            raise AssertionError(f"Duplicate asset id: {asset_id}")
+        seen_ids.add(asset_id)
+        if asset["type"] not in allowed_types:
+            raise AssertionError(f"Asset {asset_id} has unsupported type {asset['type']}")
+        if not isinstance(asset["tags"], list) or not all(isinstance(tag, str) and tag for tag in asset["tags"]):
+            raise AssertionError(f"Asset {asset_id} tags must be non-empty strings")
+        for path_key in ("path", "preview_path"):
+            value = asset[path_key]
+            if not isinstance(value, str) or not value:
+                raise AssertionError(f"Asset {asset_id} {path_key} must be a non-empty string")
+            if Path(value).is_absolute():
+                raise AssertionError(f"Asset {asset_id} {path_key} must be project-relative")
+            if not project_path(value).exists():
+                raise AssertionError(f"Asset {asset_id} {path_key} does not exist: {value}")
+        scale_hints = asset["scale_hints"]
+        if not isinstance(scale_hints, dict):
+            raise AssertionError(f"Asset {asset_id} scale_hints must be an object")
+        if not isinstance(scale_hints.get("default_scale"), (int, float)):
+            raise AssertionError(f"Asset {asset_id} scale_hints.default_scale must be numeric")
+        target_size = scale_hints.get("target_size")
+        if not isinstance(target_size, list) or len(target_size) != 3:
+            raise AssertionError(f"Asset {asset_id} scale_hints.target_size must be [x, y, z]")
+
+
 def check_mcp_tool_coverage() -> None:
     mcp_source = project_path("scripts/codex_blender_mcp.py").read_text(encoding="utf-8")
     declared_tools = set(re.findall(r'"name": "(blender_[^"]+)"', mcp_source))
@@ -417,6 +465,7 @@ def main() -> int:
         ("README paths", check_readme_paths),
         ("bridge path normalization", check_bridge_path_normalization),
         ("BlenderMCP adapter examples", check_blendermcp_adapter_examples),
+        ("asset library manifest", check_asset_library_manifest),
         ("MCP tool coverage", check_mcp_tool_coverage),
         ("repository hygiene", check_repository_hygiene),
         ("package ZIP", check_package_zip),

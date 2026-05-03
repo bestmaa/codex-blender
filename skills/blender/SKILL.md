@@ -59,6 +59,8 @@ Put texture files under `assets/textures/`. Use `apply_texture_material` for use
 
 Put importable models under `assets/models/`. Use `import_asset`, then `fit_object_to_bounds` if the imported object is too large, too small, or not aligned to the floor. Use `export_glb` for reusable scene/model exchange and `export_obj` when a simple mesh export is enough.
 
+Use `assets/library.json` as the stable local asset manifest. It records searchable names, types, tags, paths, preview paths, license/source notes, and scale hints for models, textures, and references.
+
 ### Render And Save
 
 Use `set_render_preset` before `render_scene` when speed or quality matters. Use `save_blend` after creating or editing a useful scene.

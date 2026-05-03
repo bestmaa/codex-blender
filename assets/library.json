@@ -1,0 +1,50 @@
+{
+  "schema_version": "1.0",
+  "assets": [
+    {
+      "id": "sample_pyramid_obj",
+      "name": "Sample Pyramid OBJ",
+      "type": "model",
+      "tags": ["sample", "primitive", "obj", "demo"],
+      "path": "assets/models/sample_pyramid.obj",
+      "scale_hints": {
+        "unit": "blender_unit",
+        "default_scale": 1.0,
+        "target_size": [1.0, 1.0, 1.0]
+      },
+      "license": "Project sample asset",
+      "source": "Codex Blender repository",
+      "preview_path": "assets/icon.png"
+    },
+    {
+      "id": "oak_wood_basecolor",
+      "name": "Oak Wood Base Color",
+      "type": "texture",
+      "tags": ["wood", "oak", "basecolor", "texture"],
+      "path": "assets/textures/oak_wood_basecolor.png",
+      "scale_hints": {
+        "unit": "texture_repeat",
+        "default_scale": 1.0,
+        "target_size": [2.0, 2.0, 0.0]
+      },
+      "license": "Project sample asset",
+      "source": "Codex Blender repository",
+      "preview_path": "assets/textures/oak_wood_basecolor.png"
+    },
+    {
+      "id": "modern_table_reference",
+      "name": "Modern Table Reference",
+      "type": "reference",
+      "tags": ["table", "reference", "product", "image"],
+      "path": "assets/references/modern_table_reference.png",
+      "scale_hints": {
+        "unit": "reference_plane",
+        "default_scale": 1.0,
+        "target_size": [3.0, 2.0, 0.0]
+      },
+      "license": "Project sample asset",
+      "source": "Codex Blender repository",
+      "preview_path": "assets/references/modern_table_reference.png"
+    }
+  ]
+}
