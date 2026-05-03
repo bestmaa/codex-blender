@@ -15,3 +15,5 @@ Each asset entry must include:
 - `preview_path`: project-relative preview image path.
 
 Generated renders, exports, scenes, and development-only reference files should not be listed in the stable manifest.
+
+Use `search_assets` or the `blender_search_assets` MCP tool to query this manifest by name, type, tag, extension, or general text.

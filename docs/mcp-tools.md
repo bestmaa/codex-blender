@@ -21,6 +21,7 @@ The MCP server in `scripts/codex_blender_mcp.py` exposes stable tools for normal
 | `create_room_layout` | `blender_create_room_layout` |
 | `list_procedural_catalog` | `blender_list_procedural_catalog` |
 | `list_assets` | `blender_list_assets` |
+| `search_assets` | `blender_search_assets` |
 | `fit_object_to_bounds` | `blender_fit_object_to_bounds` |
 | `inspect_scene` | `blender_inspect_scene` |
 | `transform_object` | `blender_transform_object` |

@@ -367,6 +367,19 @@ TOOLS = [
         ),
     },
     {
+        "name": "blender_search_assets",
+        "description": "Search assets/library.json by query, type, tag, and file extension.",
+        "inputSchema": json_schema(
+            {
+                "query": {"type": "string", "description": "Search terms matched against id, name, type, path, and tags.", "default": ""},
+                "type": {"type": "string", "description": "Optional asset type: model, texture, or reference."},
+                "tag": {"type": "string", "description": "Optional single tag filter."},
+                "extension": {"type": "string", "description": "Optional file extension filter, for example obj or png."},
+                "limit": {"type": "integer", "description": "Maximum number of results.", "default": 20},
+            }
+        ),
+    },
+    {
         "name": "blender_fit_object_to_bounds",
         "description": "Scale and place an object inside target bounds, optionally aligning its bottom to the floor.",
         "inputSchema": json_schema(
@@ -1040,6 +1053,15 @@ def call_tool(name: str, arguments: dict[str, Any]) -> tuple[dict[str, Any], boo
             "extension": arguments.get("extension"),
         }
         result = call_http("/command", {"action": "list_assets", "params": params})
+    elif name == "blender_search_assets":
+        params = {
+            "query": arguments.get("query", ""),
+            "type": arguments.get("type"),
+            "tag": arguments.get("tag"),
+            "extension": arguments.get("extension"),
+            "limit": arguments.get("limit", 20),
+        }
+        result = call_http("/command", {"action": "search_assets", "params": params})
     elif name == "blender_fit_object_to_bounds":
         params = {
             "object": arguments.get("object"),
@@ -1224,7 +1246,7 @@ def handle_request(message: dict[str, Any]) -> dict[str, Any] | None:
             {
                 "protocolVersion": "2024-11-05",
                 "capabilities": {"tools": {}},
-                "serverInfo": {"name": "codex-blender", "version": "1.3.0"},
+                "serverInfo": {"name": "codex-blender", "version": "1.3.1"},
             },
         )
     if method == "tools/list":

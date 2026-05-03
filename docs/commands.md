@@ -49,6 +49,7 @@ Successful responses always include `"ok": true`. Failed responses include `"ok"
 | Action | Params And Defaults | Success Shape |
 | --- | --- | --- |
 | `list_assets` | optional `type`, optional `extension`; types: `model`, `texture`, `reference` | `{ok, message, assets, count}` |
+| `search_assets` | `query=""`, optional `type`, optional `tag`, optional `extension`, `limit=20`; searches `assets/library.json` | `{ok, message, assets, count}` |
 | `import_asset` | `path` required, `location=[0,0,0]`, `rotation=[0,0,0]`, `scale=1.0`; supports `.glb`, `.gltf`, `.fbx`, `.obj` | `{ok, message, path, objects}` |
 | `fit_object_to_bounds` | `object` required, `target_size=[1,1,1]`, `target_location=[0,0,0]`, `align_to_floor=true` | `{ok, message, object, dimensions, location}` |
 

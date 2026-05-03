@@ -1,0 +1,9 @@
+{
+  "action": "search_assets",
+  "params": {
+    "query": "oak wood",
+    "type": "texture",
+    "extension": "png",
+    "limit": 10
+  }
+}

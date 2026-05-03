@@ -1,7 +1,7 @@
 bl_info = {
     "name": "Codex Blender Bridge",
     "author": "Aditya",
-    "version": (1, 3, 0),
+    "version": (1, 3, 1),
     "blender": (3, 6, 0),
     "location": "View3D > Sidebar > Codex",
     "description": "Local HTTP bridge for sending Codex commands to Blender.",
@@ -1149,6 +1149,63 @@ def action_list_assets(params):
             )
 
     return make_result(True, message="Listed assets.", assets=assets, count=len(assets))
+
+
+def read_asset_library():
+    path = get_project_root() / "assets" / "library.json"
+    if not path.exists():
+        raise FileNotFoundError(f"Asset library not found: {path}")
+    data = json.loads(path.read_text(encoding="utf-8"))
+    assets = data.get("assets", [])
+    if not isinstance(assets, list):
+        raise ValueError("assets/library.json assets must be a list")
+    return assets
+
+
+def action_search_assets(params):
+    query = params.get("query", "")
+    if not isinstance(query, str):
+        raise ValueError("params.query must be a string")
+    asset_type = params.get("type")
+    if asset_type is not None and not isinstance(asset_type, str):
+        raise ValueError("params.type must be a string")
+    tag = params.get("tag")
+    if tag is not None and not isinstance(tag, str):
+        raise ValueError("params.tag must be a string")
+    extension = params.get("extension")
+    if extension is not None and not isinstance(extension, str):
+        raise ValueError("params.extension must be a string")
+    limit = get_int(params, "limit", 20, minimum=1, maximum=100)
+
+    query_terms = [term for term in query.lower().split() if term]
+    selected_type = asset_type.lower() if asset_type else None
+    selected_tag = tag.lower() if tag else None
+    selected_extension = extension.lower().lstrip(".") if extension else None
+    results = []
+    for asset in read_asset_library():
+        haystack = " ".join(
+            [
+                asset.get("id", ""),
+                asset.get("name", ""),
+                asset.get("type", ""),
+                asset.get("path", ""),
+                " ".join(asset.get("tags", [])),
+            ]
+        ).lower()
+        tags = [item.lower() for item in asset.get("tags", [])]
+        suffix = Path(asset.get("path", "")).suffix.lower().lstrip(".")
+        if query_terms and not all(term in haystack for term in query_terms):
+            continue
+        if selected_type and selected_type not in {asset.get("type", "").lower(), asset.get("type", "").lower() + "s"}:
+            continue
+        if selected_tag and selected_tag not in tags:
+            continue
+        if selected_extension and selected_extension != suffix:
+            continue
+        results.append(asset)
+        if len(results) >= limit:
+            break
+    return make_result(True, message="Searched asset library.", assets=results, count=len(results))
 
 
 def add_tree(index, x, y, trunk_mat, leaf_mat, height_offset=0.0, variant="pine"):
@@ -2730,6 +2787,8 @@ def execute_command(payload):
         return action_create_room_layout(params)
     if action == "list_assets":
         return action_list_assets(params)
+    if action == "search_assets":
+        return action_search_assets(params)
     if action == "inspect_rig":
         return action_inspect_rig(params)
     if action == "render_scene":

@@ -27,7 +27,7 @@ It cannot turn any arbitrary image into a perfect production 3D model by itself.
 - Create a composed furniture set scene.
 - Create reusable room layout presets.
 - List local model, texture, and reference assets.
-- Maintain a searchable local asset manifest with paths, tags, license/source notes, previews, and scale hints.
+- Maintain and search a local asset manifest with paths, tags, license/source notes, previews, and scale hints.
 - Fit and place imported assets inside target bounds.
 - Inspect current scene objects before editing.
 - Move, rotate, scale, and resize named scene objects.
@@ -109,7 +109,7 @@ https://github.com/bestmaa/codex-blender/releases
 Download the current versioned ZIP, for example:
 
 ```text
-codex_blender_addon_v1.3.0.zip
+codex_blender_addon_v1.3.1.zip
 ```
 
 Or build it locally:
@@ -219,6 +219,7 @@ python bridge\codex_blender_bridge.py examples\create_primitive_library.json
 python bridge\codex_blender_bridge.py examples\create_furniture_presets.json
 python bridge\codex_blender_bridge.py examples\create_architecture_presets.json
 python bridge\codex_blender_bridge.py examples\list_procedural_catalog.json
+python bridge\codex_blender_bridge.py examples\search_assets.json
 python bridge\codex_blender_bridge.py examples\create_furniture_set.json
 python bridge\codex_blender_bridge.py examples\add_reference_image.json
 python bridge\codex_blender_bridge.py examples\setup_compare_view.json
@@ -364,6 +365,7 @@ List local assets:
 
 ```powershell
 python bridge\codex_blender_bridge.py examples\list_assets.json
+python bridge\codex_blender_bridge.py examples\search_assets.json
 ```
 
 Fit the sample imported asset:
@@ -881,7 +883,7 @@ Save scene:
 
 ## Supported Actions
 
-Supported v1.3.0 actions:
+Supported v1.3.1 actions:
 
 - `ping`
 - `create_room`
@@ -898,6 +900,7 @@ Supported v1.3.0 actions:
 - `create_furniture_set`
 - `create_room_layout`
 - `list_assets`
+- `search_assets`
 - `fit_object_to_bounds`
 - `inspect_scene`
 - `transform_object`
@@ -947,6 +950,7 @@ When connected as a Codex plugin/MCP server, it exposes:
 - `blender_create_furniture_set`
 - `blender_create_room_layout`
 - `blender_list_assets`
+- `blender_search_assets`
 - `blender_fit_object_to_bounds`
 - `blender_inspect_scene`
 - `blender_transform_object`
