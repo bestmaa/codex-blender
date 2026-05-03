@@ -1180,3 +1180,576 @@ Verify:
 
 Commit:
 `Release v1.0.0`
+
+### 52. v1.1.0 BlenderMCP Compatibility Research
+
+Status: pending
+
+Goal:
+Define what "BlenderMCP-compatible" means for this project before writing adapters.
+
+Scope:
+- Review common BlenderMCP-style command/tool names.
+- Map likely commands to existing bridge actions.
+- Identify commands that require new generic object/material/light helpers.
+- Add `docs/blendermcp-compatibility.md`.
+
+Verify:
+- Compatibility doc lists supported, mapped, and unsupported command families.
+- Validation passes.
+
+Commit:
+`Document BlenderMCP compatibility plan`
+
+### 53. v1.1.1 BlenderMCP Payload Adapter
+
+Status: pending
+
+Goal:
+Accept BlenderMCP-style payloads and translate safe ones into bridge actions.
+
+Scope:
+- Add adapter module/function for payload translation.
+- Support health/ping, scene inspect, primitive create, render, save where practical.
+- Return clear errors for unsupported payloads.
+- Add examples under `examples/blendermcp/`.
+
+Verify:
+- Adapter unit/example checks pass.
+- Validation passes.
+
+Commit:
+`Add BlenderMCP payload adapter`
+
+### 54. v1.1.2 BlenderMCP Raw Tool Bridge
+
+Status: pending
+
+Goal:
+Expose compatibility through MCP and terminal workflows.
+
+Scope:
+- Add MCP tool for compatible raw BlenderMCP payloads.
+- Add terminal example for translated payload.
+- Document when to use compatibility vs native actions.
+
+Verify:
+- MCP initializes.
+- Tool list includes compatibility tool.
+- Validation passes.
+
+Commit:
+`Expose BlenderMCP compatibility tool`
+
+### 55. v1.1.3 BlenderMCP Compatibility Smoke Test
+
+Status: pending
+
+Goal:
+Prove compatibility layer works against a running Blender bridge.
+
+Scope:
+- Add optional smoke test for compatibility payloads.
+- Include inspect, create simple primitive, render, and save.
+- Keep test optional and documented.
+
+Verify:
+- Smoke test succeeds against live bridge.
+- Validation passes.
+
+Commit:
+`Add BlenderMCP compatibility smoke test`
+
+### 56. v1.2.0 Procedural Primitive Library
+
+Status: pending
+
+Goal:
+Add better reusable procedural primitive helpers for future models.
+
+Scope:
+- Add actions/helpers for bevelled boxes, cylinders, cones, planes, labels, panels, and simple glass.
+- Standardize naming, materials, transforms, and dimensions.
+- Add examples.
+
+Verify:
+- Examples create expected objects.
+- Validation passes.
+
+Commit:
+`Add procedural primitive library`
+
+### 57. v1.2.1 Procedural Furniture Expansion
+
+Status: pending
+
+Goal:
+Expand built-in furniture generation beyond the initial v1 set.
+
+Scope:
+- Add reusable shelf, cabinet, desk, bed, door, window, and wall art actions or presets.
+- Include basic material and size params.
+- Add examples and README entries.
+
+Verify:
+- New examples run against live bridge.
+- Validation passes.
+
+Commit:
+`Expand procedural furniture library`
+
+### 58. v1.2.2 Procedural Architecture Expansion
+
+Status: pending
+
+Goal:
+Add room and building-detail primitives for richer scenes.
+
+Scope:
+- Add walls with openings, floor tiles, ceiling panels, stairs, railings, and simple facade elements.
+- Keep geometry procedural and lightweight.
+- Add examples.
+
+Verify:
+- Architecture examples run.
+- Validation passes.
+
+Commit:
+`Expand procedural architecture library`
+
+### 59. v1.2.3 Procedural Outdoor Expansion
+
+Status: pending
+
+Goal:
+Improve outdoor scene generation.
+
+Scope:
+- Add sidewalk, curb, road markings, benches, signs, bushes, rocks, and varied trees.
+- Add params for density and style.
+- Add render example.
+
+Verify:
+- Outdoor example runs and renders.
+- Validation passes.
+
+Commit:
+`Expand procedural outdoor library`
+
+### 60. v1.2.4 Procedural Library Catalog
+
+Status: pending
+
+Goal:
+Make procedural assets discoverable from Codex and terminal.
+
+Scope:
+- Add action to list procedural presets/assets.
+- Document categories and params.
+- Add MCP wrapper if useful.
+
+Verify:
+- Catalog command returns expected categories.
+- Validation passes.
+
+Commit:
+`Add procedural asset catalog`
+
+### 61. v1.3.0 Asset Library Manifest
+
+Status: pending
+
+Goal:
+Create a searchable local asset library format.
+
+Scope:
+- Add `assets/library.json` schema or index.
+- Include name, type, tags, path, scale hints, license/source, preview path.
+- Add validation for manifest paths.
+
+Verify:
+- Manifest validation passes.
+- Validation passes.
+
+Commit:
+`Add asset library manifest`
+
+### 62. v1.3.1 Asset Search Action
+
+Status: pending
+
+Goal:
+Search local assets by name, tag, type, and extension.
+
+Scope:
+- Add bridge action for asset search.
+- Add MCP wrapper.
+- Add examples.
+
+Verify:
+- Search returns known sample assets.
+- Validation passes.
+
+Commit:
+`Add asset search action`
+
+### 63. v1.3.2 Asset Import From Search
+
+Status: pending
+
+Goal:
+Make search-to-import workflow easy.
+
+Scope:
+- Add action to import by asset library id/name.
+- Apply scale/location hints.
+- Fit to bounds when requested.
+
+Verify:
+- Import-by-id example runs.
+- Validation passes.
+
+Commit:
+`Add asset library import workflow`
+
+### 64. v1.3.3 Asset Preview And Metadata Docs
+
+Status: pending
+
+Goal:
+Document how users should add their own models, textures, and previews.
+
+Scope:
+- Add docs for asset folders, manifest entries, previews, tags, and licenses.
+- Link from README.
+
+Verify:
+- README links resolve.
+- Validation passes.
+
+Commit:
+`Document asset library workflow`
+
+### 65. v1.4.0 Image-To-3D Integration Plan
+
+Status: pending
+
+Goal:
+Design a provider-neutral image-to-3D integration before adding any vendor-specific code.
+
+Scope:
+- Add `docs/image-to-3d.md`.
+- Define local provider and cloud provider interface.
+- Document expected inputs, outputs, costs, GPU/API-key requirements, and limitations.
+- Keep default behavior offline/safe.
+
+Verify:
+- Docs explain provider setup and limitations clearly.
+- Validation passes.
+
+Commit:
+`Document image-to-3D integration plan`
+
+### 66. v1.4.1 Image-To-3D Job Schema
+
+Status: pending
+
+Goal:
+Add a job file format for image-to-3D generation requests.
+
+Scope:
+- Add JSON schema/examples for image path, provider, prompt, output path, quality, and import options.
+- Add validation for examples.
+
+Verify:
+- Job examples validate.
+- Validation passes.
+
+Commit:
+`Add image-to-3D job schema`
+
+### 67. v1.4.2 Local Image-To-3D Provider Stub
+
+Status: pending
+
+Goal:
+Add a safe local provider interface without requiring heavy model dependencies.
+
+Scope:
+- Add provider stub that explains missing setup and expected command.
+- Support configurable executable/command path.
+- Do not bundle large AI models.
+
+Verify:
+- Missing-provider error is actionable.
+- Validation passes.
+
+Commit:
+`Add local image-to-3D provider stub`
+
+### 68. v1.4.3 Cloud Image-To-3D Provider Adapter
+
+Status: pending
+
+Goal:
+Add optional cloud-provider adapter pattern for image-to-3D.
+
+Scope:
+- Add provider interface and one documented placeholder adapter.
+- Use env vars for API keys.
+- Avoid committing secrets.
+- Add dry-run mode.
+
+Verify:
+- Dry-run works without API key.
+- Validation passes.
+
+Commit:
+`Add cloud image-to-3D adapter pattern`
+
+### 69. v1.4.4 Image-To-3D Import Workflow
+
+Status: pending
+
+Goal:
+Import generated `.glb`/`.obj` output back into Blender automatically.
+
+Scope:
+- Add command that runs provider, waits for output, imports model, fits bounds, sets camera, and renders preview.
+- Add example job.
+
+Verify:
+- Workflow works with a local sample/mock generated model.
+- Validation passes.
+
+Commit:
+`Add image-to-3D import workflow`
+
+### 70. v1.5.0 Texture Generation Plan
+
+Status: pending
+
+Goal:
+Define how generated or user-provided textures should enter the Blender workflow.
+
+Scope:
+- Add docs for texture sources, generated maps, naming, and storage.
+- Explain offline/manual/cloud options.
+- Link from README.
+
+Verify:
+- Docs are linked.
+- Validation passes.
+
+Commit:
+`Document texture generation workflow`
+
+### 71. v1.5.1 Procedural Texture Generator
+
+Status: pending
+
+Goal:
+Generate simple local bitmap textures without external AI dependencies.
+
+Scope:
+- Add script/action to create wood, fabric, stone, noise, and stripe basecolor textures.
+- Save under `assets/textures/` or ignored generated texture folder.
+- Add examples.
+
+Verify:
+- Generated textures can be applied to an object.
+- Validation passes.
+
+Commit:
+`Add procedural texture generator`
+
+### 72. v1.5.2 Material Recipe System
+
+Status: pending
+
+Goal:
+Create reusable material recipes that combine texture maps and shader settings.
+
+Scope:
+- Add material recipe JSON format.
+- Add apply-material-recipe action.
+- Include wood, fabric, metal, glass, plastic recipes.
+
+Verify:
+- Recipe example applies to an object.
+- Validation passes.
+
+Commit:
+`Add material recipe system`
+
+### 73. v1.5.3 Texture From Image Workflow
+
+Status: pending
+
+Goal:
+Improve workflow for user-provided image textures.
+
+Scope:
+- Add helper to copy/register user texture images.
+- Add guidance for scale/projection tuning.
+- Add example applying a user texture to a generated model.
+
+Verify:
+- Example applies texture and renders.
+- Validation passes.
+
+Commit:
+`Add user texture registration workflow`
+
+### 74. v1.6.0 Render Comparison Plan
+
+Status: pending
+
+Goal:
+Design a better reference-vs-render comparison loop.
+
+Scope:
+- Add docs for reference image, camera, render, compare, adjust loop.
+- Define comparison output folder and naming.
+- Link from README.
+
+Verify:
+- Docs are linked.
+- Validation passes.
+
+Commit:
+`Document render comparison loop`
+
+### 75. v1.6.1 Side-By-Side Contact Sheet
+
+Status: pending
+
+Goal:
+Generate a side-by-side comparison image from reference and render files.
+
+Scope:
+- Add script to create contact sheet PNG.
+- Support labels and simple metadata.
+- Add example command.
+
+Verify:
+- Contact sheet generates from existing sample images.
+- Validation passes.
+
+Commit:
+`Add render comparison contact sheet`
+
+### 76. v1.6.2 Basic Image Difference Metrics
+
+Status: pending
+
+Goal:
+Provide simple numeric feedback for reference matching.
+
+Scope:
+- Add lightweight image comparison script.
+- Compute dimensions, rough color histogram difference, and optional crop support.
+- Avoid pretending it is semantic accuracy.
+
+Verify:
+- Metrics script runs on sample render/reference.
+- Validation passes.
+
+Commit:
+`Add basic render comparison metrics`
+
+### 77. v1.6.3 Iteration Report
+
+Status: pending
+
+Goal:
+Create a report after reference matching iterations.
+
+Scope:
+- Add script/action that records commands, renders, comparison sheets, and notes.
+- Save report under ignored generated folder.
+- Add docs.
+
+Verify:
+- Report script runs.
+- Validation passes.
+
+Commit:
+`Add render iteration report`
+
+### 78. v1.7.0 GitHub Release Checklist
+
+Status: pending
+
+Goal:
+Prepare repeatable GitHub release publishing.
+
+Scope:
+- Add `docs/github-release.md`.
+- Include branch, tag, push, release notes, and ZIP asset checklist.
+- Mention do not publish without user confirmation.
+
+Verify:
+- Docs are linked.
+- Validation passes.
+
+Commit:
+`Document GitHub release workflow`
+
+### 79. v1.7.1 Release Asset Verification
+
+Status: pending
+
+Goal:
+Verify ZIP release asset before publishing.
+
+Scope:
+- Add script/check for ZIP filename, contents, version, and size.
+- Optionally compute SHA256.
+- Document output.
+
+Verify:
+- Script verifies `dist/codex_blender_addon_v<VERSION>.zip`.
+- Validation passes.
+
+Commit:
+`Add release asset verification`
+
+### 80. v1.7.2 GitHub Release Draft Helper
+
+Status: pending
+
+Goal:
+Prepare release metadata without publishing automatically.
+
+Scope:
+- Add script or docs to generate release title/body from release notes.
+- Include ZIP path and checksum.
+- Keep actual GitHub publish manual/user-confirmed.
+
+Verify:
+- Draft metadata generates.
+- Validation passes.
+
+Commit:
+`Add GitHub release draft helper`
+
+### 81. v1.7.3 Publish GitHub Release
+
+Status: pending
+
+Goal:
+Publish GitHub release only when the user explicitly confirms.
+
+Scope:
+- Push branch and tag when requested.
+- Create GitHub release with ZIP asset when requested.
+- Confirm release URL.
+
+Verify:
+- GitHub release exists.
+- ZIP asset is attached.
+- Git status is clean.
+
+Commit:
+`Publish GitHub release`
