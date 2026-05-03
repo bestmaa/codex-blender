@@ -819,7 +819,7 @@ Commit:
 
 ### 35. v0.96 RC Bugfix Pass
 
-Status: pending
+Status: completed
 
 Goal:
 Fix release candidate bugs only.
