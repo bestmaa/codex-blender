@@ -1,6 +1,6 @@
-# v0.95.0 Release Candidate Notes
+# v0.97.0 Release Candidate Notes
 
-Codex Blender v0.95.0 is the release candidate stabilization point for the local Blender bridge before v1.0.
+Codex Blender v0.97.0 is the final packaging release candidate for the local Blender bridge before v1.0.
 
 ## Included Workflows
 
@@ -17,7 +17,7 @@ Codex Blender v0.95.0 is the release candidate stabilization point for the local
 Build or download:
 
 ```text
-dist/codex_blender_addon_v0.95.0.zip
+dist/codex_blender_addon_v0.97.0.zip
 ```
 
 Install in Blender:

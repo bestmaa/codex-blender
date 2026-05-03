@@ -837,7 +837,7 @@ Commit:
 
 ### 36. v0.97 Final Packaging Pass
 
-Status: pending
+Status: completed
 
 Goal:
 Make final package and release files clean.
