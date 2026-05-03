@@ -4,6 +4,12 @@ Codex Blender is an open-source local bridge for controlling Blender from Codex 
 
 This is not a cloud connector. Blender runs locally on your machine.
 
+## What It Can And Cannot Do
+
+Codex Blender can create procedural scenes, import local assets, apply materials and textures, place reference images, render, save, export, inspect objects, and perform simple transforms or animations through structured commands.
+
+It cannot turn any arbitrary image into a perfect production 3D model by itself. Image-to-model work is an iterative workflow: add a reference, create or import a base model, adjust geometry/materials/camera, render, compare, and repeat.
+
 ## Features
 
 - Start and stop a local Blender bridge at `http://127.0.0.1:8765`.
@@ -95,10 +101,10 @@ Download the latest add-on ZIP from GitHub Releases:
 https://github.com/bestmaa/codex-blender/releases
 ```
 
-For v0.7.0, download:
+Download the current versioned ZIP, for example:
 
 ```text
-codex_blender_addon_v0.7.0.zip
+codex_blender_addon_v0.92.0.zip
 ```
 
 Or build it locally:
@@ -130,6 +136,21 @@ Expected response:
 }
 ```
 
+## First Run
+
+1. Install and enable the Blender add-on.
+2. Click `Start Bridge` in Blender's `Codex` sidebar tab.
+3. Open a terminal in this project folder.
+4. Run a health check.
+5. Run one scene command.
+6. Render or save the result.
+
+```powershell
+Invoke-RestMethod -Uri http://127.0.0.1:8765/health
+python bridge\codex_blender_bridge.py examples\create_room.json
+python bridge\codex_blender_bridge.py examples\render_scene.json
+```
+
 ## Use From Terminal
 
 Run commands from the project folder.
@@ -150,6 +171,18 @@ For common local setup and runtime issues, see:
 
 ```text
 docs/troubleshooting.md
+```
+
+## Common Commands
+
+```powershell
+python bridge\codex_blender_bridge.py examples\create_table_model.json
+python bridge\codex_blender_bridge.py examples\create_furniture_set.json
+python bridge\codex_blender_bridge.py examples\add_reference_image.json
+python bridge\codex_blender_bridge.py examples\setup_compare_view.json
+python bridge\codex_blender_bridge.py examples\set_render_preset.json
+python bridge\codex_blender_bridge.py examples\render_scene.json
+python bridge\codex_blender_bridge.py examples\save_blend.json
 ```
 
 For release ZIP packaging, see:

@@ -739,7 +739,7 @@ Commit:
 
 ### 31. v0.92 Documentation Pass
 
-Status: pending
+Status: completed
 
 Goal:
 Make docs easy for a new user.

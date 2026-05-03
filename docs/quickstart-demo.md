@@ -1,9 +1,9 @@
 # Quickstart Demo
 
-This demo verifies the full local workflow:
+This demo verifies the first-run local workflow:
 
 ```text
-Start Bridge -> Create Scene -> Import Asset -> Render PNG -> Save .blend
+Start Bridge -> Health Check -> Create Scene -> Render PNG -> Save .blend
 ```
 
 ## 1. Install And Start The Bridge
@@ -39,16 +39,10 @@ Expected:
 
 Run these commands from the project folder.
 
-Create an outdoor scene:
+Create a starter room:
 
 ```powershell
-python bridge\codex_blender_bridge.py examples\create_outdoor_scene.json
-```
-
-Import the sample OBJ asset:
-
-```powershell
-python bridge\codex_blender_bridge.py examples\import_asset.json
+python bridge\codex_blender_bridge.py examples\create_room.json
 ```
 
 Render the scene:
@@ -61,6 +55,12 @@ Save the scene:
 
 ```powershell
 python bridge\codex_blender_bridge.py examples\save_blend.json
+```
+
+Optional asset import smoke test:
+
+```powershell
+python bridge\codex_blender_bridge.py examples\import_asset.json
 ```
 
 ## 3. Expected Outputs
