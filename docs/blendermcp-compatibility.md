@@ -124,6 +124,35 @@ The adapter should normalize `tool`, `name`, `command`, `params`, `arguments`, a
 }
 ```
 
+## Terminal Example
+
+The terminal bridge can translate compatibility examples before sending them to Blender:
+
+```powershell
+python bridge\codex_blender_bridge.py examples\blendermcp\get_scene_info.json
+python bridge\codex_blender_bridge.py examples\blendermcp\create_cube.json
+python bridge\codex_blender_bridge.py examples\blendermcp\render_scene.json
+python bridge\codex_blender_bridge.py examples\blendermcp\save_scene.json
+```
+
+## MCP Example
+
+Use the compatibility MCP tool when a prompt or saved payload uses BlenderMCP-style naming:
+
+```json
+{
+  "payload": {
+    "name": "create_object",
+    "arguments": {
+      "type": "cube",
+      "name": "compatibility cube",
+      "location": [0, 0, 0.75],
+      "dimensions": [1.5, 1.5, 1.5]
+    }
+  }
+}
+```
+
 ## Implementation Plan
 
 1. Add a pure Python adapter function that converts supported BlenderMCP-style payloads to native bridge payloads.

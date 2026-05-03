@@ -1223,7 +1223,7 @@ Commit:
 
 ### 54. v1.1.2 BlenderMCP Raw Tool Bridge
 
-Status: pending
+Status: completed
 
 Goal:
 Expose compatibility through MCP and terminal workflows.

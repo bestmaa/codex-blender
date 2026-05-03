@@ -36,6 +36,25 @@ The MCP server in `scripts/codex_blender_mcp.py` exposes stable tools for normal
 | `render_scene` | `blender_render_scene` |
 | `inspect_rig` | `blender_inspect_rig` |
 
+## Compatibility Tool
+
+`blender_blendermcp_command` accepts a common BlenderMCP-style payload, translates it to a native Codex Blender bridge payload, and runs it.
+
+Example:
+
+```json
+{
+  "payload": {
+    "tool": "get_scene_info",
+    "params": {
+      "include_hidden": false
+    }
+  }
+}
+```
+
+Prefer native tools for normal Codex Blender workflows. Use `blender_blendermcp_command` when reusing prompts or payloads written for BlenderMCP-style tools. Unsupported compatibility payloads return `UnsupportedCompatibilityPayload` instead of silently running unsafe commands.
+
 ## Raw-Only Action
 
 `run_python` is intentionally not exposed as a first-class MCP tool because it executes arbitrary Python inside Blender. Trusted local callers can still send it through `blender_command` when development diagnostics require it.

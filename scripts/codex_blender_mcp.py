@@ -6,6 +6,7 @@ from __future__ import annotations
 import json
 import os
 import sys
+import importlib.util
 import urllib.error
 import urllib.request
 from pathlib import Path
@@ -14,6 +15,20 @@ from typing import Any
 
 BRIDGE_URL = os.environ.get("BLENDER_BRIDGE_URL", "http://127.0.0.1:8765").rstrip("/")
 OUTPUT_BASE_DIR = Path(os.environ.get("BLENDER_OUTPUT_BASE_DIR", os.getcwd()))
+ROOT = Path(__file__).resolve().parents[1]
+
+
+def load_blendermcp_adapter():
+    adapter_path = ROOT / "bridge" / "blendermcp_adapter.py"
+    spec = importlib.util.spec_from_file_location("blendermcp_adapter", adapter_path)
+    if spec is None or spec.loader is None:
+        raise RuntimeError(f"Could not load BlenderMCP adapter from {adapter_path}")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module.translate_blendermcp_payload
+
+
+translate_blendermcp_payload = load_blendermcp_adapter()
 
 
 def json_schema(properties: dict[str, Any], required: list[str] | None = None) -> dict[str, Any]:
@@ -732,6 +747,19 @@ TOOLS = [
             required=["payload"],
         ),
     },
+    {
+        "name": "blender_blendermcp_command",
+        "description": "Translate a common BlenderMCP-style payload to a native Codex Blender bridge command and run it.",
+        "inputSchema": json_schema(
+            {
+                "payload": {
+                    "type": "object",
+                    "description": "BlenderMCP-style payload using tool/name/command plus params/arguments/args.",
+                }
+            },
+            required=["payload"],
+        ),
+    },
 ]
 
 
@@ -767,6 +795,25 @@ def normalize_output_path(value: Any) -> Any:
 
 def normalize_input_path(value: Any) -> Any:
     return normalize_output_path(value)
+
+
+def normalize_payload_paths(payload: dict[str, Any]) -> dict[str, Any]:
+    if payload.get("action") in {"render_scene", "save_blend", "export_glb", "export_obj"}:
+        params = payload.setdefault("params", {})
+        default_output = "scenes/scene.blend" if payload.get("action") == "save_blend" else "exports/scene.glb" if payload.get("action") == "export_glb" else "exports/scene.obj" if payload.get("action") == "export_obj" else "renders/room.png"
+        params["output"] = normalize_output_path(params.get("output", default_output))
+    if payload.get("action") == "import_asset":
+        params = payload.setdefault("params", {})
+        params["path"] = normalize_input_path(params.get("path"))
+    if payload.get("action") == "add_reference_image":
+        params = payload.setdefault("params", {})
+        params["path"] = normalize_input_path(params.get("path"))
+    if payload.get("action") == "apply_texture_material":
+        params = payload.setdefault("params", {})
+        params["path"] = normalize_input_path(params.get("path"))
+        for texture_key in ("base_color_path", "roughness_path", "normal_path", "metallic_path", "alpha_path"):
+            params[texture_key] = normalize_input_path(params.get(texture_key))
+    return payload
 
 
 def call_tool(name: str, arguments: dict[str, Any]) -> tuple[dict[str, Any], bool]:
@@ -1020,23 +1067,21 @@ def call_tool(name: str, arguments: dict[str, Any]) -> tuple[dict[str, Any], boo
         if not isinstance(payload, dict):
             result = {"ok": False, "error": "payload must be an object"}
         else:
-            if payload.get("action") in {"render_scene", "save_blend", "export_glb", "export_obj"}:
-                params = payload.setdefault("params", {})
-                default_output = "scenes/scene.blend" if payload.get("action") == "save_blend" else "exports/scene.glb" if payload.get("action") == "export_glb" else "exports/scene.obj" if payload.get("action") == "export_obj" else "renders/room.png"
-                params["output"] = normalize_output_path(params.get("output", default_output))
-            if payload.get("action") == "import_asset":
-                params = payload.setdefault("params", {})
-                params["path"] = normalize_input_path(params.get("path"))
-            if payload.get("action") == "add_reference_image":
-                params = payload.setdefault("params", {})
-                params["path"] = normalize_input_path(params.get("path"))
-            if payload.get("action") == "apply_texture_material":
-                params = payload.setdefault("params", {})
-                params["path"] = normalize_input_path(params.get("path"))
-                for texture_key in ("base_color_path", "roughness_path", "normal_path", "metallic_path", "alpha_path"):
-                    params[texture_key] = normalize_input_path(params.get(texture_key))
+            payload = normalize_payload_paths(payload)
             timeout = payload.get("params", {}).get("timeout_seconds", 300)
             result = call_http("/command", payload, timeout=timeout)
+    elif name == "blender_blendermcp_command":
+        payload = arguments.get("payload")
+        if not isinstance(payload, dict):
+            result = {"ok": False, "error": "payload must be an object"}
+        else:
+            translated = translate_blendermcp_payload(payload)
+            if translated.get("ok") is False:
+                result = translated
+            else:
+                translated = normalize_payload_paths(translated)
+                timeout = translated.get("params", {}).get("timeout_seconds", 300)
+                result = call_http("/command", translated, timeout=timeout)
     else:
         result = {"ok": False, "error": f"Unknown tool: {name}"}
 
@@ -1062,7 +1107,7 @@ def handle_request(message: dict[str, Any]) -> dict[str, Any] | None:
             {
                 "protocolVersion": "2024-11-05",
                 "capabilities": {"tools": {}},
-                "serverInfo": {"name": "codex-blender", "version": "1.1.1"},
+                "serverInfo": {"name": "codex-blender", "version": "1.1.2"},
             },
         )
     if method == "tools/list":
