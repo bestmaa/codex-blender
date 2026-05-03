@@ -34,6 +34,18 @@ Every provider should expose the same small interface:
 }
 ```
 
+The formal JSON schema lives at:
+
+```text
+schemas/image-to-3d-job.schema.json
+```
+
+An example job lives at:
+
+```text
+examples/image-to-3d/local_provider_job.json
+```
+
 Expected provider result:
 
 ```json

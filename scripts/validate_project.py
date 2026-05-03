@@ -74,6 +74,8 @@ REQUIRED_FILES = [
     "assets/library.json",
     "docs/asset-library.md",
     "docs/image-to-3d.md",
+    "schemas/image-to-3d-job.schema.json",
+    "examples/image-to-3d/local_provider_job.json",
     "docs/quickstart-demo.md",
     "docs/commands.md",
     "docs/mcp-tools.md",
@@ -105,6 +107,8 @@ JSON_FILES = [
     ".mcp.json",
     ".agents/plugins/marketplace.json",
     "assets/library.json",
+    "schemas/image-to-3d-job.schema.json",
+    "examples/image-to-3d/local_provider_job.json",
     "examples/create_room.json",
     "examples/create_outdoor_scene.json",
     "examples/render_outdoor_scene.json",
@@ -379,6 +383,35 @@ def check_asset_library_manifest() -> None:
             raise AssertionError(f"Asset {asset_id} scale_hints.target_size must be [x, y, z]")
 
 
+def check_image_to_3d_job_examples() -> None:
+    schema = json.loads(project_path("schemas/image-to-3d-job.schema.json").read_text(encoding="utf-8"))
+    required = set(schema.get("required", []))
+    allowed_qualities = set(schema["properties"]["quality"]["enum"])
+    allowed_model_extensions = {".glb", ".gltf", ".obj", ".fbx"}
+    for path in sorted((ROOT / "examples" / "image-to-3d").glob("*.json")):
+        job = json.loads(path.read_text(encoding="utf-8"))
+        missing = sorted(required - set(job))
+        if missing:
+            raise AssertionError(f"{path.relative_to(ROOT)} missing required fields: " + ", ".join(missing))
+        for field in ("provider", "input_image", "output"):
+            if not isinstance(job.get(field), str) or not job[field]:
+                raise AssertionError(f"{path.relative_to(ROOT)} {field} must be a non-empty string")
+        input_image = Path(job["input_image"])
+        if not input_image.is_absolute() and not project_path(job["input_image"]).exists():
+            raise AssertionError(f"{path.relative_to(ROOT)} input_image does not exist: {job['input_image']}")
+        if job["quality"] not in allowed_qualities:
+            raise AssertionError(f"{path.relative_to(ROOT)} quality must be one of {sorted(allowed_qualities)}")
+        if Path(job["output"]).suffix.lower() not in allowed_model_extensions:
+            raise AssertionError(f"{path.relative_to(ROOT)} output must be a supported model extension")
+        import_options = job.get("import_options", {})
+        if import_options and not isinstance(import_options, dict):
+            raise AssertionError(f"{path.relative_to(ROOT)} import_options must be an object")
+        for vector_key in ("location", "rotation", "target_location"):
+            value = import_options.get(vector_key)
+            if value is not None and (not isinstance(value, list) or len(value) != 3):
+                raise AssertionError(f"{path.relative_to(ROOT)} import_options.{vector_key} must be [x, y, z]")
+
+
 def check_mcp_tool_coverage() -> None:
     mcp_source = project_path("scripts/codex_blender_mcp.py").read_text(encoding="utf-8")
     declared_tools = set(re.findall(r'"name": "(blender_[^"]+)"', mcp_source))
@@ -473,6 +506,7 @@ def main() -> int:
         ("bridge path normalization", check_bridge_path_normalization),
         ("BlenderMCP adapter examples", check_blendermcp_adapter_examples),
         ("asset library manifest", check_asset_library_manifest),
+        ("image-to-3D job examples", check_image_to_3d_job_examples),
         ("MCP tool coverage", check_mcp_tool_coverage),
         ("repository hygiene", check_repository_hygiene),
         ("package ZIP", check_package_zip),

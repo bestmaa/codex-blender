@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Codex Blender Image-To-3D Job",
+  "type": "object",
+  "required": ["provider", "input_image", "output", "quality"],
+  "additionalProperties": false,
+  "properties": {
+    "provider": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Configured provider name, for example local_stub or cloud_placeholder."
+    },
+    "input_image": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Project-relative or absolute source image path."
+    },
+    "prompt": {
+      "type": "string",
+      "description": "Optional guidance for the provider."
+    },
+    "output": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Desired generated model path, usually .glb, .gltf, .obj, or .fbx."
+    },
+    "quality": {
+      "type": "string",
+      "enum": ["draft", "preview", "final"]
+    },
+    "seed": {
+      "type": "integer"
+    },
+    "timeout_seconds": {
+      "type": "number",
+      "minimum": 1
+    },
+    "metadata_output": {
+      "type": "string",
+      "description": "Optional metadata JSON output path."
+    },
+    "import_options": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "import_after_generate": {"type": "boolean"},
+        "location": {"type": "array", "items": {"type": "number"}, "minItems": 3, "maxItems": 3},
+        "rotation": {"type": "array", "items": {"type": "number"}, "minItems": 3, "maxItems": 3},
+        "scale": {
+          "oneOf": [
+            {"type": "number"},
+            {"type": "array", "items": {"type": "number"}, "minItems": 3, "maxItems": 3}
+          ]
+        },
+        "fit_to_bounds": {"type": "boolean"},
+        "target_size": {
+          "oneOf": [
+            {"type": "number"},
+            {"type": "array", "items": {"type": "number"}, "minItems": 3, "maxItems": 3}
+          ]
+        },
+        "target_location": {"type": "array", "items": {"type": "number"}, "minItems": 3, "maxItems": 3},
+        "align_to_floor": {"type": "boolean"},
+        "render_preview": {"type": "boolean"},
+        "preview_output": {"type": "string"}
+      }
+    }
+  }
+}

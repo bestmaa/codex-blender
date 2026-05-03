@@ -1452,7 +1452,7 @@ Commit:
 
 ### 66. v1.4.1 Image-To-3D Job Schema
 
-Status: pending
+Status: completed
 
 Goal:
 Add a job file format for image-to-3D generation requests.
