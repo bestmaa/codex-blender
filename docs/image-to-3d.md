@@ -74,6 +74,26 @@ A local provider runs on the user's machine. It may require:
 
 The plugin should only call a configured command path. If the command is missing, it should return a clear setup error and should not install heavy dependencies automatically.
 
+Use the local runner for provider integration tests:
+
+```powershell
+python scripts\run_image_to_3d_job.py examples\image-to-3d\local_provider_job.json
+```
+
+The runner resolves the executable in this order:
+
+1. `--provider-command`
+2. `provider_command` in the job JSON
+3. `CODEX_BLENDER_IMAGE_TO_3D_COMMAND`
+
+The configured command is called with:
+
+```text
+--job JOB.json --input-image IMAGE.png --output MODEL.glb --quality preview --provider local_stub
+```
+
+Missing commands or placeholder commands return `MissingImageTo3DProviderCommand` with setup instructions. This is intentional: the repository does not bundle model weights or install heavy AI dependencies.
+
 ## Cloud Provider
 
 A cloud provider runs through a vendor API. It may require:

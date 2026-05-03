@@ -1470,7 +1470,7 @@ Commit:
 
 ### 67. v1.4.2 Local Image-To-3D Provider Stub
 
-Status: pending
+Status: completed
 
 Goal:
 Add a safe local provider interface without requiring heavy model dependencies.

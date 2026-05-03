@@ -24,6 +24,7 @@ REQUIRED_FILES = [
     "bridge/codex_blender_bridge.py",
     "bridge/blendermcp_adapter.py",
     "scripts/codex_blender_mcp.py",
+    "scripts/run_image_to_3d_job.py",
     "scripts/package_addon.py",
     "scripts/smoke_test_bridge.py",
     "scripts/smoke_test_blendermcp.py",
@@ -96,6 +97,7 @@ PYTHON_FILES = [
     "bridge/codex_blender_bridge.py",
     "bridge/blendermcp_adapter.py",
     "scripts/codex_blender_mcp.py",
+    "scripts/run_image_to_3d_job.py",
     "scripts/package_addon.py",
     "scripts/smoke_test_bridge.py",
     "scripts/smoke_test_blendermcp.py",
@@ -406,10 +408,45 @@ def check_image_to_3d_job_examples() -> None:
         import_options = job.get("import_options", {})
         if import_options and not isinstance(import_options, dict):
             raise AssertionError(f"{path.relative_to(ROOT)} import_options must be an object")
+        provider_command = job.get("provider_command")
+        if provider_command is not None:
+            if isinstance(provider_command, str):
+                if not provider_command:
+                    raise AssertionError(f"{path.relative_to(ROOT)} provider_command must not be empty")
+            elif isinstance(provider_command, list):
+                if not provider_command or not all(isinstance(part, str) and part for part in provider_command):
+                    raise AssertionError(f"{path.relative_to(ROOT)} provider_command must be non-empty strings")
+            else:
+                raise AssertionError(f"{path.relative_to(ROOT)} provider_command must be a string or string list")
         for vector_key in ("location", "rotation", "target_location"):
             value = import_options.get(vector_key)
             if value is not None and (not isinstance(value, list) or len(value) != 3):
                 raise AssertionError(f"{path.relative_to(ROOT)} import_options.{vector_key} must be [x, y, z]")
+
+
+def check_image_to_3d_provider_stub() -> None:
+    completed = subprocess.run(
+        [
+            sys.executable,
+            str(project_path("scripts/run_image_to_3d_job.py")),
+            str(project_path("examples/image-to-3d/local_provider_job.json")),
+        ],
+        cwd=ROOT,
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        check=False,
+    )
+    if completed.returncode != 2:
+        raise AssertionError(f"Provider stub should return setup error code 2, got {completed.returncode}")
+    try:
+        payload = json.loads(completed.stdout)
+    except json.JSONDecodeError as exc:
+        raise AssertionError(f"Provider stub did not return JSON: {exc}") from exc
+    if payload.get("errorType") != "MissingImageTo3DProviderCommand":
+        raise AssertionError("Provider stub missing-provider error is not actionable")
+    if "expected_command" not in payload or "setup" not in payload:
+        raise AssertionError("Provider stub setup error must include expected_command and setup")
 
 
 def check_mcp_tool_coverage() -> None:
@@ -507,6 +544,7 @@ def main() -> int:
         ("BlenderMCP adapter examples", check_blendermcp_adapter_examples),
         ("asset library manifest", check_asset_library_manifest),
         ("image-to-3D job examples", check_image_to_3d_job_examples),
+        ("image-to-3D provider stub", check_image_to_3d_provider_stub),
         ("MCP tool coverage", check_mcp_tool_coverage),
         ("repository hygiene", check_repository_hygiene),
         ("package ZIP", check_package_zip),

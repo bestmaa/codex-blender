@@ -6,6 +6,7 @@
   "quality": "preview",
   "seed": 42,
   "timeout_seconds": 900,
+  "provider_command": ["python", "path/to/local_image_to_3d_provider.py"],
   "metadata_output": "assets/models/generated/modern_table_from_image.metadata.json",
   "import_options": {
     "import_after_generate": true,

@@ -35,6 +35,17 @@
       "type": "number",
       "minimum": 1
     },
+    "provider_command": {
+      "oneOf": [
+        {"type": "string", "minLength": 1},
+        {
+          "type": "array",
+          "items": {"type": "string", "minLength": 1},
+          "minItems": 1
+        }
+      ],
+      "description": "Optional local executable/command used by scripts/run_image_to_3d_job.py."
+    },
     "metadata_output": {
       "type": "string",
       "description": "Optional metadata JSON output path."
