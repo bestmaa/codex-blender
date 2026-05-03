@@ -55,6 +55,8 @@ REQUIRED_FILES = [
     "examples/inspect_rig.json",
     "assets/models/sample_pyramid.obj",
     "docs/quickstart-demo.md",
+    "docs/reference-workflow.md",
+    "docs/troubleshooting.md",
 ]
 
 PYTHON_FILES = [
@@ -118,7 +120,8 @@ def check_python_syntax() -> None:
 
 
 def check_json_files() -> None:
-    for relative_path in JSON_FILES:
+    stable_examples = sorted(f"examples/{path.name}" for path in (ROOT / "examples").glob("*.json"))
+    for relative_path in sorted(set(JSON_FILES + stable_examples)):
         json.loads(project_path(relative_path).read_text(encoding="utf-8"))
 
 
@@ -126,9 +129,17 @@ def check_versions() -> None:
     manifest = json.loads(project_path(".codex-plugin/plugin.json").read_text(encoding="utf-8"))
     version = manifest["version"]
     addon_source = project_path("blender_addon/codex_blender_addon.py").read_text(encoding="utf-8")
+    mcp_source = project_path("scripts/codex_blender_mcp.py").read_text(encoding="utf-8")
     expected = tuple(int(part) for part in version.split("."))
     if f'"version": {expected}' not in addon_source:
         raise AssertionError(f"Add-on bl_info version does not match plugin version {version}")
+    if f'"version": "{version}"' not in mcp_source:
+        raise AssertionError(f"MCP server version does not match plugin version {version}")
+
+
+def get_supported_actions() -> set[str]:
+    addon_source = project_path("blender_addon/codex_blender_addon.py").read_text(encoding="utf-8")
+    return set(re.findall(r'if action == "([^"]+)"', addon_source))
 
 
 def check_examples() -> None:
@@ -168,6 +179,24 @@ def check_examples() -> None:
         payload = json.loads(project_path(relative_path).read_text(encoding="utf-8"))
         if payload.get("action") != action:
             raise AssertionError(f"{relative_path} expected action {action}")
+    supported_actions = get_supported_actions()
+    stable_examples = sorted((ROOT / "examples").glob("*.json"))
+    for path in stable_examples:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+        action = payload.get("action")
+        if action not in supported_actions:
+            raise AssertionError(f"{path.relative_to(ROOT)} uses unsupported action {action}")
+
+
+def check_skill_actions() -> None:
+    skill = project_path("skills/blender/SKILL.md").read_text(encoding="utf-8")
+    example_actions = {
+        json.loads(path.read_text(encoding="utf-8")).get("action")
+        for path in (ROOT / "examples").glob("*.json")
+    }
+    missing = sorted(action for action in example_actions if action and action not in skill)
+    if missing:
+        raise AssertionError("Skill does not mention actions: " + ", ".join(missing))
 
 
 def check_readme_paths() -> None:
@@ -203,6 +232,7 @@ def main() -> int:
         ("JSON files", check_json_files),
         ("version alignment", check_versions),
         ("example actions", check_examples),
+        ("skill actions", check_skill_actions),
         ("README paths", check_readme_paths),
         ("package ZIP", check_package_zip),
     ]

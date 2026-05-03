@@ -613,7 +613,7 @@ Commit:
 
 ### 25. v0.36 Validation Expansion
 
-Status: pending
+Status: completed
 
 Goal:
 Make validation catch more project drift before release.
