@@ -305,6 +305,19 @@ Creates simple location, rotation, or scale keyframes for an existing object.
 }
 ```
 
+### set_render_preset
+
+Applies draft, preview, or final render settings for engine, samples, resolution, and view transform.
+
+```json
+{
+  "action": "set_render_preset",
+  "params": {
+    "preset": "preview"
+  }
+}
+```
+
 ### add_reference_image
 
 Adds a local image as a reference plane in the current Blender scene. Use this before or after model creation when matching a generated/reference image.

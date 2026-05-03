@@ -519,7 +519,7 @@ Commit:
 
 ### 21. v0.32 Render Presets
 
-Status: pending
+Status: completed
 
 Goal:
 Make render quality easier to control.

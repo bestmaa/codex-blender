@@ -22,6 +22,7 @@ This is not a cloud connector. Blender runs locally on your machine.
 - Move, rotate, scale, and resize named scene objects.
 - Duplicate and arrange repeated objects.
 - Add simple object keyframe animations.
+- Apply draft, preview, and final render presets.
 - Add reference images as textured planes for side-by-side modeling.
 - Apply user-provided image textures to Blender objects.
 - Create approximate scenes from structured reference-image plans.
@@ -223,6 +224,12 @@ Animate the table top:
 
 ```powershell
 python bridge\codex_blender_bridge.py examples\animate_tabletop.json
+```
+
+Apply a render preset:
+
+```powershell
+python bridge\codex_blender_bridge.py examples\set_render_preset.json
 ```
 
 Add a reference image plane:
@@ -539,6 +546,17 @@ Animate object:
 }
 ```
 
+Set render preset:
+
+```json
+{
+  "action": "set_render_preset",
+  "params": {
+    "preset": "preview"
+  }
+}
+```
+
 Add reference image:
 
 ```json
@@ -711,6 +729,7 @@ Supported v0.20 actions:
 - `transform_object`
 - `duplicate_object`
 - `animate_object`
+- `set_render_preset`
 - `add_reference_image`
 - `apply_texture_material`
 - `apply_material_preset`
@@ -755,6 +774,7 @@ When connected as a Codex plugin/MCP server, it exposes:
 - `blender_transform_object`
 - `blender_duplicate_object`
 - `blender_animate_object`
+- `blender_set_render_preset`
 - `blender_add_reference_image`
 - `blender_apply_texture_material`
 - `blender_apply_material_preset`

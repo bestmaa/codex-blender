@@ -1,7 +1,7 @@
 bl_info = {
     "name": "Codex Blender Bridge",
     "author": "Aditya",
-    "version": (0, 31, 0),
+    "version": (0, 32, 0),
     "blender": (3, 6, 0),
     "location": "View3D > Sidebar > Codex",
     "description": "Local HTTP bridge for sending Codex commands to Blender.",
@@ -1313,6 +1313,70 @@ def set_resolution(params):
     return resolution
 
 
+def set_render_engine(preferred_engines):
+    scene = bpy.context.scene
+    for engine in preferred_engines:
+        try:
+            scene.render.engine = engine
+            return scene.render.engine
+        except TypeError:
+            continue
+    scene.render.engine = "CYCLES"
+    return scene.render.engine
+
+
+def action_set_render_preset(params):
+    preset = params.get("preset", "preview")
+    if not isinstance(preset, str):
+        raise ValueError("params.preset must be a string")
+    preset = preset.lower()
+    presets = {
+        "draft": {
+            "engines": ["BLENDER_EEVEE_NEXT", "BLENDER_EEVEE", "CYCLES"],
+            "resolution": [960, 540],
+            "samples": 24,
+            "look": "Medium High Contrast",
+        },
+        "preview": {
+            "engines": ["CYCLES"],
+            "resolution": [1280, 720],
+            "samples": 64,
+            "look": "Medium High Contrast",
+        },
+        "final": {
+            "engines": ["CYCLES"],
+            "resolution": [1920, 1080],
+            "samples": 192,
+            "look": "High Contrast",
+        },
+    }
+    if preset not in presets:
+        raise ValueError("params.preset must be draft, preview, or final")
+
+    config = presets[preset]
+    engine = set_render_engine(config["engines"])
+    resolution = set_resolution({"resolution": config["resolution"]})
+    samples = config["samples"]
+    if engine == "CYCLES":
+        bpy.context.scene.cycles.samples = samples
+    elif hasattr(bpy.context.scene, "eevee"):
+        bpy.context.scene.eevee.taa_render_samples = samples
+    bpy.context.scene.view_settings.view_transform = "Filmic"
+    bpy.context.scene.view_settings.look = config["look"]
+    bpy.context.scene.render.film_transparent = False
+
+    return make_result(
+        True,
+        message="Applied render preset.",
+        preset=preset,
+        engine=engine,
+        resolution=resolution,
+        samples=samples,
+        view_transform=bpy.context.scene.view_settings.view_transform,
+        look=bpy.context.scene.view_settings.look,
+    )
+
+
 def action_render_scene(params):
     if bpy.context.scene.camera is None:
         return make_result(False, error="Scene has no active camera")
@@ -2101,6 +2165,8 @@ def execute_command(payload):
         return action_inspect_rig(params)
     if action == "render_scene":
         return action_render_scene(params)
+    if action == "set_render_preset":
+        return action_set_render_preset(params)
     if action == "save_blend":
         return action_save_blend(params)
     if action == "export_glb":

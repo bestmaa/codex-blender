@@ -1,0 +1,6 @@
+{
+  "action": "set_render_preset",
+  "params": {
+    "preset": "preview"
+  }
+}

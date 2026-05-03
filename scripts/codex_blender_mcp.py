@@ -324,6 +324,15 @@ TOOLS = [
         ),
     },
     {
+        "name": "blender_set_render_preset",
+        "description": "Apply draft, preview, or final render settings for engine, samples, resolution, and view transform.",
+        "inputSchema": json_schema(
+            {
+                "preset": {"type": "string", "description": "draft, preview, or final.", "default": "preview"},
+            }
+        ),
+    },
+    {
         "name": "blender_save_blend",
         "description": "Save the current Blender scene to a .blend file.",
         "inputSchema": json_schema(
@@ -912,6 +921,9 @@ def call_tool(name: str, arguments: dict[str, Any]) -> tuple[dict[str, Any], boo
             if key in arguments:
                 params[key] = arguments[key]
         result = call_http("/command", {"action": "animate_object", "params": params})
+    elif name == "blender_set_render_preset":
+        params = {"preset": arguments.get("preset", "preview")}
+        result = call_http("/command", {"action": "set_render_preset", "params": params})
     elif name == "blender_save_blend":
         params = {"output": normalize_output_path(arguments.get("output", "scenes/scene.blend"))}
         result = call_http("/command", {"action": "save_blend", "params": params})
@@ -1050,7 +1062,7 @@ def handle_request(message: dict[str, Any]) -> dict[str, Any] | None:
             {
                 "protocolVersion": "2024-11-05",
                 "capabilities": {"tools": {}},
-                "serverInfo": {"name": "codex-blender", "version": "0.31.0"},
+                "serverInfo": {"name": "codex-blender", "version": "0.32.0"},
             },
         )
     if method == "tools/list":
