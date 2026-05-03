@@ -204,6 +204,23 @@ TOOLS = [
         ),
     },
     {
+        "name": "blender_create_furniture_preset",
+        "description": "Create procedural furniture presets such as shelves, cabinets, desks, beds, doors, windows, and wall art.",
+        "inputSchema": json_schema(
+            {
+                "preset": {"type": "string", "description": "shelf, cabinet, desk, bed, door, window, or wall_art.", "default": "shelf"},
+                "name": {"type": "string", "description": "Object name prefix.", "default": "procedural shelf"},
+                "location": {"type": "array", "items": {"type": "number"}, "default": [0, 0, 0]},
+                "width": {"type": "number", "description": "Furniture width.", "default": 2.0},
+                "depth": {"type": "number", "description": "Furniture depth.", "default": 0.55},
+                "height": {"type": "number", "description": "Furniture height.", "default": 2.0},
+                "wood_color": {"type": "array", "items": {"type": "number"}, "default": [0.62, 0.42, 0.25, 1]},
+                "accent_color": {"type": "array", "items": {"type": "number"}, "default": [0.18, 0.20, 0.22, 1]},
+                "items": {"type": "array", "description": "Optional list of furniture preset item objects.", "items": {"type": "object"}},
+            }
+        ),
+    },
+    {
         "name": "blender_create_sofa_model",
         "description": "Create a modern sofa model with cushions, arms, legs, camera, and lighting.",
         "inputSchema": json_schema(
@@ -883,6 +900,9 @@ def call_tool(name: str, arguments: dict[str, Any]) -> tuple[dict[str, Any], boo
     elif name == "blender_create_primitive":
         params = dict(arguments)
         result = call_http("/command", {"action": "create_primitive", "params": params})
+    elif name == "blender_create_furniture_preset":
+        params = dict(arguments)
+        result = call_http("/command", {"action": "create_furniture_preset", "params": params})
     elif name == "blender_create_sofa_model":
         params = {
             "width": arguments.get("width", 3.2),
@@ -1125,7 +1145,7 @@ def handle_request(message: dict[str, Any]) -> dict[str, Any] | None:
             {
                 "protocolVersion": "2024-11-05",
                 "capabilities": {"tools": {}},
-                "serverInfo": {"name": "codex-blender", "version": "1.2.0"},
+                "serverInfo": {"name": "codex-blender", "version": "1.2.1"},
             },
         )
     if method == "tools/list":

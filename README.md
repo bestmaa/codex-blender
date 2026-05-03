@@ -21,6 +21,7 @@ It cannot turn any arbitrary image into a perfect production 3D model by itself.
 - Create a reusable indoor plant model.
 - Create reusable floor, table, and ceiling lamp models with real Blender lights.
 - Create reusable procedural primitives such as beveled boxes, panels, glass panels, cylinders, cones, planes, spheres, and labels.
+- Create procedural furniture presets such as shelves, cabinets, desks, beds, doors, windows, and wall art.
 - Create a composed furniture set scene.
 - Create reusable room layout presets.
 - List local model, texture, and reference assets.
@@ -105,7 +106,7 @@ https://github.com/bestmaa/codex-blender/releases
 Download the current versioned ZIP, for example:
 
 ```text
-codex_blender_addon_v1.2.0.zip
+codex_blender_addon_v1.2.1.zip
 ```
 
 Or build it locally:
@@ -210,6 +211,7 @@ docs/windows-paths.md
 ```powershell
 python bridge\codex_blender_bridge.py examples\create_table_model.json
 python bridge\codex_blender_bridge.py examples\create_primitive_library.json
+python bridge\codex_blender_bridge.py examples\create_furniture_presets.json
 python bridge\codex_blender_bridge.py examples\create_furniture_set.json
 python bridge\codex_blender_bridge.py examples\add_reference_image.json
 python bridge\codex_blender_bridge.py examples\setup_compare_view.json
@@ -288,6 +290,12 @@ Create a procedural primitive sample scene:
 
 ```powershell
 python bridge\codex_blender_bridge.py examples\create_primitive_library.json
+```
+
+Create procedural furniture presets:
+
+```powershell
+python bridge\codex_blender_bridge.py examples\create_furniture_presets.json
 ```
 
 Create a modern chair model:
@@ -847,13 +855,14 @@ Save scene:
 
 ## Supported Actions
 
-Supported v1.2.0 actions:
+Supported v1.2.1 actions:
 
 - `ping`
 - `create_room`
 - `create_outdoor_scene`
 - `create_table_model`
 - `create_primitive`
+- `create_furniture_preset`
 - `create_chair_model`
 - `create_sofa_model`
 - `create_plant_model`
@@ -900,6 +909,7 @@ When connected as a Codex plugin/MCP server, it exposes:
 - `blender_create_outdoor_scene`
 - `blender_create_table_model`
 - `blender_create_primitive`
+- `blender_create_furniture_preset`
 - `blender_create_chair_model`
 - `blender_create_sofa_model`
 - `blender_create_plant_model`

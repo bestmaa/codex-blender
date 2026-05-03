@@ -11,6 +11,7 @@ The MCP server in `scripts/codex_blender_mcp.py` exposes stable tools for normal
 | `create_outdoor_scene` | `blender_create_outdoor_scene` |
 | `create_table_model` | `blender_create_table_model` |
 | `create_primitive` | `blender_create_primitive` |
+| `create_furniture_preset` | `blender_create_furniture_preset` |
 | `create_chair_model` | `blender_create_chair_model` |
 | `create_sofa_model` | `blender_create_sofa_model` |
 | `create_plant_model` | `blender_create_plant_model` |

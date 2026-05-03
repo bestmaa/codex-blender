@@ -45,6 +45,8 @@ Use `create_scene_from_reference` only when there is a structured scene plan; it
 
 Use `create_primitive` when a scene needs reusable low-level shapes such as beveled boxes, panels, glass panels, cylinders, cones, planes, spheres, or labels. Use it before higher-level furniture/architecture helpers when the requested object is custom but can be built from simple parts.
 
+Use `create_furniture_preset` when the user asks for common room objects such as a shelf, cabinet, desk, bed, door, window, or wall art and does not need a highly custom model.
+
 ### Texture Workflow
 
 Put texture files under `assets/textures/`. Use `apply_texture_material` for user-provided images and multi-map materials. Use `texture_scale`, `texture_offset`, `texture_rotation`, and `projection` when the image placement needs tuning. Use `apply_material_preset` for fast built-in materials when no custom image texture is needed.
@@ -156,6 +158,27 @@ Creates one or more reusable procedural primitives. Supported types include `bev
     "bevel": 0.08,
     "color": [0.42, 0.50, 0.56, 1],
     "material_name": "soft grey material"
+  }
+}
+```
+
+### create_furniture_preset
+
+Creates one or more procedural furniture presets. Supported presets include `shelf`, `cabinet`, `desk`, `bed`, `door`, `window`, and `wall_art`.
+
+```json
+{
+  "action": "create_furniture_preset",
+  "params": {
+    "preset": "shelf",
+    "name": "open oak shelf",
+    "location": [0, 0, 0],
+    "width": 1.4,
+    "depth": 0.4,
+    "height": 2.2,
+    "levels": 5,
+    "wood_color": [0.64, 0.42, 0.23, 1],
+    "accent_color": [0.26, 0.20, 0.16, 1]
   }
 }
 ```

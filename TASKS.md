@@ -1281,7 +1281,7 @@ Commit:
 
 ### 57. v1.2.1 Procedural Furniture Expansion
 
-Status: pending
+Status: completed
 
 Goal:
 Expand built-in furniture generation beyond the initial v1 set.

@@ -1,7 +1,7 @@
 bl_info = {
     "name": "Codex Blender Bridge",
     "author": "Aditya",
-    "version": (1, 2, 0),
+    "version": (1, 2, 1),
     "blender": (3, 6, 0),
     "location": "View3D > Sidebar > Codex",
     "description": "Local HTTP bridge for sending Codex commands to Blender.",
@@ -1455,6 +1455,130 @@ def action_create_primitive(params):
     return make_result(True, message="Created procedural primitives.", objects=created, count=len(created))
 
 
+def create_furniture_part(name, location, dimensions, material, bevel=0.025):
+    obj = create_rounded_cube(name, location, dimensions, material, bevel, 3)
+    return obj
+
+
+def create_furniture_preset_item(item, index):
+    preset = item.get("preset", item.get("type", "shelf"))
+    if not isinstance(preset, str):
+        raise ValueError("params.preset must be a string")
+    preset = preset.lower()
+    name = item.get("name", f"{preset} {index}")
+    if not isinstance(name, str) or not name.strip():
+        raise ValueError("params.name must be a non-empty string")
+    x, y, z = get_vector(item, "location", [0, 0, 0])
+    width = get_number(item, "width", 2.0, minimum=0.2, maximum=20)
+    depth = get_number(item, "depth", 0.55, minimum=0.05, maximum=10)
+    height = get_number(item, "height", 2.0, minimum=0.2, maximum=20)
+    thickness = get_number(item, "thickness", 0.08, minimum=0.02, maximum=1.0)
+    wood = create_material(f"{name} wood", get_color(item, "wood_color", [0.62, 0.42, 0.25, 1]), roughness=0.58)
+    accent = create_material(f"{name} accent", get_color(item, "accent_color", [0.18, 0.20, 0.22, 1]), roughness=0.46, metallic=0.15)
+    fabric = create_material(f"{name} fabric", get_color(item, "fabric_color", [0.72, 0.70, 0.64, 1]), roughness=0.88)
+    glass = create_material(f"{name} glass", get_color(item, "glass_color", [0.55, 0.75, 0.86, 0.34]), roughness=0.08)
+    glass.blend_method = "BLEND"
+    glass.use_screen_refraction = True
+
+    created = []
+
+    def add(part, loc, dims, mat, bevel=0.025):
+        obj = create_furniture_part(f"{name} {part}", loc, dims, mat, bevel)
+        created.append(obj.name)
+        return obj
+
+    if preset == "shelf":
+        levels = get_int(item, "levels", 4, minimum=2, maximum=10)
+        add("left side", (x - width / 2 + thickness / 2, y, z + height / 2), (thickness, depth, height), wood)
+        add("right side", (x + width / 2 - thickness / 2, y, z + height / 2), (thickness, depth, height), wood)
+        for level in range(levels):
+            shelf_z = z + thickness / 2 + (height - thickness) * level / (levels - 1)
+            add(f"shelf {level + 1}", (x, y, shelf_z), (width, depth, thickness), wood)
+        add("back panel", (x, y + depth / 2 - thickness / 2, z + height / 2), (width, thickness, height), accent, 0.01)
+    elif preset == "cabinet":
+        add("carcass", (x, y, z + height / 2), (width, depth, height), wood, 0.035)
+        add("left door", (x - width * 0.255, y - depth / 2 - 0.015, z + height * 0.52), (width * 0.49, thickness, height * 0.82), accent, 0.025)
+        add("right door", (x + width * 0.255, y - depth / 2 - 0.015, z + height * 0.52), (width * 0.49, thickness, height * 0.82), accent, 0.025)
+        add("left handle", (x - width * 0.07, y - depth / 2 - 0.07, z + height * 0.55), (0.035, 0.06, height * 0.34), wood, 0.015)
+        add("right handle", (x + width * 0.07, y - depth / 2 - 0.07, z + height * 0.55), (0.035, 0.06, height * 0.34), wood, 0.015)
+        add("toe kick", (x, y - depth * 0.12, z + 0.06), (width * 0.82, depth * 0.45, 0.12), accent, 0.01)
+    elif preset == "desk":
+        add("top", (x, y, z + height), (width, depth, thickness * 1.25), wood, 0.04)
+        leg_h = height - thickness * 0.6
+        for label, lx, ly in [
+            ("front left leg", -width * 0.43, -depth * 0.38),
+            ("front right leg", width * 0.43, -depth * 0.38),
+            ("back left leg", -width * 0.43, depth * 0.38),
+            ("back right leg", width * 0.43, depth * 0.38),
+        ]:
+            add(label, (x + lx, y + ly, z + leg_h / 2), (thickness, thickness, leg_h), accent, 0.018)
+        add("back modesty panel", (x, y + depth * 0.44, z + height * 0.52), (width * 0.78, thickness, height * 0.48), wood, 0.018)
+    elif preset == "bed":
+        add("base frame", (x, y, z + height * 0.20), (width, depth, height * 0.28), wood, 0.04)
+        add("mattress", (x, y - depth * 0.04, z + height * 0.42), (width * 0.92, depth * 0.86, height * 0.22), fabric, 0.08)
+        add("headboard", (x, y + depth / 2 - thickness / 2, z + height * 0.66), (width, thickness, height * 0.68), wood, 0.045)
+        add("left pillow", (x - width * 0.22, y + depth * 0.22, z + height * 0.58), (width * 0.34, depth * 0.22, height * 0.12), fabric, 0.07)
+        add("right pillow", (x + width * 0.22, y + depth * 0.22, z + height * 0.58), (width * 0.34, depth * 0.22, height * 0.12), fabric, 0.07)
+    elif preset == "door":
+        add("slab", (x, y, z + height / 2), (width, thickness, height), wood, 0.03)
+        add("left frame", (x - width / 2 - thickness / 2, y, z + height / 2), (thickness, thickness * 1.4, height + thickness), accent, 0.012)
+        add("right frame", (x + width / 2 + thickness / 2, y, z + height / 2), (thickness, thickness * 1.4, height + thickness), accent, 0.012)
+        add("top frame", (x, y, z + height + thickness / 2), (width + thickness * 2, thickness * 1.4, thickness), accent, 0.012)
+        add("handle", (x + width * 0.33, y - thickness, z + height * 0.52), (0.08, 0.08, 0.08), accent, 0.035)
+    elif preset == "window":
+        add("glass", (x, y, z + height / 2), (width * 0.86, thickness * 0.55, height * 0.78), glass, 0.012)
+        add("left frame", (x - width / 2, y, z + height / 2), (thickness, thickness, height), wood, 0.012)
+        add("right frame", (x + width / 2, y, z + height / 2), (thickness, thickness, height), wood, 0.012)
+        add("top frame", (x, y, z + height, ), (width + thickness, thickness, thickness), wood, 0.012)
+        add("bottom frame", (x, y, z), (width + thickness, thickness, thickness), wood, 0.012)
+        add("center mullion", (x, y - thickness * 0.12, z + height / 2), (thickness * 0.55, thickness, height * 0.86), wood, 0.01)
+        add("middle rail", (x, y - thickness * 0.12, z + height / 2), (width * 0.92, thickness, thickness * 0.55), wood, 0.01)
+    elif preset == "wall_art":
+        add("canvas", (x, y, z + height / 2), (width, thickness * 0.45, height), fabric, 0.018)
+        add("top frame", (x, y - thickness * 0.22, z + height + thickness / 2), (width + thickness * 2, thickness, thickness), wood, 0.01)
+        add("bottom frame", (x, y - thickness * 0.22, z - thickness / 2), (width + thickness * 2, thickness, thickness), wood, 0.01)
+        add("left frame", (x - width / 2 - thickness / 2, y - thickness * 0.22, z + height / 2), (thickness, thickness, height), wood, 0.01)
+        add("right frame", (x + width / 2 + thickness / 2, y - thickness * 0.22, z + height / 2), (thickness, thickness, height), wood, 0.01)
+    else:
+        raise ValueError("params.preset must be shelf, cabinet, desk, bed, door, window, or wall_art")
+
+    return created
+
+
+def action_create_furniture_preset(params):
+    clear_scene()
+    items = params.get("items")
+    if items is None:
+        items = [params]
+    if not isinstance(items, list) or not items:
+        raise ValueError("params.items must be a non-empty list")
+
+    created = []
+    for index, item in enumerate(items, start=1):
+        if not isinstance(item, dict):
+            raise ValueError("each item in params.items must be an object")
+        created.extend(create_furniture_preset_item(item, index))
+
+    if params.get("include_floor", True):
+        floor_mat = create_material("furniture preset studio floor", (0.72, 0.72, 0.68, 1), roughness=0.72)
+        create_rounded_cube("furniture preset floor", (0, 0, -0.035), (7.5, 5.5, 0.07), floor_mat, 0.02, 2)
+
+    add_area_light("furniture preset softbox", (-2.8, -3.4, 4.5), (math.radians(62), 0, math.radians(-25)), 620, 4.6)
+    add_area_light("furniture preset rim light", (3.0, 2.4, 3.1), (math.radians(68), 0, math.radians(135)), 140, 2.3)
+    target = get_vector(params, "target", [0, 0.15, 1.15])
+    camera_location = get_vector(params, "camera_location", [4.8, -5.6, 3.0])
+    bpy.ops.object.camera_add(location=camera_location)
+    camera = bpy.context.object
+    camera.name = "furniture preset camera"
+    look_at(camera, target)
+    bpy.context.scene.camera = camera
+    bpy.context.scene.render.engine = "CYCLES"
+    bpy.context.scene.cycles.samples = 64
+    bpy.context.scene.world.color = (0.78, 0.82, 0.86)
+
+    return make_result(True, message="Created procedural furniture presets.", objects=created, count=len(created))
+
+
 def set_resolution(params):
     resolution = params.get("resolution", [1280, 720])
     if (
@@ -2321,6 +2445,8 @@ def execute_command(payload):
         return action_create_table_model(params)
     if action == "create_primitive":
         return action_create_primitive(params)
+    if action == "create_furniture_preset":
+        return action_create_furniture_preset(params)
     if action == "create_chair_model":
         return action_create_chair_model(params)
     if action == "create_sofa_model":
