@@ -14,3 +14,4 @@ examples/dev/*
 assets/references/dev/*
 !assets/references/dev/README.md
 assets/models/generated/
+assets/textures/generated/

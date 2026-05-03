@@ -1527,7 +1527,7 @@ Commit:
 
 ### 70. v1.5.0 Texture Generation Plan
 
-Status: pending
+Status: completed
 
 Goal:
 Define how generated or user-provided textures should enter the Blender workflow.

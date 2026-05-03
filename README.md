@@ -109,7 +109,7 @@ https://github.com/bestmaa/codex-blender/releases
 Download the current versioned ZIP, for example:
 
 ```text
-codex_blender_addon_v1.4.4.zip
+codex_blender_addon_v1.5.0.zip
 ```
 
 Or build it locally:
@@ -891,7 +891,7 @@ Save scene:
 
 ## Supported Actions
 
-Supported v1.4.4 actions:
+Supported v1.5.0 actions:
 
 - `ping`
 - `create_room`
@@ -1047,6 +1047,8 @@ assets/references/
 ```
 
 `apply_texture_material` supports one base color image through `path` or `base_color_path`, plus optional `roughness_path`, `normal_path`, `metallic_path`, and `alpha_path`. Use it for user-supplied wood, fabric, stone, label, decal, or pattern images. Use `texture_scale`, `texture_offset`, `texture_rotation`, and `projection` to tune placement.
+
+For generated texture storage, naming, source choices, and the render-adjust loop, see `docs/texture-generation.md`.
 
 Built-in material presets are available through `apply_material_preset`:
 

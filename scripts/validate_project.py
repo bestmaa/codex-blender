@@ -77,6 +77,7 @@ REQUIRED_FILES = [
     "assets/library.json",
     "docs/asset-library.md",
     "docs/image-to-3d.md",
+    "docs/texture-generation.md",
     "schemas/image-to-3d-job.schema.json",
     "examples/image-to-3d/local_provider_job.json",
     "examples/image-to-3d/cloud_placeholder_job.json",
@@ -564,6 +565,7 @@ def check_repository_hygiene() -> None:
         "examples/dev/*",
         "assets/references/dev/*",
         "assets/models/generated/",
+        "assets/textures/generated/",
     }
     missing_ignored_paths = sorted(required_ignored_paths - set(gitignore))
     if missing_ignored_paths:
