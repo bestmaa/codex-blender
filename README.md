@@ -104,7 +104,7 @@ https://github.com/bestmaa/codex-blender/releases
 Download the current versioned ZIP, for example:
 
 ```text
-codex_blender_addon_v0.99.0.zip
+codex_blender_addon_v0.99.1.zip
 ```
 
 Or build it locally:
@@ -173,6 +173,12 @@ For common local setup and runtime issues, see:
 docs/troubleshooting.md
 ```
 
+For Windows, WSL, UNC, and PowerShell path rules, see:
+
+```text
+docs/windows-paths.md
+```
+
 ## Common Commands
 
 ```powershell
@@ -207,6 +213,12 @@ For the final smoke test matrix, see:
 
 ```text
 docs/smoke-test-matrix.md
+```
+
+For Windows path and PowerShell quoting examples, see:
+
+```text
+docs/windows-paths.md
 ```
 
 Create a starter room:
@@ -784,7 +796,7 @@ Save scene:
 
 ## Supported Actions
 
-Supported v0.99.0 pre-release actions:
+Supported v0.99.1 pre-release actions:
 
 - `ping`
 - `create_room`
@@ -895,7 +907,7 @@ If asset import fails:
 
 - Put models under `assets/models/`.
 - Use a supported file type: `.glb`, `.gltf`, `.fbx`, or `.obj`.
-- Use a relative path like `assets/models/car.glb`, or an absolute path.
+- Use a relative path like `assets/models/sample_pyramid.obj`, or an absolute path.
 
 More detailed troubleshooting is in:
 
@@ -939,6 +951,7 @@ If render or save output goes to the wrong place:
 
 - Run the bridge command from the project folder.
 - Use explicit output paths such as `renders/room.png` or `scenes/scene.blend`.
+- On Windows, quote UNC paths and paths with spaces. See `docs/windows-paths.md`.
 
 ## Roadmap
 

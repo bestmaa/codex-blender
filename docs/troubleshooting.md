@@ -54,6 +54,21 @@ Fix:
 - Put reference images in `assets/references/`.
 - Use project-relative paths such as `assets/textures/oak_wood_basecolor.png`.
 
+## Windows PowerShell Path Quoting
+
+Symptom:
+
+```text
+The bridge command works from one terminal but fails from PowerShell, or a path with backslashes/spaces is split incorrectly.
+```
+
+Fix:
+
+- Prefer running commands from the project folder and using project-relative paths in JSON.
+- Quote UNC paths and paths with spaces in PowerShell.
+- Put larger commands in `.json` files instead of inline JSON.
+- See `docs/windows-paths.md` for Windows, WSL, UNC, texture, render, export, and scene path examples.
+
 ## Object Name Not Found
 
 Symptom:

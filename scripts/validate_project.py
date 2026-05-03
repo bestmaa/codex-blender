@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import json
+import importlib.util
 import py_compile
 import re
 import sys
@@ -57,6 +58,7 @@ REQUIRED_FILES = [
     "docs/quickstart-demo.md",
     "docs/reference-workflow.md",
     "docs/troubleshooting.md",
+    "docs/windows-paths.md",
     "docs/release-packaging.md",
     "docs/demo-assets.md",
     "docs/smoke-test-matrix.md",
@@ -204,10 +206,46 @@ def check_skill_actions() -> None:
 
 def check_readme_paths() -> None:
     readme = project_path("README.md").read_text(encoding="utf-8")
-    referenced_paths = sorted(set(re.findall(r"(?:examples|docs|assets/models|scripts|bridge|blender_addon)/[\\w./-]+", readme)))
+    referenced_paths = sorted(set(re.findall(r"(?:examples|docs|assets/models|scripts|bridge|blender_addon)/[\w./-]+", readme)))
     missing = [path for path in referenced_paths if not project_path(path).exists()]
     if missing:
         raise AssertionError("README references missing paths: " + ", ".join(missing))
+
+
+def check_bridge_path_normalization() -> None:
+    bridge_path = project_path("bridge/codex_blender_bridge.py")
+    spec = importlib.util.spec_from_file_location("codex_blender_bridge", bridge_path)
+    if spec is None or spec.loader is None:
+        raise AssertionError("Could not load bridge path normalization module")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+
+    payload = {
+        "action": "apply_texture_material",
+        "params": {
+            "path": "assets/textures/wood.png",
+            "base_color_path": "assets/textures/wood_basecolor.png",
+            "roughness_path": "assets/textures/wood_roughness.png",
+            "normal_path": "assets/textures/wood_normal.png",
+            "metallic_path": "assets/textures/wood_metallic.png",
+            "alpha_path": "assets/textures/wood_alpha.png",
+        },
+    }
+    normalized = module.normalize_command_paths(payload, ROOT)
+    for key in ("path", "base_color_path", "roughness_path", "normal_path", "metallic_path", "alpha_path"):
+        value = normalized["params"][key]
+        if not Path(value).is_absolute():
+            raise AssertionError(f"Texture path was not normalized: {key}")
+
+    for action in ("render_scene", "save_blend", "export_glb", "export_obj"):
+        normalized = module.normalize_command_paths({"action": action, "params": {"output": "renders/test.png"}}, ROOT)
+        if not Path(normalized["params"]["output"]).is_absolute():
+            raise AssertionError(f"Output path was not normalized for {action}")
+
+    for action in ("import_asset", "add_reference_image"):
+        normalized = module.normalize_command_paths({"action": action, "params": {"path": "assets/models/sample_pyramid.obj"}}, ROOT)
+        if not Path(normalized["params"]["path"]).is_absolute():
+            raise AssertionError(f"Input path was not normalized for {action}")
 
 
 def check_package_zip() -> None:
@@ -240,6 +278,7 @@ def main() -> int:
         ("example actions", check_examples),
         ("skill actions", check_skill_actions),
         ("README paths", check_readme_paths),
+        ("bridge path normalization", check_bridge_path_normalization),
         ("package ZIP", check_package_zip),
     ]
 

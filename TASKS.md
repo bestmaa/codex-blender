@@ -924,7 +924,7 @@ Commit:
 
 ### 40. v0.99.1 Windows Path Polish
 
-Status: pending
+Status: completed
 
 Goal:
 Make Windows and WSL path handling clearer and more reliable.
