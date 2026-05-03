@@ -1,0 +1,79 @@
+{
+  "action": "create_architecture_preset",
+  "params": {
+    "items": [
+      {
+        "preset": "floor_tiles",
+        "name": "lobby floor tile grid",
+        "location": [0, 0, 0.02],
+        "width": 5.8,
+        "depth": 4.2,
+        "height": 0.04,
+        "columns": 8,
+        "rows": 6,
+        "gap": 0.025,
+        "floor_color": [0.58, 0.58, 0.54, 1]
+      },
+      {
+        "preset": "wall_opening",
+        "name": "back wall window opening",
+        "location": [-1.35, 2.08, 0],
+        "width": 2.45,
+        "depth": 0.12,
+        "height": 2.7,
+        "opening_width": 1.15,
+        "opening_height": 1.2,
+        "sill_height": 0.78,
+        "wall_color": [0.76, 0.76, 0.72, 1],
+        "trim_color": [0.92, 0.90, 0.84, 1]
+      },
+      {
+        "preset": "stairs",
+        "name": "short display stairs",
+        "location": [2.05, -0.78, 0],
+        "width": 1.35,
+        "depth": 1.5,
+        "height": 0.72,
+        "steps": 5,
+        "floor_color": [0.50, 0.48, 0.44, 1]
+      },
+      {
+        "preset": "railing",
+        "name": "stair side railing",
+        "location": [2.05, -1.62, 0.72],
+        "width": 1.55,
+        "depth": 0.08,
+        "height": 0.72,
+        "posts": 5,
+        "accent_color": [0.16, 0.17, 0.17, 1]
+      },
+      {
+        "preset": "ceiling_panels",
+        "name": "acoustic ceiling grid",
+        "location": [0, 0, 2.82],
+        "width": 4.6,
+        "depth": 3.3,
+        "height": 0.045,
+        "columns": 4,
+        "rows": 3,
+        "trim_color": [0.86, 0.85, 0.80, 1],
+        "accent_color": [0.36, 0.37, 0.36, 1]
+      },
+      {
+        "preset": "facade",
+        "name": "simple storefront facade",
+        "location": [0.95, 2.22, 0],
+        "width": 2.7,
+        "depth": 0.14,
+        "height": 2.7,
+        "floors": 2,
+        "bays": 3,
+        "wall_color": [0.70, 0.70, 0.66, 1],
+        "trim_color": [0.92, 0.90, 0.84, 1],
+        "glass_color": [0.48, 0.70, 0.84, 0.36]
+      }
+    ],
+    "target": [0, 0.15, 1.25],
+    "camera_location": [5.2, -5.6, 3.1]
+  }
+}

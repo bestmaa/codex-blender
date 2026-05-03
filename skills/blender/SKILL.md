@@ -47,6 +47,8 @@ Use `create_primitive` when a scene needs reusable low-level shapes such as beve
 
 Use `create_furniture_preset` when the user asks for common room objects such as a shelf, cabinet, desk, bed, door, window, or wall art and does not need a highly custom model.
 
+Use `create_architecture_preset` when the user asks for room or building details such as walls with openings, floor tiles, ceiling panels, stairs, railings, or facade elements.
+
 ### Texture Workflow
 
 Put texture files under `assets/textures/`. Use `apply_texture_material` for user-provided images and multi-map materials. Use `texture_scale`, `texture_offset`, `texture_rotation`, and `projection` when the image placement needs tuning. Use `apply_material_preset` for fast built-in materials when no custom image texture is needed.
@@ -179,6 +181,29 @@ Creates one or more procedural furniture presets. Supported presets include `she
     "levels": 5,
     "wood_color": [0.64, 0.42, 0.23, 1],
     "accent_color": [0.26, 0.20, 0.16, 1]
+  }
+}
+```
+
+### create_architecture_preset
+
+Creates one or more procedural architecture presets. Supported presets include `wall_opening`, `floor_tiles`, `ceiling_panels`, `stairs`, `railing`, and `facade`.
+
+```json
+{
+  "action": "create_architecture_preset",
+  "params": {
+    "preset": "wall_opening",
+    "name": "back wall window opening",
+    "location": [0, 2, 0],
+    "width": 2.6,
+    "depth": 0.12,
+    "height": 2.7,
+    "opening_width": 1.2,
+    "opening_height": 1.15,
+    "sill_height": 0.75,
+    "wall_color": [0.76, 0.76, 0.72, 1],
+    "trim_color": [0.92, 0.90, 0.84, 1]
   }
 }
 ```

@@ -1300,7 +1300,7 @@ Commit:
 
 ### 58. v1.2.2 Procedural Architecture Expansion
 
-Status: pending
+Status: completed
 
 Goal:
 Add room and building-detail primitives for richer scenes.

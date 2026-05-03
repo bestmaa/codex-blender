@@ -1,7 +1,7 @@
 bl_info = {
     "name": "Codex Blender Bridge",
     "author": "Aditya",
-    "version": (1, 2, 1),
+    "version": (1, 2, 2),
     "blender": (3, 6, 0),
     "location": "View3D > Sidebar > Codex",
     "description": "Local HTTP bridge for sending Codex commands to Blender.",
@@ -1579,6 +1579,142 @@ def action_create_furniture_preset(params):
     return make_result(True, message="Created procedural furniture presets.", objects=created, count=len(created))
 
 
+def create_architecture_preset_item(item, index):
+    preset = item.get("preset", item.get("type", "wall_opening"))
+    if not isinstance(preset, str):
+        raise ValueError("params.preset must be a string")
+    preset = preset.lower()
+    name = item.get("name", f"{preset} {index}")
+    if not isinstance(name, str) or not name.strip():
+        raise ValueError("params.name must be a non-empty string")
+    x, y, z = get_vector(item, "location", [0, 0, 0])
+    width = get_number(item, "width", 3.0, minimum=0.2, maximum=40)
+    depth = get_number(item, "depth", 0.12, minimum=0.02, maximum=20)
+    height = get_number(item, "height", 2.8, minimum=0.01, maximum=40)
+    thickness = get_number(item, "thickness", 0.10, minimum=0.02, maximum=1.0)
+    wall_mat = create_material(f"{name} wall", get_color(item, "wall_color", [0.78, 0.78, 0.74, 1]), roughness=0.82)
+    trim_mat = create_material(f"{name} trim", get_color(item, "trim_color", [0.92, 0.90, 0.84, 1]), roughness=0.58)
+    floor_mat = create_material(f"{name} floor", get_color(item, "floor_color", [0.58, 0.56, 0.52, 1]), roughness=0.66)
+    glass_mat = create_material(f"{name} glass", get_color(item, "glass_color", [0.50, 0.72, 0.84, 0.34]), roughness=0.08)
+    glass_mat.blend_method = "BLEND"
+    accent_mat = create_material(f"{name} accent", get_color(item, "accent_color", [0.22, 0.24, 0.24, 1]), roughness=0.44, metallic=0.1)
+
+    created = []
+
+    def add(part, loc, dims, mat, bevel=0.01):
+        obj = create_rounded_cube(f"{name} {part}", loc, dims, mat, bevel, 2)
+        created.append(obj.name)
+        return obj
+
+    if preset == "wall_opening":
+        opening_width = get_number(item, "opening_width", width * 0.38, minimum=0.05, maximum=width * 0.9)
+        opening_height = get_number(item, "opening_height", height * 0.58, minimum=0.05, maximum=height * 0.92)
+        sill_height = get_number(item, "sill_height", 0.55, minimum=0, maximum=height - opening_height)
+        side_width = (width - opening_width) / 2
+        if side_width > 0:
+            add("left wall segment", (x - opening_width / 2 - side_width / 2, y, z + height / 2), (side_width, depth, height), wall_mat)
+            add("right wall segment", (x + opening_width / 2 + side_width / 2, y, z + height / 2), (side_width, depth, height), wall_mat)
+        if sill_height > 0:
+            add("lower wall segment", (x, y, z + sill_height / 2), (opening_width, depth, sill_height), wall_mat)
+        top_height = height - sill_height - opening_height
+        if top_height > 0:
+            add("upper wall segment", (x, y, z + sill_height + opening_height + top_height / 2), (opening_width, depth, top_height), wall_mat)
+        add("opening top trim", (x, y - depth * 0.55, z + sill_height + opening_height + thickness / 2), (opening_width + thickness * 2, thickness, thickness), trim_mat)
+        add("opening left trim", (x - opening_width / 2 - thickness / 2, y - depth * 0.55, z + sill_height + opening_height / 2), (thickness, thickness, opening_height), trim_mat)
+        add("opening right trim", (x + opening_width / 2 + thickness / 2, y - depth * 0.55, z + sill_height + opening_height / 2), (thickness, thickness, opening_height), trim_mat)
+    elif preset == "floor_tiles":
+        columns = get_int(item, "columns", 6, minimum=1, maximum=24)
+        rows = get_int(item, "rows", 5, minimum=1, maximum=24)
+        gap = get_number(item, "gap", 0.025, minimum=0, maximum=0.2)
+        tile_w = max(0.02, width / columns - gap)
+        tile_d = max(0.02, depth / rows - gap)
+        for col in range(columns):
+            for row in range(rows):
+                tx = x - width / 2 + width * (col + 0.5) / columns
+                ty = y - depth / 2 + depth * (row + 0.5) / rows
+                add(f"tile {col + 1}-{row + 1}", (tx, ty, z), (tile_w, tile_d, height), floor_mat, 0.006)
+    elif preset == "ceiling_panels":
+        columns = get_int(item, "columns", 4, minimum=1, maximum=16)
+        rows = get_int(item, "rows", 3, minimum=1, maximum=16)
+        panel_w = width / columns
+        panel_d = depth / rows
+        for col in range(columns):
+            for row in range(rows):
+                tx = x - width / 2 + panel_w * (col + 0.5)
+                ty = y - depth / 2 + panel_d * (row + 0.5)
+                add(f"ceiling panel {col + 1}-{row + 1}", (tx, ty, z), (panel_w * 0.94, panel_d * 0.94, height), trim_mat, 0.008)
+        add("ceiling border front", (x, y - depth / 2, z), (width, thickness, height * 1.2), accent_mat, 0.006)
+        add("ceiling border back", (x, y + depth / 2, z), (width, thickness, height * 1.2), accent_mat, 0.006)
+        add("ceiling border left", (x - width / 2, y, z), (thickness, depth, height * 1.2), accent_mat, 0.006)
+        add("ceiling border right", (x + width / 2, y, z), (thickness, depth, height * 1.2), accent_mat, 0.006)
+    elif preset == "stairs":
+        steps = get_int(item, "steps", 6, minimum=1, maximum=24)
+        step_depth = depth / steps
+        step_height = height / steps
+        for step in range(steps):
+            step_d = step_depth * (step + 1)
+            loc_y = y - depth / 2 + step_d / 2
+            loc_z = z + step_height * (step + 0.5)
+            add(f"step {step + 1}", (x, loc_y, loc_z), (width, step_d, step_height), floor_mat, 0.012)
+    elif preset == "railing":
+        posts = get_int(item, "posts", 5, minimum=2, maximum=32)
+        post_width = get_number(item, "post_width", thickness, minimum=0.02, maximum=0.5)
+        for post in range(posts):
+            px = x - width / 2 + width * post / (posts - 1)
+            add(f"post {post + 1}", (px, y, z + height / 2), (post_width, post_width, height), accent_mat, 0.012)
+        add("top rail", (x, y, z + height), (width + post_width, post_width, post_width), accent_mat, 0.012)
+        add("mid rail", (x, y, z + height * 0.55), (width + post_width, post_width * 0.75, post_width * 0.75), accent_mat, 0.01)
+    elif preset == "facade":
+        floors = get_int(item, "floors", 3, minimum=1, maximum=12)
+        bays = get_int(item, "bays", 4, minimum=1, maximum=16)
+        add("main wall", (x, y, z + height / 2), (width, depth, height), wall_mat, 0.01)
+        bay_w = width / bays
+        floor_h = height / floors
+        for floor in range(floors):
+            for bay in range(bays):
+                wx = x - width / 2 + bay_w * (bay + 0.5)
+                wz = z + floor_h * floor + floor_h * 0.58
+                add(f"window glass {floor + 1}-{bay + 1}", (wx, y - depth * 0.60, wz), (bay_w * 0.42, thickness * 0.45, floor_h * 0.36), glass_mat, 0.006)
+                add(f"window trim {floor + 1}-{bay + 1}", (wx, y - depth * 0.64, wz), (bay_w * 0.52, thickness * 0.55, floor_h * 0.46), trim_mat, 0.006)
+        for floor in range(1, floors):
+            add(f"floor band {floor}", (x, y - depth * 0.66, z + floor_h * floor), (width * 1.02, thickness, thickness), accent_mat, 0.006)
+        add("top cornice", (x, y - depth * 0.68, z + height + thickness / 2), (width * 1.08, thickness * 1.5, thickness), accent_mat, 0.008)
+    else:
+        raise ValueError("params.preset must be wall_opening, floor_tiles, ceiling_panels, stairs, railing, or facade")
+
+    return created
+
+
+def action_create_architecture_preset(params):
+    clear_scene()
+    items = params.get("items")
+    if items is None:
+        items = [params]
+    if not isinstance(items, list) or not items:
+        raise ValueError("params.items must be a non-empty list")
+
+    created = []
+    for index, item in enumerate(items, start=1):
+        if not isinstance(item, dict):
+            raise ValueError("each item in params.items must be an object")
+        created.extend(create_architecture_preset_item(item, index))
+
+    add_area_light("architecture softbox", (-3.5, -4.0, 5.2), (math.radians(62), 0, math.radians(-28)), 720, 5.5)
+    add_area_light("architecture fill", (3.2, 2.8, 3.2), (math.radians(68), 0, math.radians(132)), 160, 2.8)
+    target = get_vector(params, "target", [0, 0, 1.4])
+    camera_location = get_vector(params, "camera_location", [5.6, -6.0, 3.4])
+    bpy.ops.object.camera_add(location=camera_location)
+    camera = bpy.context.object
+    camera.name = "architecture preset camera"
+    look_at(camera, target)
+    bpy.context.scene.camera = camera
+    bpy.context.scene.render.engine = "CYCLES"
+    bpy.context.scene.cycles.samples = 64
+    bpy.context.scene.world.color = (0.76, 0.80, 0.84)
+
+    return make_result(True, message="Created procedural architecture presets.", objects=created, count=len(created))
+
+
 def set_resolution(params):
     resolution = params.get("resolution", [1280, 720])
     if (
@@ -2447,6 +2583,8 @@ def execute_command(payload):
         return action_create_primitive(params)
     if action == "create_furniture_preset":
         return action_create_furniture_preset(params)
+    if action == "create_architecture_preset":
+        return action_create_architecture_preset(params)
     if action == "create_chair_model":
         return action_create_chair_model(params)
     if action == "create_sofa_model":
