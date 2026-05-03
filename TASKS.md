@@ -1584,7 +1584,7 @@ Commit:
 
 ### 73. v1.5.3 Texture From Image Workflow
 
-Status: pending
+Status: completed
 
 Goal:
 Improve workflow for user-provided image textures.

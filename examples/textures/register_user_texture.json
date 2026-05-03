@@ -1,0 +1,9 @@
+{
+  "source": "assets/textures/oak_wood_basecolor.png",
+  "name": "Registered Oak Wood User Texture",
+  "asset_id": "registered_oak_wood_user_texture",
+  "destination": "assets/textures/generated/registered_oak_wood_user_texture.png",
+  "tags": ["user", "wood", "basecolor", "texture"],
+  "license": "User-provided asset",
+  "source_note": "Local image supplied by user"
+}

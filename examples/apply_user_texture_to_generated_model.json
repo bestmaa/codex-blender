@@ -1,0 +1,16 @@
+{
+  "action": "apply_texture_material",
+  "params": {
+    "object": "sample_pyramid.001",
+    "base_color_path": "assets/textures/oak_wood_basecolor.png",
+    "material_name": "user texture on generated model",
+    "roughness": 0.5,
+    "metallic": 0.0,
+    "opacity": 1.0,
+    "texture_scale": [1.2, 1.2],
+    "texture_offset": [0.0, 0.0],
+    "texture_rotation": 0.0,
+    "projection": "generated",
+    "mode": "replace"
+  }
+}

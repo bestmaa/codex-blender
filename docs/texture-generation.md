@@ -56,6 +56,20 @@ User-provided textures:
 - Record source/license notes in `assets/library.json` if it becomes a reusable asset.
 - Use `texture_scale`, `texture_offset`, `texture_rotation`, and `projection` to tune placement.
 
+Use the registration helper when a user gives an image outside the project:
+
+```powershell
+python scripts\register_user_texture.py C:\path\to\fabric.png --name "Blue Fabric" --asset-id blue_fabric --destination assets\textures\blue_fabric_basecolor.png --register
+```
+
+Preview the copy/library update first:
+
+```powershell
+python scripts\register_user_texture.py assets\textures\oak_wood_basecolor.png --name "Registered Oak Wood User Texture" --asset-id registered_oak_wood_user_texture --destination assets\textures\generated\registered_oak_wood_user_texture.png --dry-run
+```
+
+After registration or copy, apply the image with `apply_texture_material`. For generated/imported models, inspect the scene first and use the exact imported object name.
+
 Offline/manual textures:
 
 - Create simple bitmap patterns locally for blockouts.

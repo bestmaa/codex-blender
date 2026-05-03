@@ -1,0 +1,8 @@
+{
+  "action": "render_scene",
+  "params": {
+    "output": "renders/user_texture_generated_model.png",
+    "resolution": [960, 540],
+    "samples": 16
+  }
+}

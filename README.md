@@ -109,7 +109,7 @@ https://github.com/bestmaa/codex-blender/releases
 Download the current versioned ZIP, for example:
 
 ```text
-codex_blender_addon_v1.5.2.zip
+codex_blender_addon_v1.5.3.zip
 ```
 
 Or build it locally:
@@ -897,7 +897,7 @@ Save scene:
 
 ## Supported Actions
 
-Supported v1.5.2 actions:
+Supported v1.5.3 actions:
 
 - `ping`
 - `create_room`
@@ -1062,6 +1062,19 @@ Generate a local procedural texture without external AI dependencies:
 
 ```powershell
 python scripts\generate_procedural_texture.py wood assets\textures\generated\procedural_wood_basecolor.png --width 512 --height 512 --seed 71
+```
+
+Register a user-provided texture image:
+
+```powershell
+python scripts\register_user_texture.py assets\textures\oak_wood_basecolor.png --name "Registered Oak Wood User Texture" --asset-id registered_oak_wood_user_texture --destination assets\textures\generated\registered_oak_wood_user_texture.png --dry-run
+```
+
+Apply a user texture to an imported/generated model and render:
+
+```powershell
+python bridge\codex_blender_bridge.py examples\apply_user_texture_to_generated_model.json
+python bridge\codex_blender_bridge.py examples\render_user_texture_model.json
 ```
 
 Built-in material presets are available through `apply_material_preset`:

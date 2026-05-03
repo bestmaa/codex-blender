@@ -28,6 +28,7 @@ REQUIRED_FILES = [
     "scripts/run_image_to_3d_job.py",
     "scripts/run_image_to_3d_import_workflow.py",
     "scripts/generate_procedural_texture.py",
+    "scripts/register_user_texture.py",
     "scripts/package_addon.py",
     "scripts/smoke_test_bridge.py",
     "scripts/smoke_test_blendermcp.py",
@@ -60,6 +61,7 @@ REQUIRED_FILES = [
     "examples/apply_multimap_wood_texture.json",
     "examples/apply_material_preset.json",
     "examples/apply_material_recipe.json",
+    "examples/apply_user_texture_to_generated_model.json",
     "examples/setup_reference_camera.json",
     "examples/setup_compare_view.json",
     "examples/export_table_glb.json",
@@ -68,6 +70,7 @@ REQUIRED_FILES = [
     "examples/import_asset_from_library.json",
     "examples/create_scene_from_reference.json",
     "examples/render_scene.json",
+    "examples/render_user_texture_model.json",
     "examples/save_blend.json",
     "examples/inspect_rig.json",
     "examples/blendermcp/get_scene_info.json",
@@ -86,6 +89,7 @@ REQUIRED_FILES = [
     "examples/image-to-3d/cloud_placeholder_job.json",
     "examples/image-to-3d/mock_import_workflow_job.json",
     "examples/textures/generate_wood_texture.json",
+    "examples/textures/register_user_texture.json",
     "docs/quickstart-demo.md",
     "docs/commands.md",
     "docs/mcp-tools.md",
@@ -110,6 +114,7 @@ PYTHON_FILES = [
     "scripts/run_image_to_3d_job.py",
     "scripts/run_image_to_3d_import_workflow.py",
     "scripts/generate_procedural_texture.py",
+    "scripts/register_user_texture.py",
     "scripts/package_addon.py",
     "scripts/smoke_test_bridge.py",
     "scripts/smoke_test_blendermcp.py",
@@ -127,6 +132,7 @@ JSON_FILES = [
     "examples/image-to-3d/cloud_placeholder_job.json",
     "examples/image-to-3d/mock_import_workflow_job.json",
     "examples/textures/generate_wood_texture.json",
+    "examples/textures/register_user_texture.json",
     "examples/create_room.json",
     "examples/create_outdoor_scene.json",
     "examples/render_outdoor_scene.json",
@@ -155,6 +161,7 @@ JSON_FILES = [
     "examples/apply_multimap_wood_texture.json",
     "examples/apply_material_preset.json",
     "examples/apply_material_recipe.json",
+    "examples/apply_user_texture_to_generated_model.json",
     "examples/setup_reference_camera.json",
     "examples/setup_compare_view.json",
     "examples/export_table_glb.json",
@@ -163,6 +170,7 @@ JSON_FILES = [
     "examples/import_asset_from_library.json",
     "examples/create_scene_from_reference.json",
     "examples/render_scene.json",
+    "examples/render_user_texture_model.json",
     "examples/save_blend.json",
     "examples/inspect_rig.json",
 ]
@@ -249,6 +257,7 @@ def check_examples() -> None:
         "examples/apply_multimap_wood_texture.json": "apply_texture_material",
         "examples/apply_material_preset.json": "apply_material_preset",
         "examples/apply_material_recipe.json": "apply_material_recipe",
+        "examples/apply_user_texture_to_generated_model.json": "apply_texture_material",
         "examples/setup_reference_camera.json": "setup_reference_camera",
         "examples/setup_compare_view.json": "setup_compare_view",
         "examples/export_table_glb.json": "export_glb",
@@ -257,6 +266,7 @@ def check_examples() -> None:
         "examples/import_asset_from_library.json": "import_asset_from_library",
         "examples/create_scene_from_reference.json": "create_scene_from_reference",
         "examples/render_scene.json": "render_scene",
+        "examples/render_user_texture_model.json": "render_scene",
         "examples/save_blend.json": "save_blend",
         "examples/inspect_rig.json": "inspect_rig",
     }
@@ -603,6 +613,49 @@ def check_procedural_texture_generator() -> None:
     output.unlink()
 
 
+def check_user_texture_registration() -> None:
+    config_path = project_path("examples/textures/register_user_texture.json")
+    config = json.loads(config_path.read_text(encoding="utf-8"))
+    required = {"source", "name", "asset_id", "destination", "tags", "license", "source_note"}
+    missing = sorted(required - set(config))
+    if missing:
+        raise AssertionError("User texture registration example missing: " + ", ".join(missing))
+    if not project_path(config["source"]).exists():
+        raise AssertionError(f"User texture registration source does not exist: {config['source']}")
+    completed = subprocess.run(
+        [
+            sys.executable,
+            str(project_path("scripts/register_user_texture.py")),
+            config["source"],
+            "--name",
+            config["name"],
+            "--asset-id",
+            config["asset_id"],
+            "--destination",
+            config["destination"],
+            "--tags",
+            ",".join(config["tags"]),
+            "--license",
+            config["license"],
+            "--source-note",
+            config["source_note"],
+            "--dry-run",
+        ],
+        cwd=ROOT,
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        check=False,
+    )
+    if completed.returncode != 0:
+        raise AssertionError(f"User texture registration dry-run failed: {completed.stderr}")
+    payload = json.loads(completed.stdout)
+    if not payload.get("ok") or not payload.get("dry_run"):
+        raise AssertionError("User texture registration dry-run did not report ok/dry_run")
+    if payload.get("asset", {}).get("type") != "texture":
+        raise AssertionError("User texture registration dry-run did not build a texture asset")
+
+
 def check_mcp_tool_coverage() -> None:
     mcp_source = project_path("scripts/codex_blender_mcp.py").read_text(encoding="utf-8")
     declared_tools = set(re.findall(r'"name": "(blender_[^"]+)"', mcp_source))
@@ -705,6 +758,7 @@ def main() -> int:
         ("cloud image-to-3D adapter", check_cloud_image_to_3d_adapter),
         ("image-to-3D import workflow", check_image_to_3d_import_workflow),
         ("procedural texture generator", check_procedural_texture_generator),
+        ("user texture registration", check_user_texture_registration),
         ("MCP tool coverage", check_mcp_tool_coverage),
         ("repository hygiene", check_repository_hygiene),
         ("package ZIP", check_package_zip),
