@@ -135,6 +135,12 @@ python bridge\codex_blender_bridge.py examples\blendermcp\render_scene.json
 python bridge\codex_blender_bridge.py examples\blendermcp\save_scene.json
 ```
 
+The same sequence can be run as an optional live smoke test when Blender is open and the bridge is running:
+
+```powershell
+python scripts\smoke_test_blendermcp.py
+```
+
 ## MCP Example
 
 Use the compatibility MCP tool when a prompt or saved payload uses BlenderMCP-style naming:

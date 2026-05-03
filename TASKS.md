@@ -1243,7 +1243,7 @@ Commit:
 
 ### 55. v1.1.3 BlenderMCP Compatibility Smoke Test
 
-Status: pending
+Status: completed
 
 Goal:
 Prove compatibility layer works against a running Blender bridge.

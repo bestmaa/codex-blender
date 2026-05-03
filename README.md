@@ -104,7 +104,7 @@ https://github.com/bestmaa/codex-blender/releases
 Download the current versioned ZIP, for example:
 
 ```text
-codex_blender_addon_v1.1.2.zip
+codex_blender_addon_v1.1.3.zip
 ```
 
 Or build it locally:
@@ -165,6 +165,7 @@ When Blender is running, selected examples can also be tested with:
 
 ```powershell
 python scripts\smoke_test_bridge.py
+python scripts\smoke_test_blendermcp.py
 ```
 
 For image/reference matching, see:
@@ -838,7 +839,7 @@ Save scene:
 
 ## Supported Actions
 
-Supported v1.1.2 actions:
+Supported v1.1.3 actions:
 
 - `ping`
 - `create_room`
