@@ -7,6 +7,7 @@ import json
 import importlib.util
 import py_compile
 import re
+import subprocess
 import sys
 import zipfile
 from pathlib import Path
@@ -280,6 +281,40 @@ def check_mcp_tool_coverage() -> None:
             raise AssertionError(f"MCP tool missing for action {action}: expected {tool_name}")
 
 
+def check_repository_hygiene() -> None:
+    gitignore = project_path(".gitignore").read_text(encoding="utf-8").splitlines()
+    required_ignored_paths = {
+        "dist/",
+        "renders/",
+        "scenes/",
+        "exports/",
+        "examples/dev/*",
+        "assets/references/dev/*",
+    }
+    missing_ignored_paths = sorted(required_ignored_paths - set(gitignore))
+    if missing_ignored_paths:
+        raise AssertionError("Generated paths missing from .gitignore: " + ", ".join(missing_ignored_paths))
+
+    tracked = subprocess.check_output(["git", "ls-files"], cwd=ROOT, text=True).splitlines()
+    generated_prefixes = ("dist/", "renders/", "scenes/", "exports/")
+    generated_files = sorted(path for path in tracked if path.startswith(generated_prefixes))
+    if generated_files:
+        raise AssertionError("Generated files should not be tracked: " + ", ".join(generated_files))
+
+    transient_files = sorted(path for path in tracked if "__pycache__/" in path or path.endswith(".pyc"))
+    if transient_files:
+        raise AssertionError("Transient Python cache files should not be tracked: " + ", ".join(transient_files))
+
+    large_files = []
+    max_size = 5 * 1024 * 1024
+    for path in tracked:
+        file_path = project_path(path)
+        if file_path.exists() and file_path.is_file() and file_path.stat().st_size > max_size:
+            large_files.append(path)
+    if large_files:
+        raise AssertionError("Tracked files exceed 5 MB: " + ", ".join(sorted(large_files)))
+
+
 def check_package_zip() -> None:
     from package_addon import package_addon, read_version
 
@@ -312,6 +347,7 @@ def main() -> int:
         ("README paths", check_readme_paths),
         ("bridge path normalization", check_bridge_path_normalization),
         ("MCP tool coverage", check_mcp_tool_coverage),
+        ("repository hygiene", check_repository_hygiene),
         ("package ZIP", check_package_zip),
     ]
 
