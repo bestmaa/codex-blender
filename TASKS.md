@@ -1159,7 +1159,7 @@ Commit:
 
 ### 51. v1.0 Stable Release
 
-Status: pending
+Status: completed
 
 Goal:
 Cut the first stable release.

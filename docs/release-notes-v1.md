@@ -1,6 +1,6 @@
-# Codex Blender v1 Release Notes Draft
+# Codex Blender v1.0.0 Release Notes
 
-Codex Blender v1 is a local Blender bridge for creating, editing, inspecting, rendering, saving, importing, and exporting Blender scenes from Codex or a terminal command.
+Codex Blender v1.0.0 is the first stable release of the local Blender bridge for creating, editing, inspecting, rendering, saving, importing, and exporting Blender scenes from Codex or a terminal command.
 
 This is local automation. Blender must be installed, open, and running the `Codex Blender Bridge` add-on for live commands to work.
 

@@ -104,7 +104,7 @@ https://github.com/bestmaa/codex-blender/releases
 Download the current versioned ZIP, for example:
 
 ```text
-codex_blender_addon_v0.99.11.zip
+codex_blender_addon_v1.0.0.zip
 ```
 
 Or build it locally:
@@ -832,7 +832,7 @@ Save scene:
 
 ## Supported Actions
 
-Supported v0.99.11 pre-release actions:
+Supported v1.0.0 actions:
 
 - `ping`
 - `create_room`

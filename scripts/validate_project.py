@@ -157,7 +157,9 @@ def check_version_references() -> None:
     expected_zip = f"codex_blender_addon_v{version}.zip"
     if expected_zip not in readme:
         raise AssertionError(f"README does not mention current package ZIP {expected_zip}")
-    if f"Supported v{version} pre-release actions" not in readme:
+    supported_heading = f"Supported v{version} actions"
+    prerelease_heading = f"Supported v{version} pre-release actions"
+    if supported_heading not in readme and prerelease_heading not in readme:
         raise AssertionError(f"README supported-action version does not match {version}")
 
 
