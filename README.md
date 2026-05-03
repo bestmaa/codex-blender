@@ -104,7 +104,7 @@ https://github.com/bestmaa/codex-blender/releases
 Download the current versioned ZIP, for example:
 
 ```text
-codex_blender_addon_v0.99.7.zip
+codex_blender_addon_v0.99.8.zip
 ```
 
 Or build it locally:
@@ -231,6 +231,12 @@ For draft v1 release notes, see:
 
 ```text
 docs/release-notes-v1.md
+```
+
+For practical limitations and expectations, see:
+
+```text
+docs/known-limitations.md
 ```
 
 For the final smoke test matrix, see:
@@ -820,7 +826,7 @@ Save scene:
 
 ## Supported Actions
 
-Supported v0.99.7 pre-release actions:
+Supported v0.99.8 pre-release actions:
 
 - `ping`
 - `create_room`

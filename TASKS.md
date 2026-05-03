@@ -1072,7 +1072,7 @@ Commit:
 
 ### 47. v0.99.8 Known Limitations Document
 
-Status: pending
+Status: completed
 
 Goal:
 Set correct expectations for AI image-to-3D and Blender automation.
