@@ -778,7 +778,7 @@ Commit:
 
 ### 33. v0.94 Release Candidate Checks
 
-Status: pending
+Status: completed
 
 Goal:
 Run final checks before release candidate.
