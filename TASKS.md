@@ -716,7 +716,7 @@ Commit:
 
 ### 30. v0.91 Beta Bugfix Pass
 
-Status: pending
+Status: completed
 
 Goal:
 Fix issues discovered while using the beta features.
