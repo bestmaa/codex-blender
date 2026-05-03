@@ -46,6 +46,21 @@
       ],
       "description": "Optional local executable/command used by scripts/run_image_to_3d_job.py."
     },
+    "provider_adapter": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Optional built-in adapter name, for example cloud_placeholder."
+    },
+    "api_key_env": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Environment variable name used by cloud adapters. Never store API keys in job files."
+    },
+    "endpoint": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Optional provider endpoint for cloud adapter implementations."
+    },
     "metadata_output": {
       "type": "string",
       "description": "Optional metadata JSON output path."

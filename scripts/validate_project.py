@@ -24,6 +24,7 @@ REQUIRED_FILES = [
     "bridge/codex_blender_bridge.py",
     "bridge/blendermcp_adapter.py",
     "scripts/codex_blender_mcp.py",
+    "scripts/image_to_3d_adapters.py",
     "scripts/run_image_to_3d_job.py",
     "scripts/package_addon.py",
     "scripts/smoke_test_bridge.py",
@@ -77,6 +78,7 @@ REQUIRED_FILES = [
     "docs/image-to-3d.md",
     "schemas/image-to-3d-job.schema.json",
     "examples/image-to-3d/local_provider_job.json",
+    "examples/image-to-3d/cloud_placeholder_job.json",
     "docs/quickstart-demo.md",
     "docs/commands.md",
     "docs/mcp-tools.md",
@@ -97,6 +99,7 @@ PYTHON_FILES = [
     "bridge/codex_blender_bridge.py",
     "bridge/blendermcp_adapter.py",
     "scripts/codex_blender_mcp.py",
+    "scripts/image_to_3d_adapters.py",
     "scripts/run_image_to_3d_job.py",
     "scripts/package_addon.py",
     "scripts/smoke_test_bridge.py",
@@ -111,6 +114,7 @@ JSON_FILES = [
     "assets/library.json",
     "schemas/image-to-3d-job.schema.json",
     "examples/image-to-3d/local_provider_job.json",
+    "examples/image-to-3d/cloud_placeholder_job.json",
     "examples/create_room.json",
     "examples/create_outdoor_scene.json",
     "examples/render_outdoor_scene.json",
@@ -418,6 +422,9 @@ def check_image_to_3d_job_examples() -> None:
                     raise AssertionError(f"{path.relative_to(ROOT)} provider_command must be non-empty strings")
             else:
                 raise AssertionError(f"{path.relative_to(ROOT)} provider_command must be a string or string list")
+        for field in ("provider_adapter", "api_key_env", "endpoint"):
+            if field in job and (not isinstance(job[field], str) or not job[field]):
+                raise AssertionError(f"{path.relative_to(ROOT)} {field} must be a non-empty string")
         for vector_key in ("location", "rotation", "target_location"):
             value = import_options.get(vector_key)
             if value is not None and (not isinstance(value, list) or len(value) != 3):
@@ -447,6 +454,33 @@ def check_image_to_3d_provider_stub() -> None:
         raise AssertionError("Provider stub missing-provider error is not actionable")
     if "expected_command" not in payload or "setup" not in payload:
         raise AssertionError("Provider stub setup error must include expected_command and setup")
+
+
+def check_cloud_image_to_3d_adapter() -> None:
+    completed = subprocess.run(
+        [
+            sys.executable,
+            str(project_path("scripts/run_image_to_3d_job.py")),
+            str(project_path("examples/image-to-3d/cloud_placeholder_job.json")),
+            "--dry-run",
+        ],
+        cwd=ROOT,
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        check=False,
+    )
+    if completed.returncode != 0:
+        raise AssertionError(f"Cloud adapter dry-run failed with code {completed.returncode}: {completed.stderr}")
+    try:
+        payload = json.loads(completed.stdout)
+    except json.JSONDecodeError as exc:
+        raise AssertionError(f"Cloud adapter dry-run did not return JSON: {exc}") from exc
+    if not payload.get("ok") or not payload.get("dry_run"):
+        raise AssertionError("Cloud adapter dry-run did not report ok/dry_run")
+    request = payload.get("request", {})
+    if request.get("api_key_env") != "CODEX_BLENDER_CLOUD_IMAGE_TO_3D_API_KEY":
+        raise AssertionError("Cloud adapter dry-run must use an env var for API keys")
 
 
 def check_mcp_tool_coverage() -> None:
@@ -545,6 +579,7 @@ def main() -> int:
         ("asset library manifest", check_asset_library_manifest),
         ("image-to-3D job examples", check_image_to_3d_job_examples),
         ("image-to-3D provider stub", check_image_to_3d_provider_stub),
+        ("cloud image-to-3D adapter", check_cloud_image_to_3d_adapter),
         ("MCP tool coverage", check_mcp_tool_coverage),
         ("repository hygiene", check_repository_hygiene),
         ("package ZIP", check_package_zip),

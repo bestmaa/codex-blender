@@ -105,6 +105,27 @@ A cloud provider runs through a vendor API. It may require:
 
 The plugin must not commit secrets or write API keys into examples. Example configs should use placeholder environment variable names.
 
+The built-in cloud adapter is only a documented pattern:
+
+```powershell
+python scripts\run_image_to_3d_job.py examples\image-to-3d\cloud_placeholder_job.json --dry-run
+```
+
+This dry-run works without an API key and prints the request metadata that would be sent. A real run requires the environment variable named by `api_key_env`, defaults to `CODEX_BLENDER_CLOUD_IMAGE_TO_3D_API_KEY`, and currently returns `CloudProviderNotImplemented` because no vendor API is bundled.
+
+Cloud adapter jobs use:
+
+```json
+{
+  "provider": "cloud_placeholder",
+  "provider_adapter": "cloud_placeholder",
+  "api_key_env": "CODEX_BLENDER_CLOUD_IMAGE_TO_3D_API_KEY",
+  "endpoint": "https://example.invalid/image-to-3d"
+}
+```
+
+Replace the placeholder adapter with vendor-specific code only after confirming upload behavior, cost, rate limits, and output-license terms.
+
 ## Inputs
 
 Required:
@@ -119,6 +140,10 @@ Optional:
 - `quality`: `draft`, `preview`, or `final`
 - `seed`
 - `timeout_seconds`
+- `provider_command`: local command string or string list
+- `provider_adapter`: built-in adapter name, such as `cloud_placeholder`
+- `api_key_env`: cloud API key environment variable name
+- `endpoint`: cloud adapter endpoint
 - `import_options`: location, rotation, scale, fit bounds, target size
 
 ## Outputs

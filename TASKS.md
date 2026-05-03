@@ -1489,7 +1489,7 @@ Commit:
 
 ### 68. v1.4.3 Cloud Image-To-3D Provider Adapter
 
-Status: pending
+Status: completed
 
 Goal:
 Add optional cloud-provider adapter pattern for image-to-3D.

@@ -13,6 +13,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from image_to_3d_adapters import ImageTo3DJob, run_adapter
+
 
 ROOT = Path(__file__).resolve().parents[1]
 ENV_COMMAND = "CODEX_BLENDER_IMAGE_TO_3D_COMMAND"
@@ -137,6 +139,13 @@ def run_job(args: argparse.Namespace) -> int:
         return 1
 
     command, source = resolve_provider_command(args, job)
+    adapter_name = args.adapter or job.get("provider_adapter")
+    if adapter_name:
+        image_job = ImageTo3DJob.from_mapping(job, ROOT)
+        result = run_adapter(str(adapter_name), image_job, dry_run=args.dry_run)
+        print_json(result)
+        return 0 if result.get("ok") else 1
+
     if not command or is_placeholder_command(command):
         print_json(missing_provider_error(job_path, job, source))
         return 2
@@ -230,6 +239,7 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Run an image-to-3D job with a configured local provider command.")
     parser.add_argument("job", help="Path to an image-to-3D job JSON file.")
     parser.add_argument("--provider-command", help="Provider executable/command. Overrides job and env config.")
+    parser.add_argument("--adapter", help="Use a built-in adapter such as cloud_placeholder instead of a local command.")
     parser.add_argument("--timeout-seconds", type=float, default=900.0, help="Fallback timeout when the job omits one.")
     parser.add_argument("--dry-run", action="store_true", help="Print the command that would run without executing it.")
     return parser.parse_args(argv)

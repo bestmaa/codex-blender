@@ -1,0 +1,25 @@
+{
+  "provider": "cloud_placeholder",
+  "provider_adapter": "cloud_placeholder",
+  "api_key_env": "CODEX_BLENDER_CLOUD_IMAGE_TO_3D_API_KEY",
+  "endpoint": "https://example.invalid/image-to-3d",
+  "input_image": "assets/references/modern_table_reference.png",
+  "prompt": "Create a clean low-poly table-like model from the reference image.",
+  "output": "assets/models/generated/cloud_table_from_image.glb",
+  "quality": "preview",
+  "seed": 42,
+  "timeout_seconds": 900,
+  "metadata_output": "assets/models/generated/cloud_table_from_image.metadata.json",
+  "import_options": {
+    "import_after_generate": true,
+    "location": [0, 0, 0],
+    "rotation": [0, 0, 0],
+    "scale": 1.0,
+    "fit_to_bounds": true,
+    "target_size": [2.8, 1.4, 1.2],
+    "target_location": [0, 0, 0],
+    "align_to_floor": true,
+    "render_preview": true,
+    "preview_output": "renders/cloud_image_to_3d_preview.png"
+  }
+}
