@@ -100,3 +100,11 @@ python scripts\compare_images.py assets\references\modern_table_reference.png re
 ```
 
 The metrics include dimensions, average RGB delta, and simple RGB histogram distance. Use them as a rough change signal only; they do not understand object identity, style, or whether a model is actually correct.
+
+Create an iteration report after a comparison pass:
+
+```powershell
+python scripts\create_iteration_report.py assets\references\modern_table_reference.png renders\compare\reports\table_iteration_v001.json --markdown-output renders\compare\reports\table_iteration_v001.md --command "python bridge\codex_blender_bridge.py examples\render_user_texture_model.json" --render renders\user_texture_generated_model.png --contact-sheet renders\compare\table_side_by_side_v001.png --metrics renders\compare\reports\table_metrics_v001.json --note "Initial comparison pass."
+```
+
+The report records commands, renders, contact sheets, metrics, and human notes in generated output folders.

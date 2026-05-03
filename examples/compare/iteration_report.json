@@ -1,0 +1,14 @@
+{
+  "reference": "assets/references/modern_table_reference.png",
+  "output": "renders/compare/reports/table_iteration_v001.json",
+  "markdown_output": "renders/compare/reports/table_iteration_v001.md",
+  "title": "Table Reference Match v001",
+  "commands": [
+    "python bridge/codex_blender_bridge.py examples/apply_user_texture_to_generated_model.json",
+    "python bridge/codex_blender_bridge.py examples/render_user_texture_model.json"
+  ],
+  "renders": ["renders/user_texture_generated_model.png"],
+  "contact_sheets": ["renders/compare/table_side_by_side_v001.png"],
+  "metrics": ["renders/compare/reports/table_metrics_v001.json"],
+  "notes": ["Initial comparison pass. Metrics are rough color/pixel signals only."]
+}

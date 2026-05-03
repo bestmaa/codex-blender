@@ -31,6 +31,7 @@ REQUIRED_FILES = [
     "scripts/register_user_texture.py",
     "scripts/create_contact_sheet.py",
     "scripts/compare_images.py",
+    "scripts/create_iteration_report.py",
     "scripts/package_addon.py",
     "scripts/smoke_test_bridge.py",
     "scripts/smoke_test_blendermcp.py",
@@ -95,6 +96,7 @@ REQUIRED_FILES = [
     "examples/textures/register_user_texture.json",
     "examples/compare/contact_sheet.json",
     "examples/compare/metrics.json",
+    "examples/compare/iteration_report.json",
     "docs/quickstart-demo.md",
     "docs/commands.md",
     "docs/mcp-tools.md",
@@ -122,6 +124,7 @@ PYTHON_FILES = [
     "scripts/register_user_texture.py",
     "scripts/create_contact_sheet.py",
     "scripts/compare_images.py",
+    "scripts/create_iteration_report.py",
     "scripts/package_addon.py",
     "scripts/smoke_test_bridge.py",
     "scripts/smoke_test_blendermcp.py",
@@ -142,6 +145,7 @@ JSON_FILES = [
     "examples/textures/register_user_texture.json",
     "examples/compare/contact_sheet.json",
     "examples/compare/metrics.json",
+    "examples/compare/iteration_report.json",
     "examples/create_room.json",
     "examples/create_outdoor_scene.json",
     "examples/render_outdoor_scene.json",
@@ -736,6 +740,46 @@ def check_image_difference_metrics() -> None:
     output.unlink()
 
 
+def check_iteration_report() -> None:
+    output = project_path("renders/compare/reports/validation_iteration_report.json")
+    markdown = project_path("renders/compare/reports/validation_iteration_report.md")
+    for path in (output, markdown):
+        if path.exists():
+            path.unlink()
+    completed = subprocess.run(
+        [
+            sys.executable,
+            str(project_path("scripts/create_iteration_report.py")),
+            str(project_path("assets/references/modern_table_reference.png")),
+            str(output),
+            "--markdown-output",
+            str(markdown),
+            "--command",
+            "python bridge/codex_blender_bridge.py examples/render_scene.json",
+            "--render",
+            "renders/sample.png",
+            "--contact-sheet",
+            "renders/compare/sample_contact_sheet.png",
+            "--metrics",
+            "renders/compare/reports/sample_metrics.json",
+            "--note",
+            "Validation report.",
+        ],
+        cwd=ROOT,
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        check=False,
+    )
+    if completed.returncode != 0:
+        raise AssertionError(f"Iteration report failed: {completed.stderr}")
+    payload = json.loads(completed.stdout)
+    if not payload.get("ok") or not output.exists() or not markdown.exists():
+        raise AssertionError("Iteration report did not create JSON and Markdown outputs")
+    output.unlink()
+    markdown.unlink()
+
+
 def check_mcp_tool_coverage() -> None:
     mcp_source = project_path("scripts/codex_blender_mcp.py").read_text(encoding="utf-8")
     declared_tools = set(re.findall(r'"name": "(blender_[^"]+)"', mcp_source))
@@ -842,6 +886,7 @@ def main() -> int:
         ("user texture registration", check_user_texture_registration),
         ("contact sheet generator", check_contact_sheet_generator),
         ("image difference metrics", check_image_difference_metrics),
+        ("iteration report", check_iteration_report),
         ("MCP tool coverage", check_mcp_tool_coverage),
         ("repository hygiene", check_repository_hygiene),
         ("package ZIP", check_package_zip),

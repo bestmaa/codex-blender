@@ -24,6 +24,12 @@ Compute rough image-difference metrics:
 python scripts\compare_images.py assets\references\modern_table_reference.png assets\logo.png --output renders\compare\reports\table_metrics_v001.json
 ```
 
+Create a comparison iteration report:
+
+```powershell
+python scripts\create_iteration_report.py assets\references\modern_table_reference.png renders\compare\reports\table_iteration_v001.json --markdown-output renders\compare\reports\table_iteration_v001.md --note "Initial comparison pass."
+```
+
 ## Features
 
 - Start and stop a local Blender bridge at `http://127.0.0.1:8765`.
@@ -123,7 +129,7 @@ https://github.com/bestmaa/codex-blender/releases
 Download the current versioned ZIP, for example:
 
 ```text
-codex_blender_addon_v1.6.2.zip
+codex_blender_addon_v1.6.3.zip
 ```
 
 Or build it locally:
@@ -911,7 +917,7 @@ Save scene:
 
 ## Supported Actions
 
-Supported v1.6.2 actions:
+Supported v1.6.3 actions:
 
 - `ping`
 - `create_room`
