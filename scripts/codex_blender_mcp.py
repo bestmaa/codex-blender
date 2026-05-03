@@ -1062,7 +1062,7 @@ def handle_request(message: dict[str, Any]) -> dict[str, Any] | None:
             {
                 "protocolVersion": "2024-11-05",
                 "capabilities": {"tools": {}},
-                "serverInfo": {"name": "codex-blender", "version": "0.37.0"},
+                "serverInfo": {"name": "codex-blender", "version": "0.38.0"},
             },
         )
     if method == "tools/list":

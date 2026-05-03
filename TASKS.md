@@ -654,7 +654,7 @@ Commit:
 
 ### 27. v0.38 Skill And MCP Polish
 
-Status: pending
+Status: completed
 
 Goal:
 Make the Codex skill and MCP tool list clear and complete.

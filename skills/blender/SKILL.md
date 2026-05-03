@@ -23,6 +23,14 @@ Use this skill for Blender automation through the local Codex Blender bridge.
 6. For rigged models, first run `inspect_rig`, then generate animation against the discovered bone names.
 7. After add-on code changes, enable `Developer Mode` and use Blender's `Reload Bridge Code` button before testing new actions.
 
+## MCP Tool Use
+
+MCP tools use the `blender_` prefix, while raw bridge actions use the action names below. Prefer the specific MCP tool when one exists, for example `blender_create_table_model` instead of the generic `blender_command`.
+
+Use `blender_inspect_scene` before transforming, duplicating, texturing, or animating existing objects so object names match Blender exactly.
+
+Use `blender_command` only for newly added actions that do not have a dedicated MCP wrapper yet.
+
 ## Safety
 
 The `run_python` action executes arbitrary code inside Blender. Only send code generated in the current trusted workflow, and keep it narrowly scoped.
