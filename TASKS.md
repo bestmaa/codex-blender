@@ -1114,7 +1114,7 @@ Commit:
 
 ### 49. v0.99.10 Final Version Alignment
 
-Status: pending
+Status: completed
 
 Goal:
 Make version handling ready for the final v1 bump.

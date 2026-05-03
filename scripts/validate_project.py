@@ -149,6 +149,17 @@ def check_versions() -> None:
         raise AssertionError(f"MCP server version does not match plugin version {version}")
 
 
+def check_version_references() -> None:
+    manifest = json.loads(project_path(".codex-plugin/plugin.json").read_text(encoding="utf-8"))
+    version = manifest["version"]
+    readme = project_path("README.md").read_text(encoding="utf-8")
+    expected_zip = f"codex_blender_addon_v{version}.zip"
+    if expected_zip not in readme:
+        raise AssertionError(f"README does not mention current package ZIP {expected_zip}")
+    if f"Supported v{version} pre-release actions" not in readme:
+        raise AssertionError(f"README supported-action version does not match {version}")
+
+
 def get_supported_actions() -> set[str]:
     addon_source = project_path("blender_addon/codex_blender_addon.py").read_text(encoding="utf-8")
     return set(re.findall(r'if action == "([^"]+)"', addon_source))
@@ -342,6 +353,7 @@ def main() -> int:
         ("Python syntax", check_python_syntax),
         ("JSON files", check_json_files),
         ("version alignment", check_versions),
+        ("version references", check_version_references),
         ("example actions", check_examples),
         ("skill actions", check_skill_actions),
         ("README paths", check_readme_paths),
