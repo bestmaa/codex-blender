@@ -1603,7 +1603,7 @@ Commit:
 
 ### 74. v1.6.0 Render Comparison Plan
 
-Status: pending
+Status: completed
 
 Goal:
 Design a better reference-vs-render comparison loop.

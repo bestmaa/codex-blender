@@ -7,6 +7,7 @@ __pycache__/
 dist/
 build/
 renders/
+renders/compare/
 scenes/
 exports/
 examples/dev/*

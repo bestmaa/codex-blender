@@ -84,6 +84,7 @@ REQUIRED_FILES = [
     "docs/asset-library.md",
     "docs/image-to-3d.md",
     "docs/texture-generation.md",
+    "docs/render-comparison.md",
     "schemas/image-to-3d-job.schema.json",
     "examples/image-to-3d/local_provider_job.json",
     "examples/image-to-3d/cloud_placeholder_job.json",
@@ -687,6 +688,7 @@ def check_repository_hygiene() -> None:
     required_ignored_paths = {
         "dist/",
         "renders/",
+        "renders/compare/",
         "scenes/",
         "exports/",
         "examples/dev/*",

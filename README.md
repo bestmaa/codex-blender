@@ -10,6 +10,8 @@ Codex Blender can create procedural scenes, import local assets, apply materials
 
 It cannot turn any arbitrary image into a perfect production 3D model by itself. Image-to-model work is an iterative workflow: add a reference, create or import a base model, adjust geometry/materials/camera, render, compare, and repeat.
 
+For a repeatable reference-vs-render process, see `docs/render-comparison.md`.
+
 ## Features
 
 - Start and stop a local Blender bridge at `http://127.0.0.1:8765`.
@@ -109,7 +111,7 @@ https://github.com/bestmaa/codex-blender/releases
 Download the current versioned ZIP, for example:
 
 ```text
-codex_blender_addon_v1.5.3.zip
+codex_blender_addon_v1.6.0.zip
 ```
 
 Or build it locally:
@@ -897,7 +899,7 @@ Save scene:
 
 ## Supported Actions
 
-Supported v1.5.3 actions:
+Supported v1.6.0 actions:
 
 - `ping`
 - `create_room`
