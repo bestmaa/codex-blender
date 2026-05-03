@@ -589,7 +589,7 @@ Commit:
 
 ### 24. v0.35 Troubleshooting And UX Polish
 
-Status: pending
+Status: completed
 
 Goal:
 Improve user-facing troubleshooting for common local Blender issues.

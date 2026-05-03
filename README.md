@@ -144,6 +144,12 @@ For image/reference matching, see:
 docs/reference-workflow.md
 ```
 
+For common local setup and runtime issues, see:
+
+```text
+docs/troubleshooting.md
+```
+
 Create a starter room:
 
 ```powershell
@@ -831,6 +837,12 @@ If asset import fails:
 - Put models under `assets/models/`.
 - Use a supported file type: `.glb`, `.gltf`, `.fbx`, or `.obj`.
 - Use a relative path like `assets/models/car.glb`, or an absolute path.
+
+More detailed troubleshooting is in:
+
+```text
+docs/troubleshooting.md
+```
 
 ## Textures
 

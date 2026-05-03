@@ -1,7 +1,7 @@
 bl_info = {
     "name": "Codex Blender Bridge",
     "author": "Aditya",
-    "version": (0, 34, 0),
+    "version": (0, 35, 0),
     "blender": (3, 6, 0),
     "location": "View3D > Sidebar > Codex",
     "description": "Local HTTP bridge for sending Codex commands to Blender.",
@@ -2199,7 +2199,12 @@ def execute_command(payload):
         return action_create_scene_from_reference(params)
     if action == "run_python":
         return action_run_python(params)
-    return make_result(False, error=f"Unsupported action: {action}")
+    return make_result(
+        False,
+        error=f"Unsupported action: {action}",
+        errorType="UnsupportedAction",
+        hint="Reload the bridge code or install the latest add-on if this action was added recently.",
+    )
 
 
 def process_queued_commands():
