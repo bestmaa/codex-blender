@@ -857,7 +857,7 @@ Commit:
 
 ### 37. v0.98 Final Documentation Pass
 
-Status: pending
+Status: completed
 
 Goal:
 Make v1 docs ready.
